@@ -115,6 +115,13 @@ function computeMatchScore(lawyer: any, criteria: any): { score: number; breakdo
   return { score, breakdown };
 }
 
+function formatHours(hours: number): string {
+  if (hours < 1) return "< 1 hour";
+  if (hours <= 2) return `${hours}h`;
+  if (hours <= 24) return `${Math.round(hours)}h`;
+  return `${Math.round(hours / 24)}d`;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
