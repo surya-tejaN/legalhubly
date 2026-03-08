@@ -19,7 +19,7 @@ export default function ClientPayments() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard icon={<DollarSign className="h-5 w-5 text-accent" />} label="Total Spent" value="$2,275" change="This month" changeType="neutral" />
-        <StatCard icon={<Clock className="h-5 w-5 text-accent" />} label="Pending" value="$1,150" change="2 invoices" changeType="warning" />
+        <StatCard icon={<Clock className="h-5 w-5 text-accent" />} label="Pending" value="$1,150" change="2 invoices" changeType="neutral" />
         <StatCard icon={<CheckCircle2 className="h-5 w-5 text-accent" />} label="Paid" value="$1,125" change="3 invoices" changeType="positive" />
         <StatCard icon={<CreditCard className="h-5 w-5 text-accent" />} label="Payment Method" value="•••• 4242" />
       </div>
