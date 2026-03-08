@@ -28,11 +28,12 @@ export const clientNavItems = [
 
 export const lawyerNavItems = [
   { icon: <LayoutDashboard />, label: "Dashboard", to: "/lawyer/dashboard" },
-  { icon: <Users />, label: "Leads", to: "/lawyer/leads", badge: 5 },
-  { icon: <Briefcase />, label: "Cases", to: "/lawyer/cases", badge: 8 },
+  { icon: <Users />, label: "Leads", to: "/lawyer/leads", badge: 6 },
+  { icon: <Briefcase />, label: "Matters", to: "/lawyer/cases", badge: 5 },
   { icon: <Calendar />, label: "Calendar", to: "/lawyer/calendar" },
   { icon: <FileText />, label: "AI Documents", to: "/lawyer/documents" },
   { icon: <MessageSquare />, label: "Messages", to: "/lawyer/messages", badge: 4 },
+  { icon: <CreditCard />, label: "Billing", to: "/lawyer/billing" },
   { icon: <BarChart3 />, label: "Analytics", to: "/lawyer/analytics" },
 ];
 
