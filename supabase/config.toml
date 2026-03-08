@@ -1,0 +1,4 @@
+project_id = "agmkgxmjktbfzpzpkqez"
+
+[functions.legal-intake]
+verify_jwt = false
