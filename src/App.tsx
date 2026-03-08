@@ -25,9 +25,12 @@ import LawyerMessages from "./pages/lawyer/LawyerMessages";
 import LawyerAnalytics from "./pages/lawyer/LawyerAnalytics";
 import LawyerBilling from "./pages/lawyer/LawyerBilling";
 
-// Admin pages
+// Firm & Admin pages
 import FirmDashboard from "./pages/firm/FirmDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+
+// Shared pages
+import CaseWorkspace from "./pages/shared/CaseWorkspace";
 
 const queryClient = new QueryClient();
 
