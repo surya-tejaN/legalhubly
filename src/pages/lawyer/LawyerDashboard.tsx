@@ -262,8 +262,114 @@ export default function LawyerDashboard() {
               </Button>
             </div>
           </div>
+
+          {/* Follow-Up Agent */}
+          <FollowUpWidget />
         </div>
       </div>
     </DashboardLayout>
+  );
+}
+
+function FollowUpWidget() {
+  const [output, setOutput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [action, setAction] = useState<string | null>(null);
+  const endRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (loading) endRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [output, loading]);
+
+  const runFollowUp = async (act: string) => {
+    setAction(act);
+    setOutput("");
+    setLoading(true);
+
+    try {
+      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/follow-up-agent`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ action: act }),
+      });
+
+      if (!resp.ok || !resp.body) {
+        toast({ title: "Error", description: "Follow-up agent failed.", variant: "destructive" });
+        setLoading(false);
+        return;
+      }
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let textBuffer = "";
+      let content = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        textBuffer += decoder.decode(value, { stream: true });
+        let newlineIndex: number;
+        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+          let line = textBuffer.slice(0, newlineIndex);
+          textBuffer = textBuffer.slice(newlineIndex + 1);
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (!line.startsWith("data: ")) continue;
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === "[DONE]") break;
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const delta = parsed.choices?.[0]?.delta?.content;
+            if (delta) { content += delta; setOutput(content); }
+          } catch {
+            textBuffer = line + "\n" + textBuffer;
+            break;
+          }
+        }
+      }
+    } catch (e) {
+      console.error(e);
+      toast({ title: "Error", description: "Connection failed.", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="rounded-xl bg-card border shadow-card p-5">
+      <div className="flex items-center gap-2 mb-3">
+        <RefreshCw className="h-4 w-4 text-accent" />
+        <h3 className="font-semibold text-sm text-foreground">Follow-Up Agent</h3>
+        <span className="text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded-full font-medium">AI</span>
+      </div>
+      <div className="flex gap-2 mb-3">
+        <Button variant="outline" size="sm" onClick={() => runFollowUp("stale_leads")} disabled={loading}>
+          <Users className="mr-1.5 h-3.5 w-3.5" /> Stale Leads
+        </Button>
+        <Button variant="outline" size="sm" onClick={() => runFollowUp("no_show_consultations")} disabled={loading}>
+          <Clock className="mr-1.5 h-3.5 w-3.5" /> No-Shows
+        </Button>
+        <Button variant="outline" size="sm" onClick={() => runFollowUp("overdue_tasks")} disabled={loading}>
+          <AlertTriangle className="mr-1.5 h-3.5 w-3.5" /> Overdue Tasks
+        </Button>
+      </div>
+      {output ? (
+        <div className="max-h-64 overflow-y-auto rounded-lg bg-muted/30 p-3">
+          <div className="prose prose-sm max-w-none text-foreground text-xs [&_p]:mb-1.5 [&_li]:text-xs [&_h1]:text-sm [&_h2]:text-sm [&_h3]:text-xs [&_strong]:text-foreground">
+            <ReactMarkdown>{output}</ReactMarkdown>
+          </div>
+          {loading && <span className="h-2 w-2 bg-accent rounded-full animate-pulse inline-block mt-2" />}
+          <div ref={endRef} />
+        </div>
+      ) : (
+        <p className="text-xs text-muted-foreground">Run a follow-up check to get AI-generated action recommendations.</p>
+      )}
+      <div className="flex items-center gap-1 mt-2 text-[9px] text-muted-foreground">
+        <Info className="h-2.5 w-2.5" />
+        AI-generated suggestions — review before acting.
+      </div>
+    </div>
   );
 }
