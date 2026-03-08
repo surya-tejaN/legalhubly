@@ -39,6 +39,8 @@ interface Lawyer {
   budget_ranges: string[];
   match_score: number;
   score_breakdown: Record<string, number>;
+  match_explanation?: string;
+  ai_disclaimer?: string;
 }
 
 const SORT_OPTIONS = [
