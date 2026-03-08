@@ -14,7 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      intake_cases: {
+        Row: {
+          ai_case_summary: string | null
+          ai_lead_score: number | null
+          ai_recommended_lawyers: string[] | null
+          ai_tags: string[] | null
+          budget_range: string | null
+          consultation_preference: string | null
+          conversation_history: Json | null
+          created_at: string
+          id: string
+          intake_data: Json | null
+          language_preference: string | null
+          legal_category: string | null
+          location: string | null
+          matter_description: string | null
+          opposing_party_details: string | null
+          session_id: string
+          status: string
+          timeline: string | null
+          updated_at: string
+          urgency: string | null
+        }
+        Insert: {
+          ai_case_summary?: string | null
+          ai_lead_score?: number | null
+          ai_recommended_lawyers?: string[] | null
+          ai_tags?: string[] | null
+          budget_range?: string | null
+          consultation_preference?: string | null
+          conversation_history?: Json | null
+          created_at?: string
+          id?: string
+          intake_data?: Json | null
+          language_preference?: string | null
+          legal_category?: string | null
+          location?: string | null
+          matter_description?: string | null
+          opposing_party_details?: string | null
+          session_id: string
+          status?: string
+          timeline?: string | null
+          updated_at?: string
+          urgency?: string | null
+        }
+        Update: {
+          ai_case_summary?: string | null
+          ai_lead_score?: number | null
+          ai_recommended_lawyers?: string[] | null
+          ai_tags?: string[] | null
+          budget_range?: string | null
+          consultation_preference?: string | null
+          conversation_history?: Json | null
+          created_at?: string
+          id?: string
+          intake_data?: Json | null
+          language_preference?: string | null
+          legal_category?: string | null
+          location?: string | null
+          matter_description?: string | null
+          opposing_party_details?: string | null
+          session_id?: string
+          status?: string
+          timeline?: string | null
+          updated_at?: string
+          urgency?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
