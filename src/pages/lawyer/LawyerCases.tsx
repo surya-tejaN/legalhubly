@@ -1,33 +1,73 @@
+import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { lawyerNavItems } from "@/lib/navigation";
 import { SectionHeader, StatusBadge } from "@/components/DashboardComponents";
 import { Button } from "@/components/ui/button";
-import { Scale, ArrowRight, Filter, Plus, Users } from "lucide-react";
-import { useState } from "react";
+import {
+  ArrowRight, Plus, Clock, CheckCircle2, Timer, StickyNote,
+  ChevronDown, FileText, DollarSign, Tag, AlertTriangle,
+} from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { motion, AnimatePresence } from "framer-motion";
 
-const cases = [
-  { id: "C-2024-001", client: "Alex Johnson", title: "Wrongful Termination Claim", status: "Active", statusVariant: "success" as const, priority: "High", lastActivity: "2 hours ago", nextDeadline: "Mar 15, 2026", billable: "$2,450" },
-  { id: "C-2024-005", client: "Robert Lee", title: "Commercial Real Estate Closing", status: "Active", statusVariant: "success" as const, priority: "Medium", lastActivity: "4 hours ago", nextDeadline: "Mar 20, 2026", billable: "$4,200" },
-  { id: "C-2024-006", client: "Jennifer Lee", title: "Employment Discrimination", status: "Discovery", statusVariant: "info" as const, priority: "High", lastActivity: "1 day ago", nextDeadline: "Mar 25, 2026", billable: "$1,800" },
-  { id: "C-2024-007", client: "Tom Wilson", title: "Non-Compete Negotiation", status: "Pending", statusVariant: "warning" as const, priority: "Low", lastActivity: "2 days ago", nextDeadline: "Apr 1, 2026", billable: "$350" },
-  { id: "C-2024-003", client: "Susan Park", title: "Patent Application", status: "Under Review", statusVariant: "info" as const, priority: "Medium", lastActivity: "3 days ago", nextDeadline: "Apr 5, 2026", billable: "$3,100" },
-];
-
-const filters = ["All Cases", "Active", "Pending", "Under Review", "Closed"];
+const filterTabs = ["All", "active", "discovery", "pending", "under-review", "closed"];
+const filterLabels: Record<string, string> = { All: "All Cases", active: "Active", discovery: "Discovery", pending: "Pending", "under-review": "Under Review", closed: "Closed" };
 
 export default function LawyerCases() {
-  const [activeFilter, setActiveFilter] = useState("All Cases");
+  const [matters, setMatters] = useState<any[]>([]);
+  const [tasks, setTasks] = useState<any[]>([]);
+  const [notes, setNotes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeFilter, setActiveFilter] = useState("All");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [newNote, setNewNote] = useState("");
+
+  useEffect(() => {
+    const load = async () => {
+      const [mattersRes, tasksRes, notesRes] = await Promise.all([
+        supabase.from("matters" as any).select("*").order("created_at", { ascending: false }),
+        supabase.from("tasks" as any).select("*").order("due_date"),
+        supabase.from("internal_notes" as any).select("*").order("created_at", { ascending: false }),
+      ]);
+      setMatters((mattersRes.data as any[]) || []);
+      setTasks((tasksRes.data as any[]) || []);
+      setNotes((notesRes.data as any[]) || []);
+      setLoading(false);
+    };
+    load();
+  }, []);
+
+  const filtered = activeFilter === "All" ? matters : matters.filter((m) => m.status === activeFilter);
+
+  const matterTasks = (matterId: string) => tasks.filter((t) => t.matter_id === matterId);
+  const matterNotes = (matterId: string) => notes.filter((n) => n.matter_id === matterId);
+
+  const addNote = async (matterId: string) => {
+    if (!newNote.trim()) return;
+    const { data } = await supabase.from("internal_notes" as any).insert({ matter_id: matterId, content: newNote, author_name: "Sarah Chen" } as any).select();
+    if (data) setNotes((prev) => [...(data as any[]), ...prev]);
+    setNewNote("");
+  };
+
+  const toggleTask = async (taskId: string, currentStatus: string) => {
+    const newStatus = currentStatus === "completed" ? "pending" : "completed";
+    await supabase.from("tasks" as any).update({ status: newStatus, completed_at: newStatus === "completed" ? new Date().toISOString() : null } as any).eq("id", taskId);
+    setTasks((prev) => prev.map((t) => t.id === taskId ? { ...t, status: newStatus } : t));
+  };
+
+  const statusVariant = (s: string) =>
+    s === "active" ? "success" : s === "discovery" ? "info" : s === "pending" ? "warning" : "default";
 
   return (
     <DashboardLayout sidebarItems={lawyerNavItems} portalLabel="Lawyer Portal" userName="Sarah Chen" userRole="Attorney">
       <SectionHeader
         title="Case Management"
-        subtitle="Manage and track all your active cases"
-        action={<Button variant="gold" size="sm"><Plus className="mr-2 h-3.5 w-3.5" /> New Case</Button>}
+        subtitle="Manage and track all your active matters"
+        action={<Button variant="gold" size="sm"><Plus className="mr-2 h-3.5 w-3.5" /> New Matter</Button>}
       />
 
       <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
-        {filters.map(f => (
+        {filterTabs.map((f) => (
           <button
             key={f}
             onClick={() => setActiveFilter(f)}
@@ -35,56 +75,146 @@ export default function LawyerCases() {
               activeFilter === f ? "bg-accent text-accent-foreground" : "bg-card border text-muted-foreground hover:bg-muted"
             }`}
           >
-            {f}
+            {filterLabels[f]}
           </button>
         ))}
       </div>
 
-      <div className="rounded-xl bg-card border shadow-card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b bg-muted/30">
-                <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider px-5 py-3">Case</th>
-                <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider px-5 py-3 hidden lg:table-cell">Client</th>
-                <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider px-5 py-3">Status</th>
-                <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider px-5 py-3 hidden md:table-cell">Priority</th>
-                <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider px-5 py-3 hidden xl:table-cell">Deadline</th>
-                <th className="text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider px-5 py-3 hidden lg:table-cell">Billed</th>
-                <th className="text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider px-5 py-3">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {cases.map((c) => (
-                <tr key={c.id} className="hover:bg-muted/20 transition-colors">
-                  <td className="px-5 py-4">
-                    <div className="text-sm font-medium text-foreground">{c.title}</div>
-                    <div className="text-xs text-muted-foreground mt-0.5">{c.id} · Updated {c.lastActivity}</div>
-                  </td>
-                  <td className="px-5 py-4 hidden lg:table-cell">
-                    <div className="flex items-center gap-2">
-                      <div className="h-7 w-7 rounded-full bg-accent/10 flex items-center justify-center text-[10px] font-bold text-accent">
-                        {c.client.split(" ").map(n => n[0]).join("")}
+      <div className="space-y-4">
+        {loading ? (
+          Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="rounded-xl bg-card border p-6 animate-pulse"><div className="h-5 w-64 bg-muted rounded mb-2" /><div className="h-4 w-48 bg-muted rounded" /></div>
+          ))
+        ) : (
+          filtered.map((m, index) => {
+            const mt = matterTasks(m.id);
+            const mn = matterNotes(m.id);
+            const completedTasks = mt.filter((t) => t.status === "completed").length;
+            const isExpanded = expandedId === m.id;
+
+            return (
+              <motion.div
+                key={m.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2, delay: index * 0.03 }}
+                className="rounded-xl bg-card border shadow-card hover:shadow-card-hover transition-all overflow-hidden"
+              >
+                <div className="p-5">
+                  <div className="flex flex-col lg:flex-row gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="font-semibold text-foreground">{m.title}</h3>
+                        <StatusBadge status={m.status} variant={statusVariant(m.status)} />
+                        <span className={`text-xs font-semibold ${m.priority === "high" ? "text-destructive" : m.priority === "medium" ? "text-warning" : "text-muted-foreground"}`}>
+                          {m.priority} priority
+                        </span>
                       </div>
-                      <span className="text-sm text-foreground">{c.client}</span>
+                      <div className="text-sm text-muted-foreground mt-1">{m.client_name} · {m.legal_category}</div>
+                      <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground flex-wrap">
+                        <span className="flex items-center gap-1"><DollarSign className="h-3 w-3" /> ${Number(m.total_billed).toLocaleString()}</span>
+                        {m.next_deadline && (
+                          <span className={`flex items-center gap-1 ${new Date(m.next_deadline) < new Date() ? "text-destructive" : ""}`}>
+                            <Clock className="h-3 w-3" /> {new Date(m.next_deadline).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                          </span>
+                        )}
+                        <span className="flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> {completedTasks}/{mt.length} tasks</span>
+                        <span className="flex items-center gap-1"><StickyNote className="h-3 w-3" /> {mn.length} notes</span>
+                      </div>
+                      {m.tags?.length > 0 && (
+                        <div className="flex gap-1.5 mt-2">
+                          {m.tags.map((tag: string) => (
+                            <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground flex items-center gap-1">
+                              <Tag className="h-2.5 w-2.5" /> {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  </td>
-                  <td className="px-5 py-4"><StatusBadge status={c.status} variant={c.statusVariant} /></td>
-                  <td className="px-5 py-4 hidden md:table-cell">
-                    <span className={`text-xs font-semibold ${c.priority === "High" ? "text-destructive" : c.priority === "Medium" ? "text-warning" : "text-muted-foreground"}`}>
-                      {c.priority}
-                    </span>
-                  </td>
-                  <td className="px-5 py-4 text-sm text-muted-foreground hidden xl:table-cell">{c.nextDeadline}</td>
-                  <td className="px-5 py-4 text-sm font-semibold text-foreground hidden lg:table-cell">{c.billable}</td>
-                  <td className="px-5 py-4 text-right">
-                    <Button variant="ghost" size="sm">Open <ArrowRight className="ml-1 h-3.5 w-3.5" /></Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Button variant="ghost" size="sm"><FileText className="mr-1.5 h-3.5 w-3.5" /> Docs</Button>
+                      <Button variant="outline" size="sm">Open <ArrowRight className="ml-1 h-3.5 w-3.5" /></Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Expand: Tasks + Notes */}
+                <button
+                  onClick={() => setExpandedId(isExpanded ? null : m.id)}
+                  className="w-full py-2 border-t text-xs text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors flex items-center justify-center gap-1"
+                >
+                  {isExpanded ? "Collapse" : "Tasks & Notes"}
+                  <ChevronDown className={`h-3 w-3 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                </button>
+
+                <AnimatePresence>
+                  {isExpanded && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-5 pb-5 grid md:grid-cols-2 gap-4">
+                        {/* Tasks */}
+                        <div>
+                          <h4 className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5 text-accent" /> Tasks</h4>
+                          <div className="space-y-1.5">
+                            {mt.length === 0 && <p className="text-xs text-muted-foreground">No tasks yet</p>}
+                            {mt.map((t) => (
+                              <button
+                                key={t.id}
+                                onClick={() => toggleTask(t.id, t.status)}
+                                className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors text-left"
+                              >
+                                <div className={`h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                                  t.status === "completed" ? "border-success bg-success/10" : t.status === "in_progress" ? "border-accent" : "border-border"
+                                }`}>
+                                  {t.status === "completed" && <CheckCircle2 className="h-2.5 w-2.5 text-success" />}
+                                  {t.status === "in_progress" && <Timer className="h-2.5 w-2.5 text-accent" />}
+                                </div>
+                                <span className={`text-xs flex-1 ${t.status === "completed" ? "line-through text-muted-foreground" : "text-foreground"}`}>{t.title}</span>
+                                {t.due_date && (
+                                  <span className={`text-[10px] ${new Date(t.due_date) < new Date() && t.status !== "completed" ? "text-destructive" : "text-muted-foreground"}`}>
+                                    {new Date(t.due_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                                  </span>
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Notes */}
+                        <div>
+                          <h4 className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1"><StickyNote className="h-3.5 w-3.5 text-accent" /> Internal Notes</h4>
+                          <div className="space-y-2 mb-2 max-h-40 overflow-y-auto">
+                            {mn.length === 0 && <p className="text-xs text-muted-foreground">No notes yet</p>}
+                            {mn.map((n) => (
+                              <div key={n.id} className="p-2 rounded-lg bg-muted/50 text-xs">
+                                <p className="text-foreground">{n.content}</p>
+                                <p className="text-[10px] text-muted-foreground mt-1">{n.author_name} · {new Date(n.created_at).toLocaleDateString()}</p>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="flex gap-2">
+                            <input
+                              value={newNote}
+                              onChange={(e) => setNewNote(e.target.value)}
+                              onKeyDown={(e) => e.key === "Enter" && addNote(m.id)}
+                              placeholder="Add note..."
+                              className="flex-1 bg-muted rounded-lg px-3 py-1.5 text-xs outline-none placeholder:text-muted-foreground"
+                            />
+                            <Button variant="outline" size="sm" onClick={() => addNote(m.id)} className="h-7 text-xs">Add</Button>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            );
+          })
+        )}
       </div>
     </DashboardLayout>
   );

@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      consultations: {
+        Row: {
+          client_name: string
+          created_at: string
+          duration_minutes: number
+          id: string
+          lawyer_id: string | null
+          matter_id: string | null
+          notes: string | null
+          scheduled_at: string
+          status: string
+          title: string
+          type: string
+        }
+        Insert: {
+          client_name: string
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          lawyer_id?: string | null
+          matter_id?: string | null
+          notes?: string | null
+          scheduled_at: string
+          status?: string
+          title: string
+          type?: string
+        }
+        Update: {
+          client_name?: string
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          lawyer_id?: string | null
+          matter_id?: string | null
+          notes?: string | null
+          scheduled_at?: string
+          status?: string
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultations_lawyer_id_fkey"
+            columns: ["lawyer_id"]
+            isOneToOne: false
+            referencedRelation: "lawyers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultations_matter_id_fkey"
+            columns: ["matter_id"]
+            isOneToOne: false
+            referencedRelation: "matters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       intake_cases: {
         Row: {
           ai_case_summary: string | null
@@ -82,6 +139,41 @@ export type Database = {
           urgency?: string | null
         }
         Relationships: []
+      }
+      internal_notes: {
+        Row: {
+          author_name: string
+          content: string
+          created_at: string
+          id: string
+          matter_id: string | null
+          pinned: boolean
+        }
+        Insert: {
+          author_name?: string
+          content: string
+          created_at?: string
+          id?: string
+          matter_id?: string | null
+          pinned?: boolean
+        }
+        Update: {
+          author_name?: string
+          content?: string
+          created_at?: string
+          id?: string
+          matter_id?: string | null
+          pinned?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "internal_notes_matter_id_fkey"
+            columns: ["matter_id"]
+            isOneToOne: false
+            referencedRelation: "matters"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lawyers: {
         Row: {
@@ -176,6 +268,207 @@ export type Database = {
         }
         Relationships: []
       }
+      leads: {
+        Row: {
+          ai_summary: string | null
+          budget_range: string | null
+          client_email: string | null
+          client_name: string
+          conflict_status: string
+          created_at: string
+          id: string
+          intake_case_id: string | null
+          issue: string
+          lawyer_id: string | null
+          lead_score: number
+          legal_category: string | null
+          source: string
+          status: string
+          updated_at: string
+          urgency: string
+        }
+        Insert: {
+          ai_summary?: string | null
+          budget_range?: string | null
+          client_email?: string | null
+          client_name: string
+          conflict_status?: string
+          created_at?: string
+          id?: string
+          intake_case_id?: string | null
+          issue: string
+          lawyer_id?: string | null
+          lead_score?: number
+          legal_category?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          urgency?: string
+        }
+        Update: {
+          ai_summary?: string | null
+          budget_range?: string | null
+          client_email?: string | null
+          client_name?: string
+          conflict_status?: string
+          created_at?: string
+          id?: string
+          intake_case_id?: string | null
+          issue?: string
+          lawyer_id?: string | null
+          lead_score?: number
+          legal_category?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          urgency?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_intake_case_id_fkey"
+            columns: ["intake_case_id"]
+            isOneToOne: false
+            referencedRelation: "intake_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_lawyer_id_fkey"
+            columns: ["lawyer_id"]
+            isOneToOne: false
+            referencedRelation: "lawyers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      matters: {
+        Row: {
+          case_number: string
+          client_email: string | null
+          client_name: string
+          created_at: string
+          description: string | null
+          id: string
+          intake_case_id: string | null
+          lawyer_id: string | null
+          legal_category: string | null
+          next_deadline: string | null
+          notes: string | null
+          priority: string
+          status: string
+          tags: string[]
+          title: string
+          total_billed: number
+          updated_at: string
+        }
+        Insert: {
+          case_number?: string
+          client_email?: string | null
+          client_name: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          intake_case_id?: string | null
+          lawyer_id?: string | null
+          legal_category?: string | null
+          next_deadline?: string | null
+          notes?: string | null
+          priority?: string
+          status?: string
+          tags?: string[]
+          title: string
+          total_billed?: number
+          updated_at?: string
+        }
+        Update: {
+          case_number?: string
+          client_email?: string | null
+          client_name?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          intake_case_id?: string | null
+          lawyer_id?: string | null
+          legal_category?: string | null
+          next_deadline?: string | null
+          notes?: string | null
+          priority?: string
+          status?: string
+          tags?: string[]
+          title?: string
+          total_billed?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matters_intake_case_id_fkey"
+            columns: ["intake_case_id"]
+            isOneToOne: false
+            referencedRelation: "intake_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matters_lawyer_id_fkey"
+            columns: ["lawyer_id"]
+            isOneToOne: false
+            referencedRelation: "lawyers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          client_name: string
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          lawyer_id: string | null
+          matter_id: string | null
+          paid_at: string | null
+          status: string
+        }
+        Insert: {
+          amount: number
+          client_name: string
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          lawyer_id?: string | null
+          matter_id?: string | null
+          paid_at?: string | null
+          status?: string
+        }
+        Update: {
+          amount?: number
+          client_name?: string
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          lawyer_id?: string | null
+          matter_id?: string | null
+          paid_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_lawyer_id_fkey"
+            columns: ["lawyer_id"]
+            isOneToOne: false
+            referencedRelation: "lawyers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_matter_id_fkey"
+            columns: ["matter_id"]
+            isOneToOne: false
+            referencedRelation: "matters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saved_lawyers: {
         Row: {
           created_at: string
@@ -201,6 +494,114 @@ export type Database = {
             columns: ["lawyer_id"]
             isOneToOne: false
             referencedRelation: "lawyers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          lawyer_id: string | null
+          matter_id: string | null
+          priority: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          lawyer_id?: string | null
+          matter_id?: string | null
+          priority?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          lawyer_id?: string | null
+          matter_id?: string | null
+          priority?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_lawyer_id_fkey"
+            columns: ["lawyer_id"]
+            isOneToOne: false
+            referencedRelation: "lawyers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_matter_id_fkey"
+            columns: ["matter_id"]
+            isOneToOne: false
+            referencedRelation: "matters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      time_entries: {
+        Row: {
+          billable: boolean
+          created_at: string
+          date: string
+          description: string
+          hours: number
+          id: string
+          lawyer_id: string | null
+          matter_id: string | null
+          rate: number
+        }
+        Insert: {
+          billable?: boolean
+          created_at?: string
+          date?: string
+          description: string
+          hours: number
+          id?: string
+          lawyer_id?: string | null
+          matter_id?: string | null
+          rate?: number
+        }
+        Update: {
+          billable?: boolean
+          created_at?: string
+          date?: string
+          description?: string
+          hours?: number
+          id?: string
+          lawyer_id?: string | null
+          matter_id?: string | null
+          rate?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "time_entries_lawyer_id_fkey"
+            columns: ["lawyer_id"]
+            isOneToOne: false
+            referencedRelation: "lawyers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_entries_matter_id_fkey"
+            columns: ["matter_id"]
+            isOneToOne: false
+            referencedRelation: "matters"
             referencedColumns: ["id"]
           },
         ]
