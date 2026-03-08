@@ -23,6 +23,7 @@ import LawyerCalendar from "./pages/lawyer/LawyerCalendar";
 import LawyerDocuments from "./pages/lawyer/LawyerDocuments";
 import LawyerMessages from "./pages/lawyer/LawyerMessages";
 import LawyerAnalytics from "./pages/lawyer/LawyerAnalytics";
+import LawyerBilling from "./pages/lawyer/LawyerBilling";
 
 // Admin pages
 import FirmDashboard from "./pages/firm/FirmDashboard";
