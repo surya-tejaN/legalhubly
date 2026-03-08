@@ -83,6 +83,128 @@ export type Database = {
         }
         Relationships: []
       }
+      lawyers: {
+        Row: {
+          availability_status: string
+          avatar_initials: string
+          avg_response_hours: number
+          bio: string | null
+          budget_ranges: string[]
+          city: string | null
+          complexity_levels: string[]
+          consultation_fee: number | null
+          consultation_types: string[]
+          created_at: string
+          email: string | null
+          experience_years: number
+          firm: string
+          hourly_rate: number | null
+          id: string
+          jurisdictions: string[]
+          languages: string[]
+          name: string
+          next_available_date: string | null
+          phone: string | null
+          practice_areas: string[]
+          rating: number
+          review_count: number
+          review_summary: string | null
+          specialization_tags: string[]
+          state: string | null
+          updated_at: string
+          verified: boolean
+        }
+        Insert: {
+          availability_status?: string
+          avatar_initials?: string
+          avg_response_hours?: number
+          bio?: string | null
+          budget_ranges?: string[]
+          city?: string | null
+          complexity_levels?: string[]
+          consultation_fee?: number | null
+          consultation_types?: string[]
+          created_at?: string
+          email?: string | null
+          experience_years?: number
+          firm: string
+          hourly_rate?: number | null
+          id?: string
+          jurisdictions?: string[]
+          languages?: string[]
+          name: string
+          next_available_date?: string | null
+          phone?: string | null
+          practice_areas?: string[]
+          rating?: number
+          review_count?: number
+          review_summary?: string | null
+          specialization_tags?: string[]
+          state?: string | null
+          updated_at?: string
+          verified?: boolean
+        }
+        Update: {
+          availability_status?: string
+          avatar_initials?: string
+          avg_response_hours?: number
+          bio?: string | null
+          budget_ranges?: string[]
+          city?: string | null
+          complexity_levels?: string[]
+          consultation_fee?: number | null
+          consultation_types?: string[]
+          created_at?: string
+          email?: string | null
+          experience_years?: number
+          firm?: string
+          hourly_rate?: number | null
+          id?: string
+          jurisdictions?: string[]
+          languages?: string[]
+          name?: string
+          next_available_date?: string | null
+          phone?: string | null
+          practice_areas?: string[]
+          rating?: number
+          review_count?: number
+          review_summary?: string | null
+          specialization_tags?: string[]
+          state?: string | null
+          updated_at?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
+      saved_lawyers: {
+        Row: {
+          created_at: string
+          id: string
+          lawyer_id: string
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lawyer_id: string
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lawyer_id?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_lawyers_lawyer_id_fkey"
+            columns: ["lawyer_id"]
+            isOneToOne: false
+            referencedRelation: "lawyers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
