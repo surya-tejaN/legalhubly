@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { lawyerNavItems } from "@/lib/navigation";
 import { StatCard, SectionHeader, StatusBadge } from "@/components/DashboardComponents";
@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import {
   Users, Briefcase, DollarSign, CalendarDays, ArrowRight, TrendingUp,
   Clock, Bot, CheckCircle2, AlertTriangle, Timer, FileText, Plus,
-  Zap, Bell, ChevronRight,
+  Zap, Bell, ChevronRight, RefreshCw, Info,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
+import ReactMarkdown from "react-markdown";
 
 export default function LawyerDashboard() {
   const [leads, setLeads] = useState<any[]>([]);
