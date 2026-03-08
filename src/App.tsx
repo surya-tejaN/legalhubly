@@ -25,9 +25,12 @@ import LawyerMessages from "./pages/lawyer/LawyerMessages";
 import LawyerAnalytics from "./pages/lawyer/LawyerAnalytics";
 import LawyerBilling from "./pages/lawyer/LawyerBilling";
 
-// Admin pages
+// Firm & Admin pages
 import FirmDashboard from "./pages/firm/FirmDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+
+// Shared pages
+import CaseWorkspace from "./pages/shared/CaseWorkspace";
 
 const queryClient = new QueryClient();
 
@@ -46,12 +49,14 @@ const App = () => (
           <Route path="/client/cases" element={<ClientCases />} />
           <Route path="/client/find-lawyers" element={<FindLawyers />} />
           <Route path="/client/messages" element={<ClientMessages />} />
+          <Route path="/client/cases/:caseId" element={<CaseWorkspace role="client" />} />
           <Route path="/client/documents" element={<ClientDocuments />} />
           <Route path="/client/payments" element={<ClientPayments />} />
 
           {/* Lawyer Portal */}
           <Route path="/lawyer/dashboard" element={<LawyerDashboard />} />
           <Route path="/lawyer/leads" element={<LawyerLeads />} />
+          <Route path="/lawyer/cases/:caseId" element={<CaseWorkspace role="lawyer" />} />
           <Route path="/lawyer/cases" element={<LawyerCases />} />
           <Route path="/lawyer/calendar" element={<LawyerCalendar />} />
           <Route path="/lawyer/documents" element={<LawyerDocuments />} />
