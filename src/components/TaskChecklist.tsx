@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckCircle2, Circle, Clock, AlertCircle } from "lucide-react";
+import { CheckCircle2, Circle, Clock, AlertCircle, Scale } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
@@ -89,6 +89,3 @@ export default function TaskChecklist({ tasks: initialTasks }: { tasks: Task[] }
     </div>
   );
 }
-
-// Need Scale import for the inline usage
-import { Scale } from "lucide-react";
