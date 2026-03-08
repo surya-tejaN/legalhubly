@@ -8,10 +8,11 @@ import {
   Star, MapPin, Clock, Shield, Filter, Search, Calendar,
   BookmarkPlus, BookmarkCheck, ArrowUpDown, Globe, Briefcase,
   ChevronDown, X, Zap, Heart, Scale, DollarSign, Timer,
-  Award, Languages, Video, Phone, Building2, CheckCircle2,
+  Award, Languages, Video, Phone, Building2, CheckCircle2, Info,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
+import ClientSupportChat from "@/components/ClientSupportChat";
 
 interface Lawyer {
   id: string;
