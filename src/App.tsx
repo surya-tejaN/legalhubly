@@ -49,6 +49,7 @@ const App = () => (
           <Route path="/client/cases" element={<ClientCases />} />
           <Route path="/client/find-lawyers" element={<FindLawyers />} />
           <Route path="/client/messages" element={<ClientMessages />} />
+          <Route path="/client/cases/:caseId" element={<CaseWorkspace role="client" />} />
           <Route path="/client/documents" element={<ClientDocuments />} />
           <Route path="/client/payments" element={<ClientPayments />} />
 
