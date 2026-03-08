@@ -138,10 +138,7 @@ export default function DashboardLayout({ children, sidebarItems, portalLabel, u
               />
             </div>
           </div>
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="h-5 w-5" />
-            <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-accent" />
-          </Button>
+          <NotificationsCenter />
         </header>
 
         <main className="flex-1 p-4 md:p-6 lg:p-8">
