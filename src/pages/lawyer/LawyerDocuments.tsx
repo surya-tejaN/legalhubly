@@ -1,79 +1,125 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { lawyerNavItems } from "@/lib/navigation";
 import { SectionHeader } from "@/components/DashboardComponents";
 import { Button } from "@/components/ui/button";
-import { Bot, FileText, Sparkles, ArrowRight, Download, Copy, Wand2 } from "lucide-react";
+import { Bot, FileText, Sparkles, Download, Copy, Wand2, AlertTriangle, Info } from "lucide-react";
 import { motion } from "framer-motion";
+import { toast } from "@/hooks/use-toast";
+import ReactMarkdown from "react-markdown";
 
 const templates = [
-  { id: "contract", name: "Service Contract", desc: "Standard client engagement agreement", icon: "📝" },
-  { id: "nda", name: "Non-Disclosure Agreement", desc: "Confidentiality agreement template", icon: "🔒" },
-  { id: "demand", name: "Demand Letter", desc: "Formal demand for action or payment", icon: "📨" },
-  { id: "notice", name: "Legal Notice", desc: "Formal notification to opposing party", icon: "⚖️" },
-  { id: "brief", name: "Legal Brief", desc: "Court filing brief template", icon: "📋" },
-  { id: "settlement", name: "Settlement Agreement", desc: "Terms for dispute resolution", icon: "🤝" },
-  { id: "motion", name: "Motion to Dismiss", desc: "Request for case dismissal", icon: "🏛️" },
-  { id: "response", name: "Client Response", desc: "AI-drafted response to client", icon: "💬" },
+  { id: "engagement_letter", name: "Engagement Letter", desc: "Client engagement agreement", icon: "📝" },
+  { id: "intake_summary", name: "Intake Summary", desc: "Structured case intake brief", icon: "📋" },
+  { id: "demand_letter", name: "Demand Letter", desc: "Formal demand for action", icon: "📨" },
+  { id: "nda", name: "Non-Disclosure Agreement", desc: "Confidentiality agreement", icon: "🔒" },
+  { id: "settlement", name: "Settlement Agreement", desc: "Dispute resolution terms", icon: "🤝" },
+  { id: "follow_up_email", name: "Follow-Up Email", desc: "Client follow-up communication", icon: "💬" },
+  { id: "legal_notice", name: "Legal Notice", desc: "Formal notification letter", icon: "⚖️" },
+  { id: "checklist", name: "Case Checklist", desc: "Action items and deadlines", icon: "✅" },
 ];
 
-const generatedDoc = `# Employment Termination Response Letter
-
-**Date:** March 8, 2026  
-**To:** HR Department, TechCorp Inc.  
-**From:** Sarah Chen, Esq., on behalf of Alex Johnson  
-**Re:** Wrongful Termination – Notice of Legal Representation
-
----
-
-Dear Sir/Madam,
-
-This letter serves as formal notice that our firm represents **Alex Johnson** in connection with the termination of employment effective February 15, 2026.
-
-## Key Points of Contention
-
-1. **Insufficient Cause**: The termination letter cites "performance issues" without documentation or prior warnings, violating the progressive discipline policy outlined in the Employee Handbook (Section 4.2).
-
-2. **Non-Compete Clause**: The non-compete agreement (Section 8, Employment Contract) is overly broad in scope and duration, rendering it unenforceable under California Business and Professions Code § 16600.
-
-3. **Severance Terms**: The proposed severance of two weeks' pay is inadequate given Mr. Johnson's tenure of 4.5 years and the circumstances of termination.
-
-## Demanded Action
-
-We request the following within **14 business days** of receipt of this letter:
-
-- Full documentation supporting the termination decision
-- Revised severance offer reflecting 6 months' compensation
-- Immediate release from the non-compete agreement
-- Written confirmation of COBRA benefits continuation
-
-Failure to respond within the stated timeframe may result in formal legal proceedings.
-
-Sincerely,  
-**Sarah Chen, Esq.**  
-Chen & Associates`;
+const caseOptions = [
+  { id: "c1", label: "C-2024-001 - Alex Johnson - Wrongful Termination", context: { client_name: "Alex Johnson", title: "Wrongful Termination", category: "Employment", description: "Employee terminated without cause after 4.5 years. Non-compete clause in dispute. Seeking revised severance." } },
+  { id: "c2", label: "C-2024-005 - Robert Lee - Real Estate Closing", context: { client_name: "Robert Lee", title: "Real Estate Closing", category: "Real Estate", description: "Commercial property closing with title issues. Environmental assessment pending." } },
+  { id: "c3", label: "C-2024-006 - Jennifer Lee - Employment Discrimination", context: { client_name: "Jennifer Lee", title: "Employment Discrimination", category: "Employment", description: "Gender-based discrimination claim. Pattern of unequal treatment documented over 2 years." } },
+];
 
 export default function LawyerDocuments() {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [selectedCase, setSelectedCase] = useState(caseOptions[0].id);
+  const [instructions, setInstructions] = useState("");
   const [generating, setGenerating] = useState(false);
-  const [generated, setGenerated] = useState(false);
+  const [generatedDoc, setGeneratedDoc] = useState("");
+  const docEndRef = useRef<HTMLDivElement>(null);
 
-  const handleGenerate = () => {
+  useEffect(() => {
+    if (generating) docEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [generatedDoc, generating]);
+
+  const handleGenerate = async () => {
+    if (!selectedTemplate) return;
     setGenerating(true);
-    setTimeout(() => {
+    setGeneratedDoc("");
+
+    const caseCtx = caseOptions.find((c) => c.id === selectedCase)?.context;
+    const templateName = templates.find((t) => t.id === selectedTemplate)?.name;
+
+    try {
+      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/document-agent`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          document_type: templateName,
+          case_context: caseCtx,
+          instructions: instructions || undefined,
+          messages: [],
+        }),
+      });
+
+      if (!resp.ok || !resp.body) {
+        if (resp.status === 429) toast({ title: "Rate limited", description: "Please try again shortly.", variant: "destructive" });
+        else if (resp.status === 402) toast({ title: "Usage limit", description: "AI credits exhausted.", variant: "destructive" });
+        else toast({ title: "Error", description: "Document generation failed.", variant: "destructive" });
+        setGenerating(false);
+        return;
+      }
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let textBuffer = "";
+      let content = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        textBuffer += decoder.decode(value, { stream: true });
+
+        let newlineIndex: number;
+        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+          let line = textBuffer.slice(0, newlineIndex);
+          textBuffer = textBuffer.slice(newlineIndex + 1);
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (!line.startsWith("data: ")) continue;
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === "[DONE]") break;
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const delta = parsed.choices?.[0]?.delta?.content;
+            if (delta) {
+              content += delta;
+              setGeneratedDoc(content);
+            }
+          } catch {
+            textBuffer = line + "\n" + textBuffer;
+            break;
+          }
+        }
+      }
+    } catch (e) {
+      console.error(e);
+      toast({ title: "Error", description: "Failed to connect to AI.", variant: "destructive" });
+    } finally {
       setGenerating(false);
-      setGenerated(true);
-    }, 1500);
+    }
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(generatedDoc);
+    toast({ title: "Copied", description: "Document copied to clipboard." });
   };
 
   return (
     <DashboardLayout sidebarItems={lawyerNavItems} portalLabel="Lawyer Portal" userName="Sarah Chen" userRole="Attorney">
       <SectionHeader
         title="AI Document Studio"
-        subtitle="Generate and draft legal documents with AI assistance"
+        subtitle="Generate legal documents with AI — review required before use"
       />
 
-      {!generated ? (
+      {!generatedDoc ? (
         <>
           {/* AI Agent Banner */}
           <div className="flex items-center gap-3 mb-6 p-4 rounded-xl bg-accent/5 border border-accent/15">
@@ -82,9 +128,15 @@ export default function LawyerDocuments() {
             </div>
             <div className="flex-1">
               <div className="font-semibold text-sm text-foreground">Document Drafting Agent</div>
-              <div className="text-xs text-muted-foreground">Select a template and I'll generate a draft based on your case details</div>
+              <div className="text-xs text-muted-foreground">Select a template and case — I'll generate a draft for your review</div>
             </div>
             <Sparkles className="h-5 w-5 text-accent animate-pulse" />
+          </div>
+
+          {/* Compliance Notice */}
+          <div className="flex items-start gap-2 mb-6 p-3 rounded-lg bg-muted/50 border text-xs text-muted-foreground">
+            <Info className="h-4 w-4 shrink-0 mt-0.5" />
+            <span>AI-generated documents are drafts that require attorney review and editing before use. Source context is tagged throughout the document. This tool provides legal information assistance, not legal advice.</span>
           </div>
 
           {/* Templates Grid */}
@@ -111,15 +163,19 @@ export default function LawyerDocuments() {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1.5">Related Case</label>
-                    <select className="w-full p-2.5 rounded-lg bg-muted/50 border text-sm outline-none focus:ring-2 focus:ring-accent/50">
-                      <option>C-2024-001 - Alex Johnson - Wrongful Termination</option>
-                      <option>C-2024-005 - Robert Lee - Real Estate Closing</option>
-                      <option>C-2024-006 - Jennifer Lee - Employment Discrimination</option>
+                    <select
+                      value={selectedCase}
+                      onChange={(e) => setSelectedCase(e.target.value)}
+                      className="w-full p-2.5 rounded-lg bg-muted/50 border text-sm outline-none focus:ring-2 focus:ring-accent/50"
+                    >
+                      {caseOptions.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
                     </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1.5">Additional Instructions (optional)</label>
                     <textarea
+                      value={instructions}
+                      onChange={(e) => setInstructions(e.target.value)}
                       placeholder="Any specific points to include or tone preferences..."
                       className="w-full h-24 p-3 rounded-lg bg-muted/50 border text-sm outline-none focus:ring-2 focus:ring-accent/50 resize-none"
                     />
@@ -138,31 +194,42 @@ export default function LawyerDocuments() {
         </>
       ) : (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          {/* Generated Document */}
+          {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold bg-success/10 text-success px-2 py-0.5 rounded-full">AI Generated</span>
-              <span className="text-sm text-muted-foreground">Based on Case C-2024-001</span>
+              <span className="text-[10px] font-bold bg-accent/10 text-accent px-2 py-0.5 rounded-full flex items-center gap-1">
+                <Bot className="h-3 w-3" /> AI Generated
+              </span>
+              <span className="text-sm text-muted-foreground">
+                {templates.find((t) => t.id === selectedTemplate)?.name} · {caseOptions.find((c) => c.id === selectedCase)?.label.split(" - ")[1]}
+              </span>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm"><Copy className="mr-2 h-3.5 w-3.5" /> Copy</Button>
-              <Button variant="outline" size="sm"><Download className="mr-2 h-3.5 w-3.5" /> Export</Button>
-              <Button variant="gold" size="sm" onClick={() => setGenerated(false)}>
+              <Button variant="outline" size="sm" onClick={handleCopy}><Copy className="mr-2 h-3.5 w-3.5" /> Copy</Button>
+              <Button variant="gold" size="sm" onClick={() => { setGeneratedDoc(""); setInstructions(""); }}>
                 <Wand2 className="mr-2 h-3.5 w-3.5" /> New Document
               </Button>
             </div>
           </div>
+
+          {/* AI Disclaimer */}
+          <div className="flex items-start gap-2 mb-4 p-3 rounded-lg bg-warning/5 border border-warning/20 text-xs text-warning">
+            <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+            <span><strong>AI-Generated Draft</strong> — This document must be reviewed, edited, and approved by a licensed attorney before use. It does not constitute legal advice. Source context is tagged with [From intake], [From case file], or [Attorney input].</span>
+          </div>
+
+          {/* Document Content */}
           <div className="rounded-xl bg-card border shadow-card p-8 max-w-4xl">
             <div className="prose prose-sm max-w-none text-foreground">
-              {generatedDoc.split("\n").map((line, i) => {
-                if (line.startsWith("# ")) return <h1 key={i} className="text-xl font-serif text-foreground mb-4">{line.slice(2)}</h1>;
-                if (line.startsWith("## ")) return <h2 key={i} className="text-lg font-semibold text-foreground mt-6 mb-2">{line.slice(3)}</h2>;
-                if (line.startsWith("---")) return <hr key={i} className="my-4 border-border" />;
-                if (line.startsWith("- ")) return <li key={i} className="text-sm text-foreground ml-4 mb-1">{line.slice(2)}</li>;
-                if (line.trim() === "") return <br key={i} />;
-                return <p key={i} className="text-sm text-foreground mb-2" dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") }} />;
-              })}
+              <ReactMarkdown>{generatedDoc}</ReactMarkdown>
             </div>
+            {generating && (
+              <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+                <span className="h-2 w-2 bg-accent rounded-full animate-pulse" />
+                Generating...
+              </div>
+            )}
+            <div ref={docEndRef} />
           </div>
         </motion.div>
       )}

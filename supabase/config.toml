@@ -8,3 +8,15 @@ verify_jwt = false
 
 [functions.lawyer-ai]
 verify_jwt = false
+
+[functions.document-agent]
+verify_jwt = false
+
+[functions.client-support]
+verify_jwt = false
+
+[functions.billing-agent]
+verify_jwt = false
+
+[functions.follow-up-agent]
+verify_jwt = false

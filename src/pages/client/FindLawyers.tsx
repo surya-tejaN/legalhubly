@@ -8,10 +8,11 @@ import {
   Star, MapPin, Clock, Shield, Filter, Search, Calendar,
   BookmarkPlus, BookmarkCheck, ArrowUpDown, Globe, Briefcase,
   ChevronDown, X, Zap, Heart, Scale, DollarSign, Timer,
-  Award, Languages, Video, Phone, Building2, CheckCircle2,
+  Award, Languages, Video, Phone, Building2, CheckCircle2, Info,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
+import ClientSupportChat from "@/components/ClientSupportChat";
 
 interface Lawyer {
   id: string;
@@ -39,6 +40,8 @@ interface Lawyer {
   budget_ranges: string[];
   match_score: number;
   score_breakdown: Record<string, number>;
+  match_explanation?: string;
+  ai_disclaimer?: string;
 }
 
 const SORT_OPTIONS = [
@@ -419,6 +422,14 @@ export default function FindLawyers() {
                         {lawyer.experience_years}yr exp
                       </div>
 
+                      {/* AI Match Explanation */}
+                      {lawyer.match_explanation && (
+                        <div className="mt-1.5 text-[11px] text-accent/80 flex items-start gap-1">
+                          <Zap className="h-3 w-3 shrink-0 mt-0.5" />
+                          <span>{lawyer.match_explanation}</span>
+                        </div>
+                      )}
+
                       {/* Practice areas */}
                       <div className="flex flex-wrap gap-1.5 mt-2">
                         {lawyer.practice_areas.slice(0, 3).map((pa) => (
@@ -564,6 +575,14 @@ export default function FindLawyers() {
           <p className="text-sm text-muted-foreground">Try adjusting your filters or search query</p>
         </div>
       )}
+
+      {/* AI Disclaimer */}
+      <div className="flex items-start gap-2 mt-6 p-3 rounded-lg bg-muted/50 border text-[11px] text-muted-foreground">
+        <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+        <span>Match scores are AI-generated estimates based on lawyer profile data and your case criteria. They do not guarantee outcomes. Always verify fit during your consultation. This is legal information, not legal advice.</span>
+      </div>
+
+      <ClientSupportChat />
     </DashboardLayout>
   );
 }
