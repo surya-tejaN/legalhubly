@@ -153,10 +153,33 @@ serve(async (req) => {
     const { data: lawyers, error } = await query;
     if (error) throw error;
 
-    // Score each lawyer
+    // Score each lawyer and generate explanation
     const scored = (lawyers || []).map((lawyer) => {
       const { score, breakdown } = computeMatchScore(lawyer, criteria || {});
-      return { ...lawyer, match_score: score, score_breakdown: breakdown };
+      
+      // Generate human-readable explanation
+      const explanations: string[] = [];
+      if (breakdown.practice_area >= 20) explanations.push(`Strong practice area match in ${criteria?.legal_category || "your area"}`);
+      else if (breakdown.practice_area >= 10) explanations.push("Partial practice area overlap");
+      
+      if (breakdown.location >= 16) explanations.push(`Located in your area (${lawyer.city}, ${lawyer.state})`);
+      else if (breakdown.location >= 10) explanations.push(`Licensed in ${lawyer.state}`);
+      
+      if (breakdown.availability >= 10) explanations.push("Currently available for new clients");
+      if (breakdown.response_speed >= 8) explanations.push(`Fast response time (~${formatHours(lawyer.avg_response_hours)})`);
+      if (breakdown.language >= 5 && criteria?.language_preference) explanations.push(`Speaks ${criteria.language_preference}`);
+      if (breakdown.reviews >= 4) explanations.push(`Highly rated (${lawyer.rating}★ from ${lawyer.review_count} reviews)`);
+      if (breakdown.budget >= 6) explanations.push("Fee structure matches your budget");
+      
+      return { 
+        ...lawyer, 
+        match_score: score, 
+        score_breakdown: breakdown,
+        match_explanation: explanations.length > 0 
+          ? explanations.join(" · ") 
+          : "General match based on availability and profile",
+        ai_disclaimer: "Match scores are AI-generated estimates based on profile data. Verify fit during consultation.",
+      };
     });
 
     // Sort
