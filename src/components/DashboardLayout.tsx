@@ -1,8 +1,9 @@
 import { ReactNode, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Scale, ChevronLeft, ChevronRight, Bell, Search, Menu, X, User } from "lucide-react";
+import { Scale, ChevronLeft, ChevronRight, Search, Menu, X, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import NotificationsCenter from "@/components/NotificationsCenter";
 
 interface SidebarItem {
   icon: ReactNode;
