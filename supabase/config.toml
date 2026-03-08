@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.match-lawyers]
 verify_jwt = false
+
+[functions.lawyer-ai]
+verify_jwt = false
