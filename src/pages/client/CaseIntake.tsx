@@ -120,7 +120,7 @@ export default function CaseIntake() {
       } else {
         const { data } = await supabase
           .from("intake_cases")
-          .insert(payload)
+          .insert(payload as any)
           .select("id")
           .single();
         if (data) setCaseId(data.id);
