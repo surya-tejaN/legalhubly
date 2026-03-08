@@ -421,6 +421,14 @@ export default function FindLawyers() {
                         {lawyer.experience_years}yr exp
                       </div>
 
+                      {/* AI Match Explanation */}
+                      {lawyer.match_explanation && (
+                        <div className="mt-1.5 text-[11px] text-accent/80 flex items-start gap-1">
+                          <Zap className="h-3 w-3 shrink-0 mt-0.5" />
+                          <span>{lawyer.match_explanation}</span>
+                        </div>
+                      )}
+
                       {/* Practice areas */}
                       <div className="flex flex-wrap gap-1.5 mt-2">
                         {lawyer.practice_areas.slice(0, 3).map((pa) => (
