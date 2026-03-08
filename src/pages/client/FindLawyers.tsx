@@ -575,6 +575,14 @@ export default function FindLawyers() {
           <p className="text-sm text-muted-foreground">Try adjusting your filters or search query</p>
         </div>
       )}
+
+      {/* AI Disclaimer */}
+      <div className="flex items-start gap-2 mt-6 p-3 rounded-lg bg-muted/50 border text-[11px] text-muted-foreground">
+        <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+        <span>Match scores are AI-generated estimates based on lawyer profile data and your case criteria. They do not guarantee outcomes. Always verify fit during your consultation. This is legal information, not legal advice.</span>
+      </div>
+
+      <ClientSupportChat />
     </DashboardLayout>
   );
 }
