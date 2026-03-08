@@ -56,6 +56,7 @@ const App = () => (
           <Route path="/lawyer/calendar" element={<LawyerCalendar />} />
           <Route path="/lawyer/documents" element={<LawyerDocuments />} />
           <Route path="/lawyer/messages" element={<LawyerMessages />} />
+          <Route path="/lawyer/billing" element={<LawyerBilling />} />
           <Route path="/lawyer/analytics" element={<LawyerAnalytics />} />
 
           {/* Firm Admin */}
