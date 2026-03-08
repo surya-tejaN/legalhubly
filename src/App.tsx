@@ -56,6 +56,7 @@ const App = () => (
           {/* Lawyer Portal */}
           <Route path="/lawyer/dashboard" element={<LawyerDashboard />} />
           <Route path="/lawyer/leads" element={<LawyerLeads />} />
+          <Route path="/lawyer/cases/:caseId" element={<CaseWorkspace role="lawyer" />} />
           <Route path="/lawyer/cases" element={<LawyerCases />} />
           <Route path="/lawyer/calendar" element={<LawyerCalendar />} />
           <Route path="/lawyer/documents" element={<LawyerDocuments />} />
