@@ -393,7 +393,7 @@ export default function Index() {
                   <div key={a.name} className="flex items-center gap-2.5 p-3 rounded-lg bg-navy-lighter/20 border border-navy-lighter/20">
                     <a.icon className="h-4 w-4 text-accent shrink-0" />
                     <span className="text-xs font-medium text-primary-foreground/70">{a.name} Agent</span>
-                    <span className="ml-auto h-2 w-2 rounded-full bg-green-400 animate-pulse" />
+                    <span className="ml-auto h-2 w-2 rounded-full bg-success animate-pulse" />
                   </div>
                 ))}
               </div>
