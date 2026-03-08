@@ -2,3 +2,6 @@ project_id = "agmkgxmjktbfzpzpkqez"
 
 [functions.legal-intake]
 verify_jwt = false
+
+[functions.match-lawyers]
+verify_jwt = false
