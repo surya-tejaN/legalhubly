@@ -6,7 +6,9 @@ import {
   Scale, Shield, ArrowRight, Sparkles, MapPin, Briefcase,
   Menu, X, Star, Clock, BadgeCheck, Search, Locate,
   Users, Home, Gavel, Globe, Heart, Building2,
-  Landmark, ScrollText, ChevronRight,
+  Landmark, ScrollText, ChevronRight, DollarSign, Brain,
+  Stethoscope, ShieldCheck, Car, KeyRound, GraduationCap,
+  Leaf, Swords, Earth, BookOpen, Receipt,
 } from "lucide-react";
 
 // ─── Data ────────────────────────────────────────────────────────────────────
