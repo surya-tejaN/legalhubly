@@ -6,27 +6,53 @@ import { useAuth, useDashboardPath } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Scale, Mail, Lock } from "lucide-react";
+import { Scale, Mail, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
 
 export default function Login() {
   const { user, profile, loading } = useAuth();
   const dashboardPath = useDashboardPath(profile?.role);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   if (!loading && user) return <Navigate to={dashboardPath} replace />;
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg("");
     setSubmitting(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) toast.error(error.message);
+
+    const trimmedEmail = email.trim().toLowerCase();
+    if (!trimmedEmail || !password) {
+      setErrorMsg("Please enter your email and password.");
+      setSubmitting(false);
+      return;
+    }
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email: trimmedEmail,
+      password,
+    });
+
+    if (error) {
+      if (error.message.includes("Invalid login credentials")) {
+        setErrorMsg("Invalid email or password. Please try again.");
+      } else if (error.message.includes("Email not confirmed")) {
+        setErrorMsg("Please verify your email address before signing in. Check your inbox.");
+      } else {
+        setErrorMsg(error.message);
+      }
+    }
     setSubmitting(false);
   };
 
   const handleGoogleLogin = async () => {
+    setErrorMsg("");
     setSubmitting(true);
     const { error } = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
@@ -76,6 +102,14 @@ export default function Login() {
           </div>
         </div>
 
+        {/* Error message */}
+        {errorMsg && (
+          <div className="flex items-start gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
+            <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+            <span>{errorMsg}</span>
+          </div>
+        )}
+
         {/* Email Form */}
         <form onSubmit={handleEmailLogin} className="space-y-4">
           <div className="space-y-2">
@@ -88,8 +122,9 @@ export default function Login() {
                 placeholder="you@example.com"
                 className="pl-10"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => { setEmail(e.target.value); setErrorMsg(""); }}
                 required
+                maxLength={255}
               />
             </div>
           </div>
@@ -104,15 +139,35 @@ export default function Login() {
               <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 id="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
-                className="pl-10"
+                className="pl-10 pr-10"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => { setPassword(e.target.value); setErrorMsg(""); }}
                 required
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
           </div>
+
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="remember"
+              checked={rememberMe}
+              onCheckedChange={(v) => setRememberMe(v === true)}
+            />
+            <Label htmlFor="remember" className="text-sm text-muted-foreground cursor-pointer">
+              Remember me
+            </Label>
+          </div>
+
           <Button type="submit" className="w-full h-11" disabled={submitting}>
             {submitting ? "Signing in…" : "Sign in"}
           </Button>

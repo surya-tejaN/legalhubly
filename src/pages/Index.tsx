@@ -83,7 +83,7 @@ type Step = "location" | "category";
 
 export default function Index() {
   const navigate = useNavigate();
-  const { user, profile } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const dashboardPath = useDashboardPath(profile?.role);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [step, setStep] = useState<Step>("location");
@@ -195,6 +195,9 @@ export default function Index() {
                     </span>
                   )}
                 </Link>
+                <Button variant="ghost" size="sm" onClick={async () => { await signOut(); navigate("/"); }} className="text-muted-foreground">
+                  Logout
+                </Button>
               </>
             ) : (
               <>
@@ -236,9 +239,14 @@ export default function Index() {
                 )}
                 <div className="pt-4 border-t mt-3 space-y-2">
                   {user ? (
-                    <Button variant="gold" className="w-full" asChild>
-                      <Link to={dashboardPath} onClick={() => setMobileMenuOpen(false)}>Go to Dashboard</Link>
-                    </Button>
+                    <>
+                      <Button variant="gold" className="w-full" asChild>
+                        <Link to={dashboardPath} onClick={() => setMobileMenuOpen(false)}>Go to Dashboard</Link>
+                      </Button>
+                      <Button variant="outline" className="w-full" onClick={async () => { setMobileMenuOpen(false); await signOut(); navigate("/"); }}>
+                        Logout
+                      </Button>
+                    </>
                   ) : (
                     <>
                       <Button variant="outline" className="w-full" asChild>
