@@ -64,7 +64,7 @@ export const SEO_PRACTICE_AREAS = [
     ],
   },
   {
-    slug: "personal-injury-lawyer",
+    slug: "personal-injury-lawyers",
     name: "Personal Injury",
     shortName: "Personal Injury",
     title: "Personal Injury Lawyer",
