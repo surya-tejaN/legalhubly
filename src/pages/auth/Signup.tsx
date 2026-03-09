@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Scale, Mail, Lock, User } from "lucide-react";
+import { Scale, Mail, Lock, User, MapPin } from "lucide-react";
 
 const ROLES: { value: AppRole; label: string }[] = [
   { value: "client", label: "I need a lawyer" },
@@ -20,6 +20,7 @@ export default function Signup() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [city, setCity] = useState("");
   const [role, setRole] = useState<AppRole>("client");
   const [submitting, setSubmitting] = useState(false);
 
@@ -33,7 +34,7 @@ export default function Signup() {
       password,
       options: {
         emailRedirectTo: window.location.origin,
-        data: { full_name: fullName, role },
+        data: { full_name: fullName, role, city },
       },
     });
     if (error) {
@@ -140,6 +141,20 @@ export default function Signup() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="city">City</Label>
+            <div className="relative">
+              <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="city"
+                placeholder="New York, NY"
+                className="pl-10"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
               />
             </div>
           </div>
