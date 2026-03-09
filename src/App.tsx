@@ -94,8 +94,8 @@ function AnimatedRoutes() {
         <Route path="/cities/:citySlug" element={<PageTransition><CityDepartments /></PageTransition>} />
         <Route path="/lawyers" element={<PageTransition><SeoDirectory /></PageTransition>} />
 
-        {/* SEO Landing Pages - city/practice-area format */}
-        <Route path="/:city/:practiceArea" element={<PageTransition><SeoLandingPage /></PageTransition>} />
+        {/* SEO Landing Pages - /lawyers/practice-area/city format */}
+        <Route path="/lawyers/:practiceArea/:city" element={<PageTransition><SeoLandingPage /></PageTransition>} />
 
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
       </Routes>
