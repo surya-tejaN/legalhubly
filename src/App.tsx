@@ -38,6 +38,10 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import CaseWorkspace from "./pages/shared/CaseWorkspace";
 import PricingPlans from "./pages/shared/PricingPlans";
 
+// SEO pages
+import SeoLandingPage from "./pages/seo/SeoLandingPage";
+import SeoDirectory from "./pages/seo/SeoDirectory";
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -82,6 +86,10 @@ function AnimatedRoutes() {
         {/* Platform Admin */}
         <Route path="/admin/dashboard" element={<PageTransition><AdminDashboard /></PageTransition>} />
         <Route path="/admin/pricing" element={<PageTransition><PricingPlans /></PageTransition>} />
+
+        {/* SEO Landing Pages */}
+        <Route path="/lawyers/:city/:practiceArea" element={<PageTransition><SeoLandingPage /></PageTransition>} />
+        <Route path="/lawyers" element={<PageTransition><SeoDirectory /></PageTransition>} />
 
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
       </Routes>

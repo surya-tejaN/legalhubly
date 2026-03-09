@@ -1,0 +1,139 @@
+// SEO data constants for city + practice area landing pages
+
+export const SEO_CITIES = [
+  { slug: "chicago", name: "Chicago", state: "IL", stateFullName: "Illinois" },
+  { slug: "new-york", name: "New York", state: "NY", stateFullName: "New York" },
+  { slug: "los-angeles", name: "Los Angeles", state: "CA", stateFullName: "California" },
+  { slug: "houston", name: "Houston", state: "TX", stateFullName: "Texas" },
+  { slug: "miami", name: "Miami", state: "FL", stateFullName: "Florida" },
+  { slug: "atlanta", name: "Atlanta", state: "GA", stateFullName: "Georgia" },
+  { slug: "seattle", name: "Seattle", state: "WA", stateFullName: "Washington" },
+  { slug: "phoenix", name: "Phoenix", state: "AZ", stateFullName: "Arizona" },
+  { slug: "boston", name: "Boston", state: "MA", stateFullName: "Massachusetts" },
+  { slug: "denver", name: "Denver", state: "CO", stateFullName: "Colorado" },
+  { slug: "san-francisco", name: "San Francisco", state: "CA", stateFullName: "California" },
+  { slug: "dallas", name: "Dallas", state: "TX", stateFullName: "Texas" },
+];
+
+export const SEO_PRACTICE_AREAS = [
+  {
+    slug: "immigration-lawyer",
+    name: "Immigration Law",
+    shortName: "Immigration",
+    title: "Immigration Lawyer",
+    description: "Navigate complex immigration processes including visas, green cards, citizenship, asylum, and deportation defense.",
+    faqs: [
+      { q: "How much does an immigration lawyer cost?", a: "Immigration lawyer fees vary from $150–$500/hour. Simple visa applications may cost $1,000–$3,000, while complex cases like deportation defense can range from $5,000–$15,000+." },
+      { q: "When should I hire an immigration lawyer?", a: "Hire an immigration lawyer if you're facing deportation, applying for asylum, sponsoring a family member, dealing with a visa denial, or navigating employment-based immigration." },
+      { q: "Can an immigration lawyer speed up my case?", a: "While lawyers can't change processing times, they ensure paperwork is complete and correct, reducing delays from errors. They can also file expedite requests when eligible." },
+      { q: "What documents do I need for an immigration consultation?", a: "Bring your passport, any current visas, I-94 arrival record, prior immigration applications, employment authorization documents, and any correspondence from USCIS." },
+    ],
+  },
+  {
+    slug: "divorce-lawyer",
+    name: "Family Law",
+    shortName: "Divorce & Family",
+    title: "Divorce Lawyer",
+    description: "Expert representation for divorce, child custody, alimony, property division, prenuptial agreements, and family disputes.",
+    faqs: [
+      { q: "How much does a divorce lawyer cost?", a: "Divorce lawyers typically charge $200–$500/hour. An uncontested divorce may cost $1,500–$5,000 total, while contested divorces can range from $10,000–$50,000+." },
+      { q: "How long does a divorce take?", a: "An uncontested divorce typically takes 3–6 months. Contested divorces with disputes over custody, property, or support can take 1–3 years." },
+      { q: "Do I need a lawyer for an uncontested divorce?", a: "While not required, a lawyer ensures your rights are protected, especially regarding asset division, retirement accounts, and custody arrangements." },
+      { q: "What's the difference between legal separation and divorce?", a: "Legal separation allows spouses to live apart while remaining legally married, preserving benefits like health insurance. Divorce fully dissolves the marriage." },
+    ],
+  },
+  {
+    slug: "criminal-defense-lawyer",
+    name: "Criminal Defense",
+    shortName: "Criminal Defense",
+    title: "Criminal Defense Lawyer",
+    description: "Aggressive defense for DUI, felony charges, misdemeanors, drug offenses, white-collar crimes, and federal cases.",
+    faqs: [
+      { q: "How much does a criminal defense lawyer cost?", a: "Fees range from $1,500–$5,000 for misdemeanors and $5,000–$25,000+ for felonies. Complex federal cases can cost $25,000–$100,000+." },
+      { q: "Should I talk to police without a lawyer?", a: "No. You have the right to remain silent and request an attorney. Anything you say can be used against you. Always consult a lawyer before making any statements." },
+      { q: "What's the difference between a misdemeanor and a felony?", a: "Misdemeanors carry penalties up to 1 year in jail. Felonies carry penalties exceeding 1 year in prison and can include fines, probation, and loss of civil rights." },
+      { q: "Can a criminal record be expunged?", a: "Many states allow expungement of certain offenses after a waiting period. Eligibility depends on the offense type, your criminal history, and state laws." },
+    ],
+  },
+  {
+    slug: "personal-injury-lawyer",
+    name: "Personal Injury",
+    shortName: "Personal Injury",
+    title: "Personal Injury Lawyer",
+    description: "Recover maximum compensation for accidents, medical malpractice, workplace injuries, and wrongful death claims.",
+    faqs: [
+      { q: "How much does a personal injury lawyer cost?", a: "Most personal injury lawyers work on contingency — they take 33–40% of your settlement. You pay nothing upfront and nothing if you don't win." },
+      { q: "How long do I have to file a personal injury claim?", a: "Statutes of limitations vary by state, typically 1–3 years from the date of injury. Some exceptions apply for minors or delayed discovery of harm." },
+      { q: "What compensation can I receive?", a: "You may recover medical expenses, lost wages, pain and suffering, emotional distress, and in some cases, punitive damages." },
+      { q: "Do I need a lawyer for a minor accident?", a: "Even minor accidents can lead to significant medical bills. A lawyer ensures you don't accept a lowball settlement and accounts for future medical needs." },
+    ],
+  },
+  {
+    slug: "employment-lawyer",
+    name: "Employment Law",
+    shortName: "Employment",
+    title: "Employment Lawyer",
+    description: "Protection against wrongful termination, workplace discrimination, harassment, wage disputes, and contract violations.",
+    faqs: [
+      { q: "How much does an employment lawyer cost?", a: "Employment lawyers charge $200–$500/hour. Many discrimination and harassment cases are taken on contingency, meaning no upfront cost." },
+      { q: "What counts as wrongful termination?", a: "Termination based on discrimination, retaliation for whistleblowing, violation of employment contracts, or firing in breach of public policy." },
+      { q: "How do I prove workplace discrimination?", a: "Document incidents, save communications, note witnesses, and file complaints with HR. An attorney can help gather evidence and file EEOC charges." },
+      { q: "What are my rights as an employee?", a: "You're protected against discrimination, entitled to minimum wage and overtime, have the right to a safe workplace, and can take medical/family leave under FMLA." },
+    ],
+  },
+  {
+    slug: "business-lawyer",
+    name: "Business Law",
+    shortName: "Business",
+    title: "Business Lawyer",
+    description: "Legal guidance for business formation, contracts, mergers, intellectual property, compliance, and commercial disputes.",
+    faqs: [
+      { q: "How much does a business lawyer cost?", a: "Business lawyers charge $200–$600/hour. Simple tasks like LLC formation cost $500–$2,000. Complex transactions can cost $10,000–$50,000+." },
+      { q: "Do I need a lawyer to start a business?", a: "While not required, a lawyer helps choose the right structure (LLC, Corp), draft operating agreements, ensure regulatory compliance, and protect intellectual property." },
+      { q: "What business structure should I choose?", a: "It depends on liability protection, tax implications, and growth plans. LLCs offer flexibility, S-Corps have tax advantages, and C-Corps are best for raising investment." },
+      { q: "When should a business hire a lawyer?", a: "When forming the business, drafting contracts, hiring employees, facing disputes, entering partnerships, or dealing with regulatory issues." },
+    ],
+  },
+  {
+    slug: "real-estate-lawyer",
+    name: "Real Estate Law",
+    shortName: "Real Estate",
+    title: "Real Estate Lawyer",
+    description: "Expert assistance with property transactions, zoning disputes, lease agreements, title issues, and real estate litigation.",
+    faqs: [
+      { q: "How much does a real estate lawyer cost?", a: "Real estate lawyers charge $150–$400/hour or flat fees of $500–$2,500 for closings. Complex transactions or litigation cost significantly more." },
+      { q: "Do I need a lawyer to buy a house?", a: "Some states require attorney involvement in real estate closings. Even where not required, a lawyer reviews contracts, identifies issues, and protects your interests." },
+      { q: "What does a real estate lawyer do at closing?", a: "They review all documents, ensure clear title, verify terms match the agreement, handle escrow, and address any last-minute issues." },
+      { q: "Can a real estate lawyer help with landlord-tenant disputes?", a: "Yes. They handle evictions, lease violations, security deposit disputes, habitability issues, and discrimination claims." },
+    ],
+  },
+  {
+    slug: "estate-planning-lawyer",
+    name: "Estate Planning",
+    shortName: "Estate Planning",
+    title: "Estate Planning Lawyer",
+    description: "Comprehensive estate plans including wills, trusts, power of attorney, probate, and asset protection strategies.",
+    faqs: [
+      { q: "How much does an estate planning lawyer cost?", a: "Simple wills cost $300–$1,000. Comprehensive estate plans with trusts range from $2,000–$5,000+. Complex estates with tax planning cost $5,000–$20,000+." },
+      { q: "What's the difference between a will and a trust?", a: "A will goes through probate and takes effect after death. A trust avoids probate, can manage assets during incapacity, and offers more control over distribution." },
+      { q: "When should I create an estate plan?", a: "Create an estate plan when you have dependents, own property, have significant assets, get married/divorced, or want to ensure your wishes are carried out." },
+      { q: "What documents do I need in an estate plan?", a: "At minimum: a will, durable power of attorney, healthcare directive, and beneficiary designations. Many people also benefit from a revocable living trust." },
+    ],
+  },
+  {
+    slug: "civil-litigation-lawyer",
+    name: "Civil Litigation",
+    shortName: "Civil Litigation",
+    title: "Civil Litigation Lawyer",
+    description: "Skilled representation in lawsuits, appeals, mediation, arbitration, contract disputes, and debt collection.",
+    faqs: [
+      { q: "How much does a civil litigation lawyer cost?", a: "Litigation lawyers charge $200–$600/hour. Simple cases may cost $5,000–$15,000. Complex commercial litigation can cost $50,000–$500,000+." },
+      { q: "How long does a civil lawsuit take?", a: "Simple cases may resolve in 6–12 months. Complex litigation can take 2–5 years, though many cases settle before trial." },
+      { q: "Should I settle or go to trial?", a: "Settlements are faster, cheaper, and more predictable. Trial offers the chance for larger awards but carries risk. Your lawyer will advise based on case strength." },
+      { q: "What's the difference between mediation and arbitration?", a: "Mediation is voluntary negotiation with a neutral facilitator. Arbitration is a binding decision by a neutral arbitrator — more formal, like a private trial." },
+    ],
+  },
+];
+
+export type SeoCity = (typeof SEO_CITIES)[number];
+export type SeoPracticeArea = (typeof SEO_PRACTICE_AREAS)[number];
