@@ -34,9 +34,11 @@ import LawyerBilling from "./pages/lawyer/LawyerBilling";
 import FirmDashboard from "./pages/firm/FirmDashboard";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 
-// Shared pages
-import CaseWorkspace from "./pages/shared/CaseWorkspace";
-import PricingPlans from "./pages/shared/PricingPlans";
+// SEO pages
+import SeoLandingPage from "./pages/seo/SeoLandingPage";
+import SeoDirectory from "./pages/seo/SeoDirectory";
+
+const queryClient = new QueryClient({
 
 const queryClient = new QueryClient({
   defaultOptions: {
