@@ -282,7 +282,7 @@ export default function SeoLandingPage() {
               {paData.title}s in {cityData.name}
             </h2>
             <Button variant="outline" size="sm" asChild>
-              <Link to={`/client/find-lawyers?location=${encodeURIComponent(cityData.name + ", " + cityData.state)}&category=${encodeURIComponent(paData.name)}`}>
+              <Link to={`/client/find-lawyers?location=${encodeURIComponent(locationShort)}&category=${encodeURIComponent(paData.name)}`}>
                 View All <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
               </Link>
             </Button>
