@@ -50,6 +50,7 @@ export const adminNavItems = [
   { icon: <LayoutDashboard />, label: "Dashboard", to: "/admin/dashboard" },
   { icon: <Users />, label: "Users", to: "/admin/users" },
   { icon: <Building2 />, label: "Firms", to: "/admin/firms" },
+  { icon: <CreditCard />, label: "Pricing Plans", to: "/admin/pricing" },
   { icon: <Shield />, label: "Moderation", to: "/admin/moderation" },
   { icon: <BarChart3 />, label: "Analytics", to: "/admin/analytics" },
   { icon: <Settings />, label: "Settings", to: "/admin/settings" },

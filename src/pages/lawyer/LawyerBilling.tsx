@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   DollarSign, Clock, Plus, Timer, CheckCircle2,
   AlertTriangle, Play, Pause, RotateCcw, Bot, FileText,
-  Send, Sparkles, X, Info,
+  Send, Sparkles, X, Info, TrendingUp, Lock,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
@@ -18,7 +18,7 @@ export default function LawyerBilling() {
   const [timeEntries, setTimeEntries] = useState<any[]>([]);
   const [matters, setMatters] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"payments" | "time" | "ai">("payments");
+  const [activeTab, setActiveTab] = useState<"payments" | "time" | "projections" | "ai">("payments");
 
   // Timer state
   const [timerRunning, setTimerRunning] = useState(false);
@@ -159,13 +159,25 @@ export default function LawyerBilling() {
   const totalPending = payments.filter((p) => p.status === "pending").reduce((s, p) => s + Number(p.amount), 0);
   const totalOverdue = payments.filter((p) => p.status === "overdue").reduce((s, p) => s + Number(p.amount), 0);
   const totalHours = timeEntries.reduce((s, t) => s + Number(t.hours), 0);
+  const avgRate = timeEntries.length > 0 ? timeEntries.reduce((s, t) => s + Number(t.rate), 0) / timeEntries.length : 350;
+  const projectedMonthly = totalHours * avgRate;
 
   return (
     <DashboardLayout sidebarItems={lawyerNavItems} portalLabel="Lawyer Portal" userName="Sarah Chen" userRole="Attorney">
-      <SectionHeader
-        title="Billing & Payments"
-        subtitle="Track revenue, time, and AI-generated invoices"
-      />
+      <SectionHeader title="Billing & Payments" subtitle="Track revenue, time, and AI-generated invoices" />
+
+      {/* MVP banner */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-6 p-3 rounded-xl bg-accent/5 border border-accent/20 flex items-center gap-3"
+      >
+        <Sparkles className="h-4 w-4 text-accent shrink-0" />
+        <span className="text-xs text-muted-foreground">
+          <strong className="text-foreground">Free MVP Mode</strong> — All platform fees waived. Track billable hours and generate invoices for your records.
+        </span>
+        <span className="text-[10px] font-bold bg-accent/10 text-accent px-3 py-1 rounded-full shrink-0">FREE BETA</span>
+      </motion.div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -227,21 +239,81 @@ export default function LawyerBilling() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6">
-        {(["payments", "time", "ai"] as const).map((tab) => (
+      <div className="flex gap-2 mb-6 overflow-x-auto">
+        {(["payments", "time", "projections", "ai"] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap ${
               activeTab === tab ? "bg-accent text-accent-foreground" : "bg-card border text-muted-foreground hover:bg-muted"
             }`}
           >
-            {tab === "payments" ? "Payments & Invoices" : tab === "time" ? "Time Entries" : <><Bot className="h-3.5 w-3.5" /> AI Output</>}
+            {tab === "payments" ? "Payments & Invoices" : tab === "time" ? "Time Entries" : tab === "projections" ? <><TrendingUp className="h-3.5 w-3.5" /> Projected Earnings</> : <><Bot className="h-3.5 w-3.5" /> AI Output</>}
           </button>
         ))}
       </div>
 
-      {activeTab === "ai" ? (
+      {activeTab === "projections" ? (
+        <div className="space-y-6">
+          {/* Projected earnings cards */}
+          <div className="grid sm:grid-cols-3 gap-4">
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl bg-card border shadow-card p-5">
+              <div className="text-xs text-muted-foreground mb-1">Monthly Projection</div>
+              <div className="text-2xl font-bold text-foreground">${projectedMonthly.toLocaleString()}</div>
+              <div className="text-xs text-muted-foreground mt-1">{totalHours.toFixed(1)}h × ${avgRate.toFixed(0)}/hr avg</div>
+            </motion.div>
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="rounded-xl bg-card border shadow-card p-5">
+              <div className="text-xs text-muted-foreground mb-1">Annual Projection</div>
+              <div className="text-2xl font-bold text-foreground">${(projectedMonthly * 12).toLocaleString()}</div>
+              <div className="text-xs text-muted-foreground mt-1">Based on current billing rate</div>
+            </motion.div>
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="rounded-xl bg-card border shadow-card p-5">
+              <div className="text-xs text-muted-foreground mb-1">Active Matters</div>
+              <div className="text-2xl font-bold text-foreground">{matters.length}</div>
+              <div className="text-xs text-muted-foreground mt-1">Avg ${matters.length > 0 ? Math.round(projectedMonthly / matters.length).toLocaleString() : 0}/matter</div>
+            </motion.div>
+          </div>
+
+          {/* Revenue breakdown by matter */}
+          <div className="rounded-xl bg-card border shadow-card overflow-hidden">
+            <div className="p-5 border-b">
+              <h3 className="font-semibold text-foreground">Revenue by Matter</h3>
+            </div>
+            <div className="p-5 space-y-4">
+              {matters.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-6">No matters yet</p>
+              ) : (
+                matters.map((m: any) => {
+                  const matterEntries = timeEntries.filter((t) => t.matter_id === m.id);
+                  const matterHours = matterEntries.reduce((s, t) => s + Number(t.hours), 0);
+                  const matterRevenue = matterEntries.reduce((s, t) => s + Number(t.hours) * Number(t.rate), 0);
+                  return (
+                    <div key={m.id} className="flex items-center gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-foreground truncate">{m.title}</div>
+                        <div className="text-xs text-muted-foreground">{m.client_name} · {matterHours.toFixed(1)}h tracked</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-bold text-foreground">${matterRevenue.toLocaleString()}</div>
+                        <div className="text-[10px] text-muted-foreground">+ ${Number(m.total_billed).toLocaleString()} billed</div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+          {/* Platform fee notice */}
+          <div className="p-4 rounded-xl bg-success/5 border border-success/20 flex items-center gap-3">
+            <Lock className="h-5 w-5 text-success shrink-0" />
+            <div>
+              <div className="text-sm font-medium text-foreground">No Platform Fees (MVP)</div>
+              <div className="text-xs text-muted-foreground">When payments go live, the Professional plan waives lead fees and reduces commission to 5%.</div>
+            </div>
+          </div>
+        </div>
+      ) : activeTab === "ai" ? (
         <div className="rounded-xl bg-card border shadow-card p-6">
           {aiOutput ? (
             <>
@@ -286,19 +358,23 @@ export default function LawyerBilling() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {payments.map((p: any) => (
-                <tr key={p.id} className="hover:bg-muted/20 transition-colors">
-                  <td className="px-5 py-4 text-sm font-medium text-foreground">{p.client_name}</td>
-                  <td className="px-5 py-4 text-sm text-muted-foreground hidden md:table-cell">{p.description}</td>
-                  <td className="px-5 py-4 text-sm font-semibold text-foreground">${Number(p.amount).toLocaleString()}</td>
-                  <td className="px-5 py-4">
-                    <StatusBadge status={p.status} variant={p.status === "paid" ? "success" : p.status === "pending" ? "warning" : "destructive"} />
-                  </td>
-                  <td className="px-5 py-4 text-sm text-muted-foreground hidden lg:table-cell">
-                    {p.due_date ? new Date(p.due_date).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "—"}
-                  </td>
-                </tr>
-              ))}
+              {payments.length === 0 ? (
+                <tr><td colSpan={5} className="px-5 py-8 text-center text-sm text-muted-foreground">No payments recorded yet</td></tr>
+              ) : (
+                payments.map((p: any) => (
+                  <tr key={p.id} className="hover:bg-muted/20 transition-colors">
+                    <td className="px-5 py-4 text-sm font-medium text-foreground">{p.client_name}</td>
+                    <td className="px-5 py-4 text-sm text-muted-foreground hidden md:table-cell">{p.description}</td>
+                    <td className="px-5 py-4 text-sm font-semibold text-foreground">${Number(p.amount).toLocaleString()}</td>
+                    <td className="px-5 py-4">
+                      <StatusBadge status={p.status} variant={p.status === "paid" ? "success" : p.status === "pending" ? "warning" : "destructive"} />
+                    </td>
+                    <td className="px-5 py-4 text-sm text-muted-foreground hidden lg:table-cell">
+                      {p.due_date ? new Date(p.due_date).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "—"}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

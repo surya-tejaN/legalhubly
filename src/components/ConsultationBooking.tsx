@@ -107,9 +107,9 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
         <p className="text-sm text-muted-foreground mb-4">
           {selectedDate?.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })} at {selectedTime}
         </p>
-        {consultationFee && (
-          <p className="text-xs text-muted-foreground mb-4">Consultation fee: ${consultationFee}</p>
-        )}
+        <p className="text-xs text-muted-foreground mb-4">
+          <span className="inline-flex items-center gap-1 bg-success/10 text-success font-bold px-2 py-0.5 rounded-full text-[10px]">FREE CONSULTATION (MVP)</span>
+        </p>
         <Button variant="gold" onClick={onClose}>Done</Button>
       </motion.div>
     );

@@ -70,6 +70,7 @@ const App = () => (
 
           {/* Platform Admin */}
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/pricing" element={<PricingPlans />} />
 
           <Route path="*" element={<NotFound />} />
         </Routes>
