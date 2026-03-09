@@ -22,6 +22,7 @@ const CATEGORY_TO_PRACTICE: Record<string, string[]> = {
 };
 
 function computeMatchScore(lawyer: any, criteria: any): { score: number; breakdown: Record<string, number> } {
+  if (!lawyer) return { score: 0, breakdown: {} };
   const breakdown: Record<string, number> = {};
   let total = 0;
   let maxScore = 0;
