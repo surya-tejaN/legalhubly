@@ -34,7 +34,7 @@ export default function Signup() {
       password,
       options: {
         emailRedirectTo: window.location.origin,
-        data: { full_name: fullName, role },
+        data: { full_name: fullName, role, city },
       },
     });
     if (error) {
