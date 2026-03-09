@@ -2,8 +2,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
+import { lazy, Suspense } from "react";
+import PageTransition from "@/components/PageTransition";
 import Index from "./pages/Index";
+import NotFound from "./pages/NotFound";
 import NotFound from "./pages/NotFound";
 
 // Client pages
