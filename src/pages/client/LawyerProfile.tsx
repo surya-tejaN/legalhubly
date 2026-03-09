@@ -396,7 +396,7 @@ export default function LawyerProfile() {
                       <MapPin className="h-5 w-5 text-accent" /> Jurisdictions
                     </h2>
                     <div className="flex flex-wrap gap-2">
-                      {lawyer.jurisdictions.map((j) => (
+                      {(lawyer.jurisdictions || []).map((j) => (
                         <Badge key={j} variant="outline" className="px-3 py-1.5 text-sm">
                           {j}
                         </Badge>
