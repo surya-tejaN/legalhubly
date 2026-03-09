@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      cities: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          slug: string
+          state: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          slug: string
+          state: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          slug?: string
+          state?: string
+        }
+        Relationships: []
+      }
       consultations: {
         Row: {
           client_name: string
@@ -312,6 +336,7 @@ export type Database = {
           bio: string | null
           budget_ranges: string[]
           city: string | null
+          city_id: string | null
           complexity_levels: string[]
           consultation_fee: number | null
           consultation_types: string[]
@@ -326,6 +351,7 @@ export type Database = {
           name: string
           next_available_date: string | null
           phone: string | null
+          practice_area_id: string | null
           practice_areas: string[]
           rating: number
           review_count: number
@@ -342,6 +368,7 @@ export type Database = {
           bio?: string | null
           budget_ranges?: string[]
           city?: string | null
+          city_id?: string | null
           complexity_levels?: string[]
           consultation_fee?: number | null
           consultation_types?: string[]
@@ -356,6 +383,7 @@ export type Database = {
           name: string
           next_available_date?: string | null
           phone?: string | null
+          practice_area_id?: string | null
           practice_areas?: string[]
           rating?: number
           review_count?: number
@@ -372,6 +400,7 @@ export type Database = {
           bio?: string | null
           budget_ranges?: string[]
           city?: string | null
+          city_id?: string | null
           complexity_levels?: string[]
           consultation_fee?: number | null
           consultation_types?: string[]
@@ -386,6 +415,7 @@ export type Database = {
           name?: string
           next_available_date?: string | null
           phone?: string | null
+          practice_area_id?: string | null
           practice_areas?: string[]
           rating?: number
           review_count?: number
@@ -395,7 +425,22 @@ export type Database = {
           updated_at?: string
           verified?: boolean
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "lawyers_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lawyers_practice_area_id_fkey"
+            columns: ["practice_area_id"]
+            isOneToOne: false
+            referencedRelation: "practice_areas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       leads: {
         Row: {
@@ -594,6 +639,62 @@ export type Database = {
             columns: ["matter_id"]
             isOneToOne: false
             referencedRelation: "matters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      practice_areas: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          created_at: string
+          id: string
+          lawyer_id: string
+          rating: number
+          review_text: string | null
+          reviewer_name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lawyer_id: string
+          rating?: number
+          review_text?: string | null
+          reviewer_name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lawyer_id?: string
+          rating?: number
+          review_text?: string | null
+          reviewer_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_lawyer_id_fkey"
+            columns: ["lawyer_id"]
+            isOneToOne: false
+            referencedRelation: "lawyers"
             referencedColumns: ["id"]
           },
         ]
