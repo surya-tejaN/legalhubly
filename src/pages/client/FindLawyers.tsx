@@ -676,9 +676,9 @@ export default function FindLawyers() {
             <div className="h-16 w-16 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
               <Search className="h-7 w-7 text-muted-foreground/40" />
             </div>
-            <h3 className="font-serif text-xl text-foreground mb-2">No lawyers found</h3>
+            <h3 className="font-serif text-xl text-foreground mb-2">No lawyers available yet in this location</h3>
             <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
-              Try adjusting your filters or broadening your search criteria.
+              Try adjusting your filters, broadening your search criteria, or check back soon as new lawyers join our platform.
             </p>
             <Button variant="outline" onClick={clearAllFilters}>
               Clear all filters

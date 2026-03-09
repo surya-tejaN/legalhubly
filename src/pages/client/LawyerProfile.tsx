@@ -129,16 +129,21 @@ export default function LawyerProfile() {
     if (!lawyerId) return;
     (async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("lawyers")
-        .select("*")
-        .eq("id", lawyerId)
-        .single();
-      if (error) {
-        console.error(error);
-        toast.error("Failed to load lawyer profile");
-      } else {
-        setLawyer(data as Lawyer);
+      try {
+        const { data, error } = await supabase
+          .from("lawyers")
+          .select("*")
+          .eq("id", lawyerId)
+          .maybeSingle();
+        if (error) {
+          console.error(error);
+          toast.error("Failed to load lawyer profile");
+        } else {
+          setLawyer(data as Lawyer | null);
+        }
+      } catch (err) {
+        console.error("Unexpected error loading lawyer:", err);
+        toast.error("Something went wrong loading this profile");
       }
       setLoading(false);
     })();
