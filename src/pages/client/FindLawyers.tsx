@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useTransition } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion, AnimatePresence } from "framer-motion";
+import { useDebounce } from "@/hooks/use-debounce";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -398,6 +399,7 @@ export default function FindLawyers() {
   const [priceMax, setPriceMax] = useState(Infinity);
   const [ratingMin, setRatingMin] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearch = useDebounce(searchQuery, 150);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
@@ -445,9 +447,9 @@ export default function FindLawyers() {
     }
     if (ratingMin > 0) result = result.filter((l) => l.rating >= ratingMin);
 
-    // Text search
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
+    // Text search (debounced)
+    if (debouncedSearch.trim()) {
+      const q = debouncedSearch.toLowerCase();
       result = result.filter(
         (l) =>
           l.name.toLowerCase().includes(q) ||
@@ -458,7 +460,7 @@ export default function FindLawyers() {
     }
 
     return result;
-  }, [lawyers, searchQuery, experienceMin, priceMax, ratingMin]);
+  }, [lawyers, debouncedSearch, experienceMin, priceMax, ratingMin]);
 
   const activeFilterCount = [
     practiceFilter !== "All",

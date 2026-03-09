@@ -131,6 +131,22 @@
   /* Smooth scrolling */
   html {
     scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* GPU-accelerate animated elements */
+  [class*="animate-"],
+  [class*="transition-"],
+  .hover-lift,
+  .border-glow {
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  /* Prevent layout shift on images */
+  img {
+    content-visibility: auto;
   }
 
   /* Custom scrollbar */
@@ -202,20 +218,30 @@
 
   /* Subtle hover lift */
   .hover-lift {
-    @apply transition-all duration-300;
+    @apply transition-all duration-200;
+    transform: translateZ(0);
   }
   .hover-lift:hover {
-    transform: translateY(-2px);
+    transform: translateY(-2px) translateZ(0);
     box-shadow: var(--shadow-card-hover);
   }
 
   /* Premium border glow on hover */
   .border-glow {
-    @apply transition-all duration-300;
+    @apply transition-all duration-200;
+    transform: translateZ(0);
   }
   .border-glow:hover {
     border-color: hsl(var(--accent) / 0.3);
     box-shadow: 0 0 0 1px hsl(var(--accent) / 0.1), var(--shadow-card-hover);
+  }
+
+  /* Touch-friendly tap targets */
+  @media (pointer: coarse) {
+    button, a, [role="button"] {
+      min-height: 44px;
+      min-width: 44px;
+    }
   }
 
   /* Gradient text */
