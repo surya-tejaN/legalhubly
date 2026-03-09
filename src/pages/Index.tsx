@@ -235,8 +235,20 @@ export default function Index() {
                   )
                 )}
                 <div className="pt-4 border-t mt-3 space-y-2">
-                  <Button variant="outline" className="w-full" asChild><Link to="/client/dashboard">Sign In</Link></Button>
-                  <Button variant="gold" className="w-full" asChild><Link to="/client/find-lawyers">Find a Lawyer</Link></Button>
+                  {user ? (
+                    <Button variant="gold" className="w-full" asChild>
+                      <Link to={dashboardPath} onClick={() => setMobileMenuOpen(false)}>Go to Dashboard</Link>
+                    </Button>
+                  ) : (
+                    <>
+                      <Button variant="outline" className="w-full" asChild>
+                        <Link to="/login" onClick={() => setMobileMenuOpen(false)}>Sign In</Link>
+                      </Button>
+                      <Button variant="gold" className="w-full" asChild>
+                        <Link to="/signup" onClick={() => setMobileMenuOpen(false)}>Sign Up</Link>
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </motion.div>
