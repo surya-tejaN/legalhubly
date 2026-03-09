@@ -217,7 +217,12 @@ function LawyerCard({ lawyer, index, expanded, onToggle }: {
                     <Shield className="h-3 w-3" /> Verified
                   </span>
                 )}
-                {lawyer.match_score >= 80 && (
+                {lawyer.is_top_match && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-accent/12 text-accent px-2 py-0.5 rounded-full border border-accent/20 shadow-sm">
+                    <Award className="h-3 w-3" /> Top Match
+                  </span>
+                )}
+                {lawyer.match_score >= 80 && !lawyer.is_top_match && (
                   <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-accent/8 text-accent px-2 py-0.5 rounded-full border border-accent/15">
                     <Zap className="h-3 w-3" /> {lawyer.match_score}% Match
                   </span>
