@@ -38,7 +38,7 @@ export const SEO_PRACTICE_AREAS = [
     ],
   },
   {
-    slug: "divorce-lawyer",
+    slug: "divorce-lawyers",
     name: "Family Law",
     shortName: "Divorce & Family",
     title: "Divorce Lawyer",
