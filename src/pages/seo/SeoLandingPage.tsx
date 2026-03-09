@@ -190,7 +190,7 @@ export default function SeoLandingPage() {
             </nav>
           </div>
           <Button variant="gold" size="sm" asChild>
-            <Link to={`/client/find-lawyers?location=${encodeURIComponent(cityData.name + ", " + cityData.state)}&category=${encodeURIComponent(paData.name)}`}>
+            <Link to={`/client/find-lawyers?location=${encodeURIComponent(locationShort)}&category=${encodeURIComponent(paData.name)}`}>
               <Search className="h-3.5 w-3.5 mr-1.5" /> Search All
             </Link>
           </Button>
