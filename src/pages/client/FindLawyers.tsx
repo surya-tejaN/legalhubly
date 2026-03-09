@@ -447,9 +447,9 @@ export default function FindLawyers() {
     }
     if (ratingMin > 0) result = result.filter((l) => l.rating >= ratingMin);
 
-    // Text search
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
+    // Text search (debounced)
+    if (debouncedSearch.trim()) {
+      const q = debouncedSearch.toLowerCase();
       result = result.filter(
         (l) =>
           l.name.toLowerCase().includes(q) ||
