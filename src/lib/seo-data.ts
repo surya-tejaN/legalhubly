@@ -51,7 +51,7 @@ export const SEO_PRACTICE_AREAS = [
     ],
   },
   {
-    slug: "criminal-defense-lawyer",
+    slug: "criminal-defense-lawyers",
     name: "Criminal Defense",
     shortName: "Criminal Defense",
     title: "Criminal Defense Lawyer",
