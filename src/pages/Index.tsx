@@ -83,6 +83,8 @@ type Step = "location" | "category";
 
 export default function Index() {
   const navigate = useNavigate();
+  const { user, profile } = useAuth();
+  const dashboardPath = useDashboardPath(profile?.role);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [step, setStep] = useState<Step>("location");
   const [locationInput, setLocationInput] = useState("");
