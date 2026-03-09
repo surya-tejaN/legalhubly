@@ -365,7 +365,7 @@ export default function SeoLandingPage() {
                     {/* CTA */}
                     <div className="flex sm:flex-col items-center sm:items-end gap-2 shrink-0">
                       <div className="flex gap-1 text-muted-foreground mb-1">
-                        {lawyer.consultation_types.map((t) => (
+                        {(lawyer.consultation_types || []).map((t) => (
                           <span key={t} className="h-7 w-7 rounded-lg bg-muted flex items-center justify-center">{typeIcons[t]}</span>
                         ))}
                       </div>
