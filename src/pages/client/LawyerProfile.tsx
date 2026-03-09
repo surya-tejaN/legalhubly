@@ -129,16 +129,21 @@ export default function LawyerProfile() {
     if (!lawyerId) return;
     (async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("lawyers")
-        .select("*")
-        .eq("id", lawyerId)
-        .single();
-      if (error) {
-        console.error(error);
-        toast.error("Failed to load lawyer profile");
-      } else {
-        setLawyer(data as Lawyer);
+      try {
+        const { data, error } = await supabase
+          .from("lawyers")
+          .select("*")
+          .eq("id", lawyerId)
+          .maybeSingle();
+        if (error) {
+          console.error(error);
+          toast.error("Failed to load lawyer profile");
+        } else {
+          setLawyer(data as Lawyer | null);
+        }
+      } catch (err) {
+        console.error("Unexpected error loading lawyer:", err);
+        toast.error("Something went wrong loading this profile");
       }
       setLoading(false);
     })();
@@ -287,7 +292,7 @@ export default function LawyerProfile() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-primary-foreground/70">Types</span>
                   <div className="flex gap-1.5">
-                    {lawyer.consultation_types.map((t) => (
+                    {(lawyer.consultation_types || []).map((t) => (
                       <span key={t} className="text-primary-foreground/60">{typeIcons[t]}</span>
                     ))}
                   </div>
@@ -339,7 +344,7 @@ export default function LawyerProfile() {
                 <section className="rounded-2xl border bg-card p-6 shadow-card">
                   <h2 className="font-serif text-xl text-foreground mb-4">About {lawyer.name}</h2>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    {lawyer.bio || `${lawyer.name} is an experienced attorney at ${lawyer.firm} with ${lawyer.experience_years} years of practice. They specialize in ${lawyer.practice_areas.slice(0, 3).join(", ")} and are committed to providing exceptional legal representation to their clients.`}
+                    {lawyer.bio || `${lawyer.name} is an experienced attorney at ${lawyer.firm} with ${lawyer.experience_years} years of practice. They specialize in ${(lawyer.practice_areas || []).slice(0, 3).join(", ")} and are committed to providing exceptional legal representation to their clients.`}
                   </p>
                 </section>
 
@@ -349,17 +354,17 @@ export default function LawyerProfile() {
                     <Scale className="h-5 w-5 text-accent" /> Practice Areas
                   </h2>
                   <div className="flex flex-wrap gap-2">
-                    {lawyer.practice_areas.map((area) => (
+                    {(lawyer.practice_areas || []).map((area) => (
                       <Badge key={area} variant="secondary" className="px-3 py-1.5 text-sm rounded-lg">
                         {area}
                       </Badge>
                     ))}
                   </div>
-                  {lawyer.specialization_tags.length > 0 && (
+                  {(lawyer.specialization_tags || []).length > 0 && (
                     <div className="mt-4 pt-4 border-t">
                       <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Specializations</p>
                       <div className="flex flex-wrap gap-2">
-                        {lawyer.specialization_tags.map((tag) => (
+                        {(lawyer.specialization_tags || []).map((tag) => (
                           <Badge key={tag} className="bg-accent/10 text-accent border-accent/20 text-xs">
                             {tag}
                           </Badge>
@@ -375,7 +380,7 @@ export default function LawyerProfile() {
                     <Globe className="h-5 w-5 text-accent" /> Languages
                   </h2>
                   <div className="flex flex-wrap gap-3">
-                    {lawyer.languages.map((lang) => (
+                    {(lawyer.languages || []).map((lang) => (
                       <div key={lang} className="flex items-center gap-2 bg-muted rounded-lg px-4 py-2.5">
                         <Languages className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm font-medium text-foreground">{lang}</span>
@@ -385,13 +390,13 @@ export default function LawyerProfile() {
                 </section>
 
                 {/* Jurisdictions */}
-                {lawyer.jurisdictions.length > 0 && (
+                {(lawyer.jurisdictions || []).length > 0 && (
                   <section className="rounded-2xl border bg-card p-6 shadow-card">
                     <h2 className="font-serif text-xl text-foreground mb-4 flex items-center gap-2">
                       <MapPin className="h-5 w-5 text-accent" /> Jurisdictions
                     </h2>
                     <div className="flex flex-wrap gap-2">
-                      {lawyer.jurisdictions.map((j) => (
+                      {(lawyer.jurisdictions || []).map((j) => (
                         <Badge key={j} variant="outline" className="px-3 py-1.5 text-sm">
                           {j}
                         </Badge>

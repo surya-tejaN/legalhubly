@@ -4,7 +4,7 @@ import { lawyerNavItems } from "@/lib/navigation";
 import { SectionHeader, StatusBadge } from "@/components/DashboardComponents";
 import { Button } from "@/components/ui/button";
 import {
-  ArrowRight, Plus, Clock, CheckCircle2, Timer, StickyNote,
+  ArrowRight, Plus, Clock, CheckCircle2, Timer, StickyNote, Briefcase,
   ChevronDown, FileText, DollarSign, Tag, AlertTriangle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -85,6 +85,11 @@ export default function LawyerCases() {
           Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="rounded-xl bg-card border p-6 animate-pulse"><div className="h-5 w-64 bg-muted rounded mb-2" /><div className="h-4 w-48 bg-muted rounded" /></div>
           ))
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-16 rounded-xl bg-card border">
+            <Briefcase className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
+            <p className="text-muted-foreground">No cases found. Create a new matter to get started.</p>
+          </div>
         ) : (
           filtered.map((m, index) => {
             const mt = matterTasks(m.id);

@@ -253,7 +253,7 @@ function LawyerCard({ lawyer, index, expanded, onToggle }: {
                 </div>
                 <div>
                   <div className="text-xs text-muted-foreground">Languages</div>
-                  <div className="text-sm font-medium text-foreground">{lawyer.languages.slice(0, 2).join(", ")}{lawyer.languages.length > 2 ? ` +${lawyer.languages.length - 2}` : ""}</div>
+                  <div className="text-sm font-medium text-foreground">{(lawyer.languages || []).slice(0, 2).join(", ")}{(lawyer.languages || []).length > 2 ? ` +${lawyer.languages.length - 2}` : ""}</div>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -269,12 +269,12 @@ function LawyerCard({ lawyer, index, expanded, onToggle }: {
 
             {/* Practice areas */}
             <div className="flex flex-wrap gap-1.5">
-              {lawyer.practice_areas.slice(0, 4).map((pa) => (
+              {(lawyer.practice_areas || []).slice(0, 4).map((pa) => (
                 <Badge key={pa} variant="secondary" className="text-[11px] px-2.5 py-0.5 font-medium rounded-lg">
                   {pa}
                 </Badge>
               ))}
-              {lawyer.practice_areas.length > 4 && (
+              {(lawyer.practice_areas || []).length > 4 && (
                 <Badge variant="outline" className="text-[11px] px-2.5 py-0.5 rounded-lg">
                   +{lawyer.practice_areas.length - 4} more
                 </Badge>
@@ -293,7 +293,7 @@ function LawyerCard({ lawyer, index, expanded, onToggle }: {
                 <span className="text-muted-foreground">({lawyer.review_count} reviews)</span>
               </div>
               <div className="hidden sm:flex items-center gap-1.5 text-muted-foreground">
-                {lawyer.consultation_types.map((ct) => {
+                {(lawyer.consultation_types || []).map((ct) => {
                   const Icon = getConsultIcon(ct);
                   return (
                     <div key={ct} className="flex items-center gap-1 text-xs">
@@ -353,7 +353,7 @@ function LawyerCard({ lawyer, index, expanded, onToggle }: {
                 <div>
                   <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Jurisdictions</h4>
                   <div className="flex flex-wrap gap-1.5">
-                    {lawyer.jurisdictions.map((j) => (
+                    {(lawyer.jurisdictions || []).map((j) => (
                       <Badge key={j} variant="outline" className="text-[11px] px-2.5 py-0.5 rounded-lg">{j}</Badge>
                     ))}
                   </div>
@@ -427,11 +427,15 @@ export default function FindLawyers() {
         },
       });
       if (error) throw error;
-      setLawyers(data.lawyers || []);
+      setLawyers(data?.lawyers || []);
     } catch (err) {
       console.error("Failed to fetch:", err);
-      const { data } = await supabase.from("lawyers" as any).select("*");
-      if (data) setLawyers((data as any[]).map((l) => ({ ...l, match_score: 75, score_breakdown: {} })));
+      try {
+        const { data } = await supabase.from("lawyers").select("*");
+        if (data) setLawyers((data as any[]).map((l) => ({ ...l, match_score: 75, score_breakdown: {}, practice_areas: l.practice_areas || [], languages: l.languages || [], consultation_types: l.consultation_types || [], jurisdictions: l.jurisdictions || [], specialization_tags: l.specialization_tags || [], complexity_levels: l.complexity_levels || [], budget_ranges: l.budget_ranges || [] })));
+      } catch {
+        setLawyers([]);
+      }
     } finally {
       setLoading(false);
     }
@@ -672,9 +676,9 @@ export default function FindLawyers() {
             <div className="h-16 w-16 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
               <Search className="h-7 w-7 text-muted-foreground/40" />
             </div>
-            <h3 className="font-serif text-xl text-foreground mb-2">No lawyers found</h3>
+            <h3 className="font-serif text-xl text-foreground mb-2">No lawyers available yet in this location</h3>
             <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
-              Try adjusting your filters or broadening your search criteria.
+              Try adjusting your filters, broadening your search criteria, or check back soon as new lawyers join our platform.
             </p>
             <Button variant="outline" onClick={clearAllFilters}>
               Clear all filters

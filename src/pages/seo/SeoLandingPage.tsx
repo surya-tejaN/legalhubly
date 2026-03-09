@@ -345,16 +345,16 @@ export default function SeoLandingPage() {
                         )}
                         <span className="flex items-center gap-1"><Briefcase className="h-3 w-3" /> {lawyer.experience_years} years</span>
                         <span className="flex items-center gap-1">
-                          <Star className="h-3 w-3 fill-accent text-accent" /> {lawyer.rating.toFixed(1)} ({lawyer.review_count})
+                          <Star className="h-3 w-3 fill-accent text-accent" /> {(lawyer.rating || 0).toFixed(1)} ({lawyer.review_count || 0})
                         </span>
-                        <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {formatResponseTime(lawyer.avg_response_hours)}</span>
+                        <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {formatResponseTime(lawyer.avg_response_hours || 24)}</span>
                       </div>
 
                       <div className="flex flex-wrap gap-1.5">
-                        {lawyer.practice_areas.slice(0, 4).map((area) => (
+                        {(lawyer.practice_areas || []).slice(0, 4).map((area) => (
                           <Badge key={area} variant="secondary" className="text-[11px] px-2 py-0.5">{area}</Badge>
                         ))}
-                        {lawyer.languages.filter((l) => l !== "English").map((lang) => (
+                        {(lawyer.languages || []).filter((l) => l !== "English").map((lang) => (
                           <Badge key={lang} className="bg-accent/10 text-accent border-accent/20 text-[11px] px-2 py-0.5">
                             <Globe className="h-2.5 w-2.5 mr-0.5" /> {lang}
                           </Badge>
@@ -365,7 +365,7 @@ export default function SeoLandingPage() {
                     {/* CTA */}
                     <div className="flex sm:flex-col items-center sm:items-end gap-2 shrink-0">
                       <div className="flex gap-1 text-muted-foreground mb-1">
-                        {lawyer.consultation_types.map((t) => (
+                        {(lawyer.consultation_types || []).map((t) => (
                           <span key={t} className="h-7 w-7 rounded-lg bg-muted flex items-center justify-center">{typeIcons[t]}</span>
                         ))}
                       </div>
@@ -383,7 +383,7 @@ export default function SeoLandingPage() {
           ) : (
             <div className="text-center py-16 rounded-2xl border bg-card">
               <Search className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
-              <p className="text-muted-foreground mb-4">No {paData.shortName.toLowerCase()} lawyers found in {cityData.name} yet.</p>
+              <p className="text-muted-foreground mb-4">No lawyers available yet in this location. Check back soon as new attorneys join our platform.</p>
               <Button variant="gold" asChild>
                 <Link to={`/client/find-lawyers?category=${encodeURIComponent(paData.name)}`}>
                   Search Nationwide
@@ -394,7 +394,7 @@ export default function SeoLandingPage() {
         </section>
 
         {/* ── FAQ Section ────────────────────────────────────────────── */}
-        {paData.faqs.length > 0 && (
+        {(paData.faqs || []).length > 0 && (
           <motion.section {...fadeUp} className="mb-12" aria-labelledby="faq-heading">
             <h2 id="faq-heading" className="font-serif text-2xl text-foreground mb-6">
               Frequently Asked Questions About {paData.title}s in {cityData.name}
