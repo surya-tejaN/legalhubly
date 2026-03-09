@@ -31,6 +31,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 
 // Shared pages
 import CaseWorkspace from "./pages/shared/CaseWorkspace";
+import PricingPlans from "./pages/shared/PricingPlans";
 
 const queryClient = new QueryClient();
 
