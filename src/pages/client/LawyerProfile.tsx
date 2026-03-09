@@ -380,7 +380,7 @@ export default function LawyerProfile() {
                     <Globe className="h-5 w-5 text-accent" /> Languages
                   </h2>
                   <div className="flex flex-wrap gap-3">
-                    {lawyer.languages.map((lang) => (
+                    {(lawyer.languages || []).map((lang) => (
                       <div key={lang} className="flex items-center gap-2 bg-muted rounded-lg px-4 py-2.5">
                         <Languages className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm font-medium text-foreground">{lang}</span>
