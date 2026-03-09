@@ -96,6 +96,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AnimatedRoutes />
+        <AiChatPlaceholder />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
