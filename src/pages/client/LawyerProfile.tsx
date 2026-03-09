@@ -344,7 +344,7 @@ export default function LawyerProfile() {
                 <section className="rounded-2xl border bg-card p-6 shadow-card">
                   <h2 className="font-serif text-xl text-foreground mb-4">About {lawyer.name}</h2>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    {lawyer.bio || `${lawyer.name} is an experienced attorney at ${lawyer.firm} with ${lawyer.experience_years} years of practice. They specialize in ${lawyer.practice_areas.slice(0, 3).join(", ")} and are committed to providing exceptional legal representation to their clients.`}
+                    {lawyer.bio || `${lawyer.name} is an experienced attorney at ${lawyer.firm} with ${lawyer.experience_years} years of practice. They specialize in ${(lawyer.practice_areas || []).slice(0, 3).join(", ")} and are committed to providing exceptional legal representation to their clients.`}
                   </p>
                 </section>
 
