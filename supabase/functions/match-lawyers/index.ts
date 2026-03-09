@@ -31,7 +31,8 @@ function computeMatchScore(lawyer: any, criteria: any): { score: number; breakdo
   maxScore += 30;
   if (criteria.legal_category) {
     const relevantAreas = CATEGORY_TO_PRACTICE[criteria.legal_category] || [criteria.legal_category];
-    const overlap = lawyer.practice_areas.filter((pa: string) =>
+    const lawyerAreas = lawyer.practice_areas || [];
+    const overlap = lawyerAreas.filter((pa: string) =>
       relevantAreas.some((ra: string) => pa.toLowerCase().includes(ra.toLowerCase()) || ra.toLowerCase().includes(pa.toLowerCase()))
     );
     breakdown.practice_area = Math.min(30, (overlap.length / Math.max(relevantAreas.length, 1)) * 30);
