@@ -360,7 +360,7 @@ export default function LawyerProfile() {
                       </Badge>
                     ))}
                   </div>
-                  {lawyer.specialization_tags.length > 0 && (
+                  {(lawyer.specialization_tags || []).length > 0 && (
                     <div className="mt-4 pt-4 border-t">
                       <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Specializations</p>
                       <div className="flex flex-wrap gap-2">
