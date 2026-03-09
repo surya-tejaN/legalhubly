@@ -263,12 +263,15 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
                 <span className="text-xs text-muted-foreground">Duration</span>
                 <span className="text-sm font-medium text-foreground">30 minutes</span>
               </div>
-              {consultationFee && (
-                <div className="flex items-center justify-between pt-2 border-t">
+              <div className="flex items-center justify-between pt-2 border-t">
                   <span className="text-xs font-medium text-foreground">Fee</span>
-                  <span className="text-sm font-bold text-accent">${consultationFee}</span>
+                  <div className="flex items-center gap-2">
+                    {consultationFee ? (
+                      <span className="text-sm line-through text-muted-foreground">${consultationFee}</span>
+                    ) : null}
+                    <span className="text-[10px] font-bold bg-success/10 text-success px-2 py-0.5 rounded-full">FREE (MVP)</span>
+                  </div>
                 </div>
-              )}
             </div>
 
             <p className="text-sm font-medium text-foreground mb-2">Notes (optional)</p>
