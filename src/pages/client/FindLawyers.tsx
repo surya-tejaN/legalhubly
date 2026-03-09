@@ -253,7 +253,7 @@ function LawyerCard({ lawyer, index, expanded, onToggle }: {
                 </div>
                 <div>
                   <div className="text-xs text-muted-foreground">Languages</div>
-                  <div className="text-sm font-medium text-foreground">{lawyer.languages.slice(0, 2).join(", ")}{lawyer.languages.length > 2 ? ` +${lawyer.languages.length - 2}` : ""}</div>
+                  <div className="text-sm font-medium text-foreground">{(lawyer.languages || []).slice(0, 2).join(", ")}{(lawyer.languages || []).length > 2 ? ` +${lawyer.languages.length - 2}` : ""}</div>
                 </div>
               </div>
               <div className="flex items-center gap-2">
