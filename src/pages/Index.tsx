@@ -1,41 +1,42 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
   Scale, Shield, ArrowRight, Sparkles, MapPin, Briefcase,
-  Menu, X, Star, Clock, BadgeCheck, ChevronDown, Search,
+  Menu, X, Star, Clock, BadgeCheck, Search, Locate,
+  Users, Home, FileText, Gavel, Globe, Heart, Building2,
+  Landmark, ScrollText,
 } from "lucide-react";
 
-const LOCATIONS = [
-  "California", "New York", "Texas", "Florida", "Illinois",
-  "Georgia", "Washington", "Arizona", "Massachusetts", "Colorado",
+const CATEGORIES = [
+  { label: "Immigration", icon: Globe, color: "bg-info/10 text-info" },
+  { label: "Divorce & Family", icon: Heart, color: "bg-destructive/10 text-destructive" },
+  { label: "Criminal Defense", icon: Gavel, color: "bg-warning/10 text-warning" },
+  { label: "Personal Injury", icon: Shield, color: "bg-success/10 text-success" },
+  { label: "Employment Law", icon: Users, color: "bg-accent/10 text-accent" },
+  { label: "Business Law", icon: Building2, color: "bg-info/10 text-info" },
+  { label: "Real Estate", icon: Home, color: "bg-success/10 text-success" },
+  { label: "Estate Planning", icon: ScrollText, color: "bg-accent/10 text-accent" },
+  { label: "Civil Litigation", icon: Landmark, color: "bg-warning/10 text-warning" },
 ];
 
-const CATEGORIES = [
-  { label: "Personal Injury", icon: "🩹" },
-  { label: "Family Law", icon: "👨‍👩‍👧" },
-  { label: "Criminal Defense", icon: "⚖️" },
-  { label: "Immigration", icon: "🌍" },
-  { label: "Employment Law", icon: "💼" },
-  { label: "Business Law", icon: "🏢" },
-  { label: "Real Estate", icon: "🏠" },
-  { label: "Estate Planning", icon: "📜" },
-  { label: "Intellectual Property", icon: "💡" },
-  { label: "Civil Litigation", icon: "📋" },
+const POPULAR_LOCATIONS = [
+  "New York, NY", "Los Angeles, CA", "Chicago, IL", "Houston, TX",
+  "Miami, FL", "Atlanta, GA", "Seattle, WA", "Phoenix, AZ",
 ];
 
 const testimonials = [
-  { name: "Jessica P.", role: "Business Owner", quote: "Found the right attorney in under 10 minutes. Incredibly easy.", rating: 5 },
-  { name: "David C.", role: "Employment Attorney", quote: "Quality leads delivered straight to my inbox. Game changer.", rating: 5 },
-  { name: "Maria S.", role: "Immigration Client", quote: "The guided process made everything clear before I even called a lawyer.", rating: 5 },
+  { name: "Jessica P.", role: "Business Owner", quote: "Found the right attorney in under 10 minutes.", rating: 5 },
+  { name: "David C.", role: "Employment Attorney", quote: "Quality leads delivered straight to my inbox.", rating: 5 },
+  { name: "Maria S.", role: "Immigration Client", quote: "The guided process made everything so clear.", rating: 5 },
 ];
 
 const metrics = [
   { value: "500+", label: "Verified Lawyers" },
-  { value: "98%", label: "Satisfaction Rate" },
+  { value: "98%", label: "Satisfaction" },
   { value: "< 2hr", label: "Avg Response" },
-  { value: "Free", label: "To Get Started" },
+  { value: "Free", label: "To Start" },
 ];
 
 const fadeUp = {
@@ -45,18 +46,83 @@ const fadeUp = {
   transition: { duration: 0.5 },
 };
 
+type Step = "location" | "category";
+
 export default function Index() {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [locationOpen, setLocationOpen] = useState(false);
+  const [step, setStep] = useState<Step>("location");
+  const [locationInput, setLocationInput] = useState("");
+  const [confirmedLocation, setConfirmedLocation] = useState("");
+  const [detecting, setDetecting] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
-  const handleSearch = () => {
+  // Filter suggestions
+  const suggestions = locationInput.trim().length > 0
+    ? POPULAR_LOCATIONS.filter((l) => l.toLowerCase().includes(locationInput.toLowerCase()))
+    : POPULAR_LOCATIONS;
+
+  // Close suggestions on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const confirmLocation = (loc: string) => {
+    setConfirmedLocation(loc);
+    setLocationInput(loc);
+    setShowSuggestions(false);
+    setStep("category");
+  };
+
+  const detectLocation = () => {
+    setDetecting(true);
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          try {
+            const res = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`
+            );
+            const data = await res.json();
+            const city = data.address?.city || data.address?.town || data.address?.county || "";
+            const state = data.address?.state || "";
+            const loc = city && state ? `${city}, ${state}` : city || state || "Your Location";
+            confirmLocation(loc);
+          } catch {
+            confirmLocation("Your Location");
+          } finally {
+            setDetecting(false);
+          }
+        },
+        () => {
+          setDetecting(false);
+        },
+        { timeout: 8000 }
+      );
+    } else {
+      setDetecting(false);
+    }
+  };
+
+  const handleCategorySelect = (category: string) => {
     const params = new URLSearchParams();
-    if (selectedLocation) params.set("location", selectedLocation);
-    if (selectedCategory) params.set("category", selectedCategory);
+    params.set("location", confirmedLocation);
+    params.set("category", category);
     navigate(`/client/find-lawyers?${params.toString()}`);
+  };
+
+  const handleBack = () => {
+    setStep("location");
+    setConfirmedLocation("");
+    setTimeout(() => inputRef.current?.focus(), 100);
   };
 
   return (
@@ -69,23 +135,19 @@ export default function Index() {
             <Scale className="h-6 w-6 text-accent" />
             <span className="font-serif text-lg tracking-tight text-foreground">LegalBridge</span>
           </Link>
-
           <div className="hidden md:flex items-center gap-6">
             <a href="#how" className="text-sm text-muted-foreground hover:text-foreground transition-colors">How it works</a>
             <a href="#reviews" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Reviews</a>
             <Link to="/lawyer/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">For Lawyers</Link>
           </div>
-
           <div className="hidden md:flex items-center gap-2">
             <Button variant="ghost" size="sm" asChild><Link to="/client/dashboard">Sign In</Link></Button>
             <Button variant="gold" size="sm" asChild><Link to="/client/find-lawyers">Find a Lawyer</Link></Button>
           </div>
-
           <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
         </div>
-
         {mobileMenuOpen && (
           <div className="md:hidden border-t bg-background px-4 py-4 space-y-2">
             <a href="#how" className="block py-2 text-sm text-foreground" onClick={() => setMobileMenuOpen(false)}>How it works</a>
@@ -99,100 +161,160 @@ export default function Index() {
         )}
       </nav>
 
-      {/* HERO — Search Funnel */}
-      <section className="pt-28 pb-16 md:pt-40 md:pb-24">
+      {/* HERO */}
+      <section className="pt-28 pb-10 md:pt-40 md:pb-20">
         <div className="container">
-          <motion.div {...fadeUp} className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-serif leading-[1.1] tracking-tight text-foreground mb-4">
-              Find the right lawyer,{" "}
-              <span className="text-gradient-gold">fast.</span>
-            </h1>
-            <p className="text-lg text-muted-foreground mb-10 max-w-xl mx-auto">
-              Tell us where you are and what you need. We'll match you with verified attorneys in minutes.
-            </p>
+          <motion.div {...fadeUp} className="max-w-2xl mx-auto text-center">
+            <AnimatePresence mode="wait">
+              {step === "location" ? (
+                <motion.div key="loc" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}>
+                  <h1 className="text-4xl md:text-[3.5rem] font-serif leading-[1.1] tracking-tight text-foreground mb-3">
+                    Where do you need{" "}
+                    <span className="text-gradient-gold">legal help?</span>
+                  </h1>
+                  <p className="text-lg text-muted-foreground mb-8">
+                    Enter your city, ZIP code, or detect your location.
+                  </p>
+                </motion.div>
+              ) : (
+                <motion.div key="cat" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}>
+                  <button onClick={handleBack} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors">
+                    <ArrowRight className="h-3.5 w-3.5 rotate-180" /> Change location
+                  </button>
+                  <h1 className="text-4xl md:text-[3.5rem] font-serif leading-[1.1] tracking-tight text-foreground mb-2">
+                    What do you need help with?
+                  </h1>
+                  <p className="text-lg text-muted-foreground mb-2">
+                    Lawyers near <span className="text-foreground font-medium">{confirmedLocation}</span>
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
 
-          {/* Search Box */}
-          <motion.div {...fadeUp} transition={{ duration: 0.5, delay: 0.15 }}
-            className="max-w-2xl mx-auto"
-          >
-            <div className="bg-card rounded-2xl border shadow-card p-3 md:p-4">
-              <div className="flex flex-col md:flex-row gap-3">
-                {/* Location select */}
-                <div className="relative flex-1">
-                  <button
-                    onClick={() => setLocationOpen(!locationOpen)}
-                    className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl bg-background border text-left transition-colors hover:border-accent/30"
-                  >
-                    <MapPin className="h-4 w-4 text-accent shrink-0" />
-                    <span className={`text-sm flex-1 ${selectedLocation ? "text-foreground font-medium" : "text-muted-foreground"}`}>
-                      {selectedLocation || "Select location"}
-                    </span>
-                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${locationOpen ? "rotate-180" : ""}`} />
-                  </button>
-                  {locationOpen && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-card border rounded-xl shadow-elevated z-20 py-1 max-h-52 overflow-y-auto">
-                      {LOCATIONS.map((loc) => (
-                        <button
-                          key={loc}
-                          onClick={() => { setSelectedLocation(loc); setLocationOpen(false); }}
-                          className={`w-full text-left px-4 py-2.5 text-sm transition-colors hover:bg-muted ${selectedLocation === loc ? "text-accent font-medium bg-accent/5" : "text-foreground"}`}
-                        >
-                          {loc}
-                        </button>
-                      ))}
+          {/* STEP 1: Location Input */}
+          <AnimatePresence mode="wait">
+            {step === "location" && (
+              <motion.div
+                key="location-input"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.3 }}
+                className="max-w-xl mx-auto mt-6"
+              >
+                <div ref={wrapperRef} className="relative">
+                  <div className="bg-card rounded-2xl border shadow-card p-2">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 flex items-center gap-3 px-4 py-3 rounded-xl bg-background border">
+                        <MapPin className="h-5 w-5 text-accent shrink-0" />
+                        <input
+                          ref={inputRef}
+                          type="text"
+                          value={locationInput}
+                          onChange={(e) => { setLocationInput(e.target.value); setShowSuggestions(true); }}
+                          onFocus={() => setShowSuggestions(true)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && locationInput.trim()) {
+                              confirmLocation(locationInput.trim());
+                            }
+                          }}
+                          placeholder="City or ZIP code..."
+                          className="flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground min-w-0"
+                          autoFocus
+                        />
+                        {locationInput && (
+                          <button onClick={() => { setLocationInput(""); inputRef.current?.focus(); }} className="text-muted-foreground hover:text-foreground">
+                            <X className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
+                      <Button
+                        variant="gold"
+                        size="lg"
+                        onClick={() => locationInput.trim() ? confirmLocation(locationInput.trim()) : inputRef.current?.focus()}
+                        className="shrink-0"
+                      >
+                        <Search className="h-4 w-4 md:mr-2" />
+                        <span className="hidden md:inline">Search</span>
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Suggestions dropdown */}
+                  {showSuggestions && (
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-card border rounded-xl shadow-elevated z-30 overflow-hidden">
+                      {/* Detect location button */}
+                      <button
+                        onClick={detectLocation}
+                        disabled={detecting}
+                        className="w-full flex items-center gap-3 px-5 py-3.5 text-left text-sm font-medium text-accent hover:bg-accent/5 transition-colors border-b"
+                      >
+                        <Locate className={`h-4 w-4 ${detecting ? "animate-pulse" : ""}`} />
+                        {detecting ? "Detecting your location..." : "Use my current location"}
+                      </button>
+
+                      {suggestions.length > 0 && (
+                        <div className="py-1">
+                          <div className="px-5 py-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                            Popular cities
+                          </div>
+                          {suggestions.map((loc) => (
+                            <button
+                              key={loc}
+                              onClick={() => confirmLocation(loc)}
+                              className="w-full flex items-center gap-3 px-5 py-2.5 text-left text-sm text-foreground hover:bg-muted transition-colors"
+                            >
+                              <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+                              {loc}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
+              </motion.div>
+            )}
 
-                {/* Category select */}
-                <div className="relative flex-1">
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl bg-background border text-sm appearance-none cursor-pointer transition-colors hover:border-accent/30 focus:outline-none focus:border-accent/40"
-                  >
-                    <option value="">Legal category</option>
-                    {CATEGORIES.map((cat) => (
-                      <option key={cat.label} value={cat.label}>{cat.icon} {cat.label}</option>
-                    ))}
-                  </select>
-                  <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-accent pointer-events-none" />
-                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            {/* STEP 2: Category Grid */}
+            {step === "category" && (
+              <motion.div
+                key="category-grid"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.3 }}
+                className="max-w-3xl mx-auto mt-8"
+              >
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {CATEGORIES.map((cat, i) => (
+                    <motion.button
+                      key={cat.label}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.25, delay: i * 0.04 }}
+                      onClick={() => handleCategorySelect(cat.label)}
+                      className="group flex items-center gap-3 p-4 rounded-xl bg-card border shadow-card hover:shadow-card-hover hover:border-accent/25 transition-all duration-200 text-left"
+                    >
+                      <div className={`h-10 w-10 rounded-xl ${cat.color} flex items-center justify-center shrink-0 transition-transform group-hover:scale-105`}>
+                        <cat.icon className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <span className="text-sm font-semibold text-foreground">{cat.label}</span>
+                        <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/0 group-hover:text-accent transition-all inline-block ml-1.5 -translate-x-1 group-hover:translate-x-0 opacity-0 group-hover:opacity-100" />
+                      </div>
+                    </motion.button>
+                  ))}
                 </div>
-
-                {/* Search button */}
-                <Button variant="gold" size="lg" onClick={handleSearch} className="md:px-8 shrink-0">
-                  <Search className="h-4 w-4 mr-2 md:mr-0 md:hidden" />
-                  <span className="md:hidden">Search</span>
-                  <span className="hidden md:inline">Find Lawyers</span>
-                  <ArrowRight className="hidden md:inline ml-2 h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            {/* Quick category chips */}
-            <div className="flex flex-wrap justify-center gap-2 mt-5">
-              {CATEGORIES.slice(0, 6).map((cat) => (
-                <button
-                  key={cat.label}
-                  onClick={() => { setSelectedCategory(cat.label); }}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                    selectedCategory === cat.label
-                      ? "bg-accent/10 border-accent/30 text-accent"
-                      : "bg-card border-border text-muted-foreground hover:border-accent/20 hover:text-foreground"
-                  }`}
-                >
-                  {cat.icon} {cat.label}
-                </button>
-              ))}
-            </div>
-          </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </section>
 
       {/* TRUST METRICS */}
-      <section className="py-6 border-y bg-card/50">
+      <section className="py-8 border-y bg-card/50 mt-6">
         <div className="container">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {metrics.map((m) => (
@@ -210,14 +332,13 @@ export default function Index() {
         <div className="container">
           <motion.div {...fadeUp} className="text-center mb-14 max-w-lg mx-auto">
             <h2 className="text-3xl md:text-4xl font-serif text-foreground mb-3">How it works</h2>
-            <p className="text-muted-foreground">Three simple steps to legal help.</p>
+            <p className="text-muted-foreground">Three steps to the right lawyer.</p>
           </motion.div>
-
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {[
-              { step: "1", icon: MapPin, title: "Tell us your location", desc: "Select your state so we can match you with locally licensed attorneys." },
-              { step: "2", icon: Briefcase, title: "Choose your legal need", desc: "Pick a category — from family law to business disputes — and we'll narrow the field." },
-              { step: "3", icon: Sparkles, title: "Get matched instantly", desc: "View ranked lawyers with ratings, availability, and free consultation options." },
+              { step: "1", icon: MapPin, title: "Enter your location", desc: "Type a city, ZIP code, or let us detect where you are." },
+              { step: "2", icon: Briefcase, title: "Pick your legal need", desc: "Choose a category so we match you with the right specialists." },
+              { step: "3", icon: Sparkles, title: "Get matched instantly", desc: "See ranked, verified lawyers with ratings, fees, and availability." },
             ].map((s, i) => (
               <motion.div key={s.step} {...fadeUp} transition={{ duration: 0.5, delay: i * 0.1 }}
                 className="text-center p-8 rounded-2xl bg-card border shadow-card hover:shadow-card-hover transition-all duration-300"
@@ -234,42 +355,12 @@ export default function Index() {
         </div>
       </section>
 
-      {/* WHY TRUST US */}
-      <section className="py-20 md:py-28 bg-muted/30">
-        <div className="container">
-          <motion.div {...fadeUp} className="text-center mb-14 max-w-lg mx-auto">
-            <h2 className="text-3xl md:text-4xl font-serif text-foreground mb-3">Why LegalBridge</h2>
-            <p className="text-muted-foreground">Built for trust, speed, and transparency.</p>
-          </motion.div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-5xl mx-auto">
-            {[
-              { icon: BadgeCheck, title: "Verified Attorneys", desc: "Every lawyer is credentialed and background-checked." },
-              { icon: Clock, title: "Fast Responses", desc: "Average response time under 2 hours." },
-              { icon: Shield, title: "Secure & Private", desc: "Bank-level encryption for all your data." },
-              { icon: Star, title: "Highly Rated", desc: "98% client satisfaction across the platform." },
-            ].map((item, i) => (
-              <motion.div key={item.title} {...fadeUp} transition={{ duration: 0.5, delay: i * 0.08 }}
-                className="p-6 rounded-2xl bg-card border shadow-card"
-              >
-                <div className="h-11 w-11 rounded-xl bg-accent/8 flex items-center justify-center mb-4">
-                  <item.icon className="h-5 w-5 text-accent" />
-                </div>
-                <h3 className="text-base font-semibold text-foreground mb-1 font-sans">{item.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* TESTIMONIALS */}
-      <section id="reviews" className="py-20 md:py-28">
+      <section id="reviews" className="py-20 md:py-28 bg-muted/30">
         <div className="container">
           <motion.div {...fadeUp} className="text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-serif text-foreground mb-3">What people say</h2>
           </motion.div>
-
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {testimonials.map((t, i) => (
               <motion.div key={t.name} {...fadeUp} transition={{ duration: 0.5, delay: i * 0.1 }}
@@ -291,21 +382,17 @@ export default function Index() {
         </div>
       </section>
 
-      {/* FINAL CTA */}
+      {/* CTA */}
       <section className="py-20 md:py-28">
         <div className="container">
           <div className="max-w-3xl mx-auto text-center p-10 md:p-16 rounded-3xl hero-gradient relative overflow-hidden">
             <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle at 30% 50%, hsl(43 56% 54%), transparent 50%)" }} />
             <div className="relative">
-              <h2 className="text-3xl md:text-4xl font-serif text-primary-foreground mb-4">
-                Ready to find your lawyer?
-              </h2>
-              <p className="text-primary-foreground/60 text-lg mb-8 max-w-md mx-auto">
-                It's free to search and get matched. Book a consultation in minutes.
-              </p>
+              <h2 className="text-3xl md:text-4xl font-serif text-primary-foreground mb-4">Ready to find your lawyer?</h2>
+              <p className="text-primary-foreground/60 text-lg mb-8 max-w-md mx-auto">Free to search. Book a consultation in minutes.</p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <Button variant="gold" size="lg" asChild>
-                  <Link to="/client/find-lawyers">Get Started Free <ArrowRight className="ml-1.5 h-4 w-4" /></Link>
+                <Button variant="gold" size="lg" onClick={() => { setStep("location"); window.scrollTo({ top: 0, behavior: "smooth" }); }}>
+                  Get Started Free <ArrowRight className="ml-1.5 h-4 w-4" />
                 </Button>
                 <Button variant="hero-outline" size="lg" asChild>
                   <Link to="/lawyer/dashboard">I'm a Lawyer</Link>
