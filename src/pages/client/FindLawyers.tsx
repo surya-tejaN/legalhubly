@@ -53,9 +53,12 @@ const SORT_OPTIONS = [
 ];
 
 const PRACTICE_AREAS = [
-  "All", "Personal Injury", "Family Law", "Criminal Defense", "Immigration Law",
+  "All", "Immigration Law", "Family Law", "Criminal Defense", "Personal Injury",
   "Employment Law", "Business Law", "Real Estate Law", "Estate Planning",
-  "Intellectual Property", "Civil Litigation",
+  "Civil Litigation", "Bankruptcy Law", "Tax Law", "Intellectual Property",
+  "Medical Malpractice", "Consumer Protection", "Traffic Violations",
+  "Landlord / Tenant Law", "Education Law", "Environmental Law",
+  "Military Law", "International Law",
 ];
 
 const LANGUAGES = ["All", "English", "Spanish", "Mandarin", "Korean", "Hindi", "French", "Arabic"];
