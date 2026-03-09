@@ -14,6 +14,7 @@ import FindLawyers from "./pages/client/FindLawyers";
 import ClientMessages from "./pages/client/ClientMessages";
 import ClientDocuments from "./pages/client/ClientDocuments";
 import ClientPayments from "./pages/client/ClientPayments";
+import LawyerProfile from "./pages/client/LawyerProfile";
 
 // Lawyer pages
 import LawyerDashboard from "./pages/lawyer/LawyerDashboard";
