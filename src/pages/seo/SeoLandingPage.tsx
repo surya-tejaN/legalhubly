@@ -136,8 +136,8 @@ export default function SeoLandingPage() {
     [paSlug]
   );
 
-  const pageTitle = `${paData.title} in ${cityData.name}, ${cityData.state} | LegalBridge`;
-  const pageDesc = `Find the best ${paData.title.toLowerCase()}s in ${cityData.name}, ${cityData.stateFullName}. Compare ratings, experience, and book free consultations on LegalBridge.`;
+  const pageTitle = `${paData.title} in ${locationShort} | LegalBridge`;
+  const pageDesc = `Find the best ${paData.title.toLowerCase()}s in ${locationString}. Compare ratings, experience, and book free consultations on LegalBridge.`;
   const canonicalUrl = `https://legalbridge.app/${citySlug}/${paSlug}`;
 
   const jsonLd = {
@@ -148,7 +148,7 @@ export default function SeoLandingPage() {
     areaServed: {
       "@type": "City",
       name: cityData.name,
-      containedInPlace: { "@type": "State", name: cityData.stateFullName },
+      ...(cityData.stateFullName ? { containedInPlace: { "@type": "State", name: cityData.stateFullName } } : {})
     },
     url: canonicalUrl,
     provider: {
