@@ -427,11 +427,15 @@ export default function FindLawyers() {
         },
       });
       if (error) throw error;
-      setLawyers(data.lawyers || []);
+      setLawyers(data?.lawyers || []);
     } catch (err) {
       console.error("Failed to fetch:", err);
-      const { data } = await supabase.from("lawyers" as any).select("*");
-      if (data) setLawyers((data as any[]).map((l) => ({ ...l, match_score: 75, score_breakdown: {} })));
+      try {
+        const { data } = await supabase.from("lawyers").select("*");
+        if (data) setLawyers((data as any[]).map((l) => ({ ...l, match_score: 75, score_breakdown: {}, practice_areas: l.practice_areas || [], languages: l.languages || [], consultation_types: l.consultation_types || [], jurisdictions: l.jurisdictions || [], specialization_tags: l.specialization_tags || [], complexity_levels: l.complexity_levels || [], budget_ranges: l.budget_ranges || [] })));
+      } catch {
+        setLawyers([]);
+      }
     } finally {
       setLoading(false);
     }
