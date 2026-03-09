@@ -20,6 +20,7 @@ export default function Signup() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [city, setCity] = useState("");
   const [role, setRole] = useState<AppRole>("client");
   const [submitting, setSubmitting] = useState(false);
 
