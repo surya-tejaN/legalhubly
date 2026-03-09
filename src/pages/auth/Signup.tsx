@@ -146,6 +146,20 @@ export default function Signup() {
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="city">City</Label>
+            <div className="relative">
+              <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="city"
+                placeholder="New York, NY"
+                className="pl-10"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
