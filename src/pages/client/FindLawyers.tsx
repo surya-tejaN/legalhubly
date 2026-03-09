@@ -41,6 +41,8 @@ interface Lawyer {
   match_score: number;
   score_breakdown: Record<string, number>;
   match_explanation?: string;
+  is_top_match?: boolean;
+  profile_completion?: number;
 }
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -215,7 +217,12 @@ function LawyerCard({ lawyer, index, expanded, onToggle }: {
                     <Shield className="h-3 w-3" /> Verified
                   </span>
                 )}
-                {lawyer.match_score >= 80 && (
+                {lawyer.is_top_match && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-accent/12 text-accent px-2 py-0.5 rounded-full border border-accent/20 shadow-sm">
+                    <Award className="h-3 w-3" /> Top Match
+                  </span>
+                )}
+                {lawyer.match_score >= 80 && !lawyer.is_top_match && (
                   <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-accent/8 text-accent px-2 py-0.5 rounded-full border border-accent/15">
                     <Zap className="h-3 w-3" /> {lawyer.match_score}% Match
                   </span>
@@ -670,27 +677,58 @@ export default function FindLawyers() {
           )}
         </div>
 
-        {/* Empty state */}
+        {/* Empty state with placeholder cards */}
         {!loading && filtered.length === 0 && (
-          <div className="text-center py-24">
-            <div className="h-16 w-16 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
-              <Search className="h-7 w-7 text-muted-foreground/40" />
+          <div className="space-y-6">
+            <div className="text-center py-8">
+              <div className="h-16 w-16 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                <Search className="h-7 w-7 text-muted-foreground/40" />
+              </div>
+              <h3 className="font-serif text-xl text-foreground mb-2">No lawyers available yet in this location</h3>
+              <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
+                Try adjusting your filters, broadening your search criteria, or check back soon as new lawyers join our platform.
+              </p>
+              <Button variant="outline" onClick={clearAllFilters}>
+                Clear all filters
+              </Button>
             </div>
-            <h3 className="font-serif text-xl text-foreground mb-2">No lawyers available yet in this location</h3>
-            <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
-              Try adjusting your filters, broadening your search criteria, or check back soon as new lawyers join our platform.
-            </p>
-            <Button variant="outline" onClick={clearAllFilters}>
-              Clear all filters
-            </Button>
+
+            {/* Placeholder cards */}
+            <div className="space-y-4 opacity-50 pointer-events-none" aria-hidden="true">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="rounded-2xl bg-card border border-dashed border-border/60 p-6">
+                  <div className="flex gap-5">
+                    <div className="h-20 w-20 rounded-2xl bg-muted/40 flex items-center justify-center shrink-0">
+                      <User className="h-8 w-8 text-muted-foreground/30" />
+                    </div>
+                    <div className="flex-1 space-y-3">
+                      <div className="h-5 w-48 bg-muted/50 rounded-lg" />
+                      <div className="h-4 w-32 bg-muted/40 rounded-lg" />
+                      <div className="flex gap-2">
+                        <div className="h-7 w-24 bg-muted/30 rounded-lg" />
+                        <div className="h-7 w-24 bg-muted/30 rounded-lg" />
+                        <div className="h-7 w-20 bg-muted/30 rounded-lg" />
+                      </div>
+                      <div className="h-4 w-56 bg-muted/30 rounded-lg" />
+                    </div>
+                    <div className="hidden md:flex flex-col items-end gap-2">
+                      <div className="h-8 w-16 bg-muted/40 rounded-lg" />
+                      <div className="h-10 w-36 bg-muted/30 rounded-xl" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
         {/* Disclaimer */}
-        <div className="flex items-start gap-2.5 mt-8 p-4 rounded-xl bg-muted/30 border border-border/50 text-xs text-muted-foreground">
-          <Info className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground/60" />
-          <span>Match scores are AI-generated estimates based on lawyer profile data and your search criteria. They do not guarantee outcomes. Always verify fit during your consultation.</span>
-        </div>
+        {filtered.length > 0 && (
+          <div className="flex items-start gap-2.5 mt-8 p-4 rounded-xl bg-muted/30 border border-border/50 text-xs text-muted-foreground">
+            <Info className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground/60" />
+            <span>Match scores are algorithm-generated estimates based on lawyer profile data and your search criteria. They do not guarantee outcomes. Always verify fit during your consultation.</span>
+          </div>
+        )}
       </div>
     </div>
   );
