@@ -31,6 +31,17 @@ const CATEGORIES = [
   { label: "Real Estate", icon: Home, desc: "Purchase, lease, zoning" },
   { label: "Estate Planning", icon: ScrollText, desc: "Wills, trusts, probate" },
   { label: "Civil Litigation", icon: Landmark, desc: "Lawsuits, appeals, mediation" },
+  { label: "Bankruptcy", icon: DollarSign, desc: "Debt relief, Chapter 7 & 13" },
+  { label: "Tax Law", icon: Receipt, desc: "IRS disputes, tax planning" },
+  { label: "Intellectual Property", icon: Brain, desc: "Patents, trademarks, copyright" },
+  { label: "Medical Malpractice", icon: Stethoscope, desc: "Negligence, surgical errors" },
+  { label: "Consumer Protection", icon: ShieldCheck, desc: "Fraud, warranties, recalls" },
+  { label: "Traffic Violations", icon: Car, desc: "Tickets, DUI, license issues" },
+  { label: "Landlord / Tenant", icon: KeyRound, desc: "Eviction, leases, deposits" },
+  { label: "Education Law", icon: GraduationCap, desc: "Student rights, IEP, Title IX" },
+  { label: "Environmental Law", icon: Leaf, desc: "Compliance, pollution, permits" },
+  { label: "Military Law", icon: Swords, desc: "Court-martial, VA benefits" },
+  { label: "International Law", icon: Earth, desc: "Trade, treaties, cross-border" },
 ];
 
 const POPULAR_LOCATIONS = [
