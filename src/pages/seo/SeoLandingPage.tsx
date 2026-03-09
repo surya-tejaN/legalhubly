@@ -65,36 +65,66 @@ export default function SeoLandingPage() {
   const [loading, setLoading] = useState(true);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  const cityData = SEO_CITIES.find((c) => c.slug === citySlug);
-  const paData = SEO_PRACTICE_AREAS.find((p) => p.slug === paSlug);
+  const formatName = (slug?: string) => 
+    (slug || "").split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+  const cityData = SEO_CITIES.find((c) => c.slug === citySlug) || {
+    slug: citySlug || "city",
+    name: formatName(citySlug) || "City",
+    state: "",
+    stateFullName: ""
+  };
+
+  const paData = SEO_PRACTICE_AREAS.find((p) => p.slug === paSlug) || {
+    slug: paSlug || "practice-area",
+    name: formatName(paSlug) || "Practice Area",
+    shortName: formatName(paSlug) || "Practice Area",
+    title: formatName(paSlug) || "Lawyer",
+    description: "Find top-rated legal representation for your case. Compare experienced attorneys, read verified reviews, and book free consultations.",
+    faqs: []
+  };
+
+  const locationString = cityData.stateFullName ? `${cityData.name}, ${cityData.stateFullName}` : cityData.name;
+  const locationShort = cityData.state ? `${cityData.name}, ${cityData.state}` : cityData.name;
 
   useEffect(() => {
-    if (!cityData || !paData) return;
     (async () => {
       setLoading(true);
-      const { data } = await supabase
-        .from("lawyers")
-        .select("*")
-        .contains("practice_areas", [paData.name])
-        .or(`city.ilike.%${cityData.name}%,state.ilike.%${cityData.state}%`)
-        .order("rating", { ascending: false })
-        .limit(20);
-
-      if (data && data.length > 0) {
-        setLawyers(data as Lawyer[]);
-      } else {
-        // Fallback: show all lawyers with matching practice area
-        const { data: fallback } = await supabase
+      try {
+        let query = supabase
           .from("lawyers")
           .select("*")
           .contains("practice_areas", [paData.name])
           .order("rating", { ascending: false })
           .limit(20);
-        setLawyers((fallback || []) as Lawyer[]);
+          
+        if (cityData.name && cityData.state) {
+          query = query.or(`city.ilike.%${cityData.name}%,state.ilike.%${cityData.state}%`);
+        } else if (cityData.name) {
+          query = query.ilike("city", `%${cityData.name}%`);
+        }
+          
+        const { data, error } = await query;
+
+        if (data && data.length > 0) {
+          setLawyers(data as Lawyer[]);
+        } else {
+          // Fallback: show all lawyers with matching practice area
+          const { data: fallback } = await supabase
+            .from("lawyers")
+            .select("*")
+            .contains("practice_areas", [paData.name])
+            .order("rating", { ascending: false })
+            .limit(20);
+          setLawyers((fallback || []) as Lawyer[]);
+        }
+      } catch (err) {
+        console.error("Error fetching lawyers:", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     })();
-  }, [cityData, paData]);
+  }, [cityData.name, cityData.state, paData.name]);
 
   // Related cities & practice areas for internal links
   const relatedCities = useMemo(
@@ -105,15 +135,6 @@ export default function SeoLandingPage() {
     () => SEO_PRACTICE_AREAS.filter((p) => p.slug !== paSlug).slice(0, 6),
     [paSlug]
   );
-
-  if (!cityData || !paData) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
-        <p className="text-muted-foreground">Page not found.</p>
-        <Button variant="outline" onClick={() => navigate("/")}>Go Home</Button>
-      </div>
-    );
-  }
 
   const pageTitle = `${paData.title} in ${cityData.name}, ${cityData.state} | LegalBridge`;
   const pageDesc = `Find the best ${paData.title.toLowerCase()}s in ${cityData.name}, ${cityData.stateFullName}. Compare ratings, experience, and book free consultations on LegalBridge.`;
