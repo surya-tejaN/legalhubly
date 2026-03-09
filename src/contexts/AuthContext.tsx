@@ -9,6 +9,9 @@ interface Profile {
   user_id: string;
   full_name: string | null;
   avatar_url: string | null;
+  profile_photo: string | null;
+  email: string | null;
+  city: string | null;
   role: AppRole;
 }
 
