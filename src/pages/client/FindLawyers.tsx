@@ -460,7 +460,7 @@ export default function FindLawyers() {
     }
 
     return result;
-  }, [lawyers, searchQuery, experienceMin, priceMax, ratingMin]);
+  }, [lawyers, debouncedSearch, experienceMin, priceMax, ratingMin]);
 
   const activeFilterCount = [
     practiceFilter !== "All",
