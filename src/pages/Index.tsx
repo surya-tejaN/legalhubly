@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { useAuth, useDashboardPath } from "@/contexts/AuthContext";
 import {
   Scale, Shield, ArrowRight, Sparkles, MapPin, Briefcase,
   Menu, X, Star, Clock, BadgeCheck, Search, Locate,
