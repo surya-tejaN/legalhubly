@@ -117,7 +117,7 @@ export default function SeoLandingPage() {
 
   const pageTitle = `${paData.title} in ${cityData.name}, ${cityData.state} | LegalBridge`;
   const pageDesc = `Find the best ${paData.title.toLowerCase()}s in ${cityData.name}, ${cityData.stateFullName}. Compare ratings, experience, and book free consultations on LegalBridge.`;
-  const canonicalUrl = `https://legalbridge.app/lawyers/${citySlug}/${paSlug}`;
+  const canonicalUrl = `https://legalbridge.app/${citySlug}/${paSlug}`;
 
   const jsonLd = {
     "@context": "https://schema.org",
