@@ -14,6 +14,7 @@ import FindLawyers from "./pages/client/FindLawyers";
 import ClientMessages from "./pages/client/ClientMessages";
 import ClientDocuments from "./pages/client/ClientDocuments";
 import ClientPayments from "./pages/client/ClientPayments";
+import LawyerProfile from "./pages/client/LawyerProfile";
 
 // Lawyer pages
 import LawyerDashboard from "./pages/lawyer/LawyerDashboard";
@@ -53,6 +54,7 @@ const App = () => (
           <Route path="/client/cases/:caseId" element={<CaseWorkspace role="client" />} />
           <Route path="/client/documents" element={<ClientDocuments />} />
           <Route path="/client/payments" element={<ClientPayments />} />
+          <Route path="/client/lawyer/:lawyerId" element={<LawyerProfile />} />
 
           {/* Lawyer Portal */}
           <Route path="/lawyer/dashboard" element={<LawyerDashboard />} />
