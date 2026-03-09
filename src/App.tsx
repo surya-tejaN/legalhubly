@@ -38,48 +38,64 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import CaseWorkspace from "./pages/shared/CaseWorkspace";
 import PricingPlans from "./pages/shared/PricingPlans";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+function AnimatedRoutes() {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<PageTransition><Index /></PageTransition>} />
+
+        {/* Client Portal */}
+        <Route path="/client/dashboard" element={<PageTransition><ClientDashboard /></PageTransition>} />
+        <Route path="/client/intake" element={<PageTransition><CaseIntake /></PageTransition>} />
+        <Route path="/client/cases" element={<PageTransition><ClientCases /></PageTransition>} />
+        <Route path="/client/find-lawyers" element={<PageTransition><FindLawyers /></PageTransition>} />
+        <Route path="/client/messages" element={<PageTransition><ClientMessages /></PageTransition>} />
+        <Route path="/client/cases/:caseId" element={<PageTransition><CaseWorkspace role="client" /></PageTransition>} />
+        <Route path="/client/documents" element={<PageTransition><ClientDocuments /></PageTransition>} />
+        <Route path="/client/payments" element={<PageTransition><ClientPayments /></PageTransition>} />
+        <Route path="/client/lawyer/:lawyerId" element={<PageTransition><LawyerProfile /></PageTransition>} />
+
+        {/* Lawyer Portal */}
+        <Route path="/lawyer/dashboard" element={<PageTransition><LawyerDashboard /></PageTransition>} />
+        <Route path="/lawyer/leads" element={<PageTransition><LawyerLeads /></PageTransition>} />
+        <Route path="/lawyer/cases/:caseId" element={<PageTransition><CaseWorkspace role="lawyer" /></PageTransition>} />
+        <Route path="/lawyer/cases" element={<PageTransition><LawyerCases /></PageTransition>} />
+        <Route path="/lawyer/calendar" element={<PageTransition><LawyerCalendar /></PageTransition>} />
+        <Route path="/lawyer/documents" element={<PageTransition><LawyerDocuments /></PageTransition>} />
+        <Route path="/lawyer/messages" element={<PageTransition><LawyerMessages /></PageTransition>} />
+        <Route path="/lawyer/billing" element={<PageTransition><LawyerBilling /></PageTransition>} />
+        <Route path="/lawyer/analytics" element={<PageTransition><LawyerAnalytics /></PageTransition>} />
+
+        {/* Firm Admin */}
+        <Route path="/firm/dashboard" element={<PageTransition><FirmDashboard /></PageTransition>} />
+
+        {/* Platform Admin */}
+        <Route path="/admin/dashboard" element={<PageTransition><AdminDashboard /></PageTransition>} />
+        <Route path="/admin/pricing" element={<PageTransition><PricingPlans /></PageTransition>} />
+
+        <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
+      </Routes>
+    </AnimatePresence>
+  );
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
+    <TooltipProvider delayDuration={200}>
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-
-          {/* Client Portal */}
-          <Route path="/client/dashboard" element={<ClientDashboard />} />
-          <Route path="/client/intake" element={<CaseIntake />} />
-          <Route path="/client/cases" element={<ClientCases />} />
-          <Route path="/client/find-lawyers" element={<FindLawyers />} />
-          <Route path="/client/messages" element={<ClientMessages />} />
-          <Route path="/client/cases/:caseId" element={<CaseWorkspace role="client" />} />
-          <Route path="/client/documents" element={<ClientDocuments />} />
-          <Route path="/client/payments" element={<ClientPayments />} />
-          <Route path="/client/lawyer/:lawyerId" element={<LawyerProfile />} />
-
-          {/* Lawyer Portal */}
-          <Route path="/lawyer/dashboard" element={<LawyerDashboard />} />
-          <Route path="/lawyer/leads" element={<LawyerLeads />} />
-          <Route path="/lawyer/cases/:caseId" element={<CaseWorkspace role="lawyer" />} />
-          <Route path="/lawyer/cases" element={<LawyerCases />} />
-          <Route path="/lawyer/calendar" element={<LawyerCalendar />} />
-          <Route path="/lawyer/documents" element={<LawyerDocuments />} />
-          <Route path="/lawyer/messages" element={<LawyerMessages />} />
-          <Route path="/lawyer/billing" element={<LawyerBilling />} />
-          <Route path="/lawyer/analytics" element={<LawyerAnalytics />} />
-
-          {/* Firm Admin */}
-          <Route path="/firm/dashboard" element={<FirmDashboard />} />
-
-          {/* Platform Admin */}
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/pricing" element={<PricingPlans />} />
-
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AnimatedRoutes />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
