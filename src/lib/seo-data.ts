@@ -77,7 +77,7 @@ export const SEO_PRACTICE_AREAS = [
     ],
   },
   {
-    slug: "employment-lawyer",
+    slug: "employment-lawyers",
     name: "Employment Law",
     shortName: "Employment",
     title: "Employment Lawyer",
