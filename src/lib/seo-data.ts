@@ -1,18 +1,26 @@
 // SEO data constants for city + practice area landing pages
 
 export const SEO_CITIES = [
-  { slug: "chicago", name: "Chicago", state: "IL", stateFullName: "Illinois" },
   { slug: "new-york", name: "New York", state: "NY", stateFullName: "New York" },
   { slug: "los-angeles", name: "Los Angeles", state: "CA", stateFullName: "California" },
+  { slug: "chicago", name: "Chicago", state: "IL", stateFullName: "Illinois" },
   { slug: "houston", name: "Houston", state: "TX", stateFullName: "Texas" },
-  { slug: "miami", name: "Miami", state: "FL", stateFullName: "Florida" },
-  { slug: "atlanta", name: "Atlanta", state: "GA", stateFullName: "Georgia" },
-  { slug: "seattle", name: "Seattle", state: "WA", stateFullName: "Washington" },
   { slug: "phoenix", name: "Phoenix", state: "AZ", stateFullName: "Arizona" },
-  { slug: "boston", name: "Boston", state: "MA", stateFullName: "Massachusetts" },
-  { slug: "denver", name: "Denver", state: "CO", stateFullName: "Colorado" },
-  { slug: "san-francisco", name: "San Francisco", state: "CA", stateFullName: "California" },
+  { slug: "philadelphia", name: "Philadelphia", state: "PA", stateFullName: "Pennsylvania" },
+  { slug: "san-antonio", name: "San Antonio", state: "TX", stateFullName: "Texas" },
+  { slug: "san-diego", name: "San Diego", state: "CA", stateFullName: "California" },
   { slug: "dallas", name: "Dallas", state: "TX", stateFullName: "Texas" },
+  { slug: "san-jose", name: "San Jose", state: "CA", stateFullName: "California" },
+  { slug: "austin", name: "Austin", state: "TX", stateFullName: "Texas" },
+  { slug: "jacksonville", name: "Jacksonville", state: "FL", stateFullName: "Florida" },
+  { slug: "san-francisco", name: "San Francisco", state: "CA", stateFullName: "California" },
+  { slug: "columbus", name: "Columbus", state: "OH", stateFullName: "Ohio" },
+  { slug: "indianapolis", name: "Indianapolis", state: "IN", stateFullName: "Indiana" },
+  { slug: "charlotte", name: "Charlotte", state: "NC", stateFullName: "North Carolina" },
+  { slug: "seattle", name: "Seattle", state: "WA", stateFullName: "Washington" },
+  { slug: "denver", name: "Denver", state: "CO", stateFullName: "Colorado" },
+  { slug: "boston", name: "Boston", state: "MA", stateFullName: "Massachusetts" },
+  { slug: "atlanta", name: "Atlanta", state: "GA", stateFullName: "Georgia" },
 ];
 
 export const SEO_PRACTICE_AREAS = [
