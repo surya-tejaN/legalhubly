@@ -347,7 +347,7 @@ export default function SeoLandingPage() {
                         <span className="flex items-center gap-1">
                           <Star className="h-3 w-3 fill-accent text-accent" /> {(lawyer.rating || 0).toFixed(1)} ({lawyer.review_count || 0})
                         </span>
-                        <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {formatResponseTime(lawyer.avg_response_hours)}</span>
+                        <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {formatResponseTime(lawyer.avg_response_hours || 24)}</span>
                       </div>
 
                       <div className="flex flex-wrap gap-1.5">
