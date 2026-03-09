@@ -19,7 +19,9 @@ export type Database = {
           client_name: string
           created_at: string
           duration_minutes: number
+          fee_amount: number | null
           id: string
+          is_mvp_free: boolean
           lawyer_id: string | null
           matter_id: string | null
           notes: string | null
@@ -32,7 +34,9 @@ export type Database = {
           client_name: string
           created_at?: string
           duration_minutes?: number
+          fee_amount?: number | null
           id?: string
+          is_mvp_free?: boolean
           lawyer_id?: string | null
           matter_id?: string | null
           notes?: string | null
@@ -45,7 +49,9 @@ export type Database = {
           client_name?: string
           created_at?: string
           duration_minutes?: number
+          fee_amount?: number | null
           id?: string
+          is_mvp_free?: boolean
           lawyer_id?: string | null
           matter_id?: string | null
           notes?: string | null
@@ -171,6 +177,129 @@ export type Database = {
             columns: ["matter_id"]
             isOneToOne: false
             referencedRelation: "matters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          amount: number
+          client_name: string
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          invoice_number: string
+          is_mvp_simulated: boolean
+          lawyer_id: string | null
+          line_items: Json
+          matter_id: string | null
+          paid_at: string | null
+          status: string
+          tax_amount: number
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          client_name: string
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          invoice_number?: string
+          is_mvp_simulated?: boolean
+          lawyer_id?: string | null
+          line_items?: Json
+          matter_id?: string | null
+          paid_at?: string | null
+          status?: string
+          tax_amount?: number
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          client_name?: string
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          invoice_number?: string
+          is_mvp_simulated?: boolean
+          lawyer_id?: string | null
+          line_items?: Json
+          matter_id?: string | null
+          paid_at?: string | null
+          status?: string
+          tax_amount?: number
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_lawyer_id_fkey"
+            columns: ["lawyer_id"]
+            isOneToOne: false
+            referencedRelation: "lawyers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_matter_id_fkey"
+            columns: ["matter_id"]
+            isOneToOne: false
+            referencedRelation: "matters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lawyer_subscriptions: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_mvp_free: boolean
+          lawyer_id: string
+          plan_id: string
+          started_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_mvp_free?: boolean
+          lawyer_id: string
+          plan_id: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_mvp_free?: boolean
+          lawyer_id?: string
+          plan_id?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lawyer_subscriptions_lawyer_id_fkey"
+            columns: ["lawyer_id"]
+            isOneToOne: false
+            referencedRelation: "lawyers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lawyer_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
             referencedColumns: ["id"]
           },
         ]
@@ -497,6 +626,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      subscription_plans: {
+        Row: {
+          ai_credits_monthly: number
+          commission_rate: number
+          created_at: string
+          features: Json
+          id: string
+          is_active: boolean
+          lead_fee: number
+          name: string
+          price_monthly: number
+          price_yearly: number
+          tier: string
+        }
+        Insert: {
+          ai_credits_monthly?: number
+          commission_rate?: number
+          created_at?: string
+          features?: Json
+          id?: string
+          is_active?: boolean
+          lead_fee?: number
+          name: string
+          price_monthly?: number
+          price_yearly?: number
+          tier?: string
+        }
+        Update: {
+          ai_credits_monthly?: number
+          commission_rate?: number
+          created_at?: string
+          features?: Json
+          id?: string
+          is_active?: boolean
+          lead_fee?: number
+          name?: string
+          price_monthly?: number
+          price_yearly?: number
+          tier?: string
+        }
+        Relationships: []
       }
       tasks: {
         Row: {
