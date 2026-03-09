@@ -65,36 +65,66 @@ export default function SeoLandingPage() {
   const [loading, setLoading] = useState(true);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  const cityData = SEO_CITIES.find((c) => c.slug === citySlug);
-  const paData = SEO_PRACTICE_AREAS.find((p) => p.slug === paSlug);
+  const formatName = (slug?: string) => 
+    (slug || "").split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+  const cityData = SEO_CITIES.find((c) => c.slug === citySlug) || {
+    slug: citySlug || "city",
+    name: formatName(citySlug) || "City",
+    state: "",
+    stateFullName: ""
+  };
+
+  const paData = SEO_PRACTICE_AREAS.find((p) => p.slug === paSlug) || {
+    slug: paSlug || "practice-area",
+    name: formatName(paSlug) || "Practice Area",
+    shortName: formatName(paSlug) || "Practice Area",
+    title: formatName(paSlug) || "Lawyer",
+    description: "Find top-rated legal representation for your case. Compare experienced attorneys, read verified reviews, and book free consultations.",
+    faqs: []
+  };
+
+  const locationString = cityData.stateFullName ? `${cityData.name}, ${cityData.stateFullName}` : cityData.name;
+  const locationShort = cityData.state ? `${cityData.name}, ${cityData.state}` : cityData.name;
 
   useEffect(() => {
-    if (!cityData || !paData) return;
     (async () => {
       setLoading(true);
-      const { data } = await supabase
-        .from("lawyers")
-        .select("*")
-        .contains("practice_areas", [paData.name])
-        .or(`city.ilike.%${cityData.name}%,state.ilike.%${cityData.state}%`)
-        .order("rating", { ascending: false })
-        .limit(20);
-
-      if (data && data.length > 0) {
-        setLawyers(data as Lawyer[]);
-      } else {
-        // Fallback: show all lawyers with matching practice area
-        const { data: fallback } = await supabase
+      try {
+        let query = supabase
           .from("lawyers")
           .select("*")
           .contains("practice_areas", [paData.name])
           .order("rating", { ascending: false })
           .limit(20);
-        setLawyers((fallback || []) as Lawyer[]);
+          
+        if (cityData.name && cityData.state) {
+          query = query.or(`city.ilike.%${cityData.name}%,state.ilike.%${cityData.state}%`);
+        } else if (cityData.name) {
+          query = query.ilike("city", `%${cityData.name}%`);
+        }
+          
+        const { data, error } = await query;
+
+        if (data && data.length > 0) {
+          setLawyers(data as Lawyer[]);
+        } else {
+          // Fallback: show all lawyers with matching practice area
+          const { data: fallback } = await supabase
+            .from("lawyers")
+            .select("*")
+            .contains("practice_areas", [paData.name])
+            .order("rating", { ascending: false })
+            .limit(20);
+          setLawyers((fallback || []) as Lawyer[]);
+        }
+      } catch (err) {
+        console.error("Error fetching lawyers:", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     })();
-  }, [cityData, paData]);
+  }, [cityData.name, cityData.state, paData.name]);
 
   // Related cities & practice areas for internal links
   const relatedCities = useMemo(
@@ -106,17 +136,8 @@ export default function SeoLandingPage() {
     [paSlug]
   );
 
-  if (!cityData || !paData) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
-        <p className="text-muted-foreground">Page not found.</p>
-        <Button variant="outline" onClick={() => navigate("/")}>Go Home</Button>
-      </div>
-    );
-  }
-
-  const pageTitle = `${paData.title} in ${cityData.name}, ${cityData.state} | LegalBridge`;
-  const pageDesc = `Find the best ${paData.title.toLowerCase()}s in ${cityData.name}, ${cityData.stateFullName}. Compare ratings, experience, and book free consultations on LegalBridge.`;
+  const pageTitle = `${paData.title} in ${locationShort} | LegalBridge`;
+  const pageDesc = `Find the best ${paData.title.toLowerCase()}s in ${locationString}. Compare ratings, experience, and book free consultations on LegalBridge.`;
   const canonicalUrl = `https://legalbridge.app/${citySlug}/${paSlug}`;
 
   const jsonLd = {
@@ -127,7 +148,7 @@ export default function SeoLandingPage() {
     areaServed: {
       "@type": "City",
       name: cityData.name,
-      containedInPlace: { "@type": "State", name: cityData.stateFullName },
+      ...(cityData.stateFullName ? { containedInPlace: { "@type": "State", name: cityData.stateFullName } } : {})
     },
     url: canonicalUrl,
     provider: {
@@ -137,7 +158,7 @@ export default function SeoLandingPage() {
     },
   };
 
-  const faqJsonLd = {
+  const faqJsonLd = paData.faqs.length > 0 ? {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     mainEntity: paData.faqs.map((f) => ({
@@ -145,7 +166,7 @@ export default function SeoLandingPage() {
       name: f.q,
       acceptedAnswer: { "@type": "Answer", text: f.a },
     })),
-  };
+  } : undefined;
 
   return (
     <div className="min-h-screen bg-background">
@@ -169,7 +190,7 @@ export default function SeoLandingPage() {
             </nav>
           </div>
           <Button variant="gold" size="sm" asChild>
-            <Link to={`/client/find-lawyers?location=${encodeURIComponent(cityData.name + ", " + cityData.state)}&category=${encodeURIComponent(paData.name)}`}>
+            <Link to={`/client/find-lawyers?location=${encodeURIComponent(locationShort)}&category=${encodeURIComponent(paData.name)}`}>
               <Search className="h-3.5 w-3.5 mr-1.5" /> Search All
             </Link>
           </Button>
@@ -182,7 +203,7 @@ export default function SeoLandingPage() {
           <motion.div {...fadeUp}>
             <div className="flex items-center gap-2 mb-4">
               <Badge className="bg-accent/20 text-accent border-accent/30 gap-1 text-xs">
-                <MapPin className="h-3 w-3" /> {cityData.name}, {cityData.state}
+                <MapPin className="h-3 w-3" /> {locationShort}
               </Badge>
               <Badge className="bg-primary-foreground/10 text-primary-foreground/80 border-primary-foreground/20 text-xs">
                 {paData.shortName}
@@ -190,14 +211,14 @@ export default function SeoLandingPage() {
             </div>
             <h1 className="font-serif text-3xl md:text-5xl leading-tight mb-4 max-w-3xl">
               Top {paData.title}s in{" "}
-              <span className="text-accent">{cityData.name}</span>, {cityData.stateFullName}
+              <span className="text-accent">{cityData.name}</span>{cityData.stateFullName ? `, ${cityData.stateFullName}` : ""}
             </h1>
             <p className="text-primary-foreground/70 text-base md:text-lg max-w-2xl leading-relaxed mb-8">
               {paData.description} Compare {cityData.name}'s top-rated attorneys, read verified reviews, and book free consultations.
             </p>
             <div className="flex flex-wrap gap-3">
               <Button variant="gold" size="lg" asChild>
-                <Link to={`/client/find-lawyers?location=${encodeURIComponent(cityData.name + ", " + cityData.state)}&category=${encodeURIComponent(paData.name)}`}>
+                <Link to={`/client/find-lawyers?location=${encodeURIComponent(locationShort)}&category=${encodeURIComponent(paData.name)}`}>
                   Find {paData.title}s <ArrowRight className="ml-1.5 h-4 w-4" />
                 </Link>
               </Button>
@@ -238,9 +259,9 @@ export default function SeoLandingPage() {
             </h2>
             <div className="prose prose-sm max-w-none text-muted-foreground space-y-4">
               <p>
-                When facing {paData.shortName.toLowerCase()} legal matters in {cityData.name}, {cityData.stateFullName}, having the right attorney can make all the difference. 
+                When facing {paData.shortName.toLowerCase()} legal matters in {locationString}, having the right attorney can make all the difference. 
                 Whether you're dealing with a complex case or need straightforward legal guidance, LegalBridge connects you with verified, 
-                experienced {paData.title.toLowerCase()}s who understand {cityData.stateFullName} law.
+                experienced {paData.title.toLowerCase()}s who understand {cityData.stateFullName || cityData.name} law.
               </p>
               <p>
                 Our platform makes it easy to compare attorneys based on experience, client reviews, response times, and consultation availability. 
@@ -261,7 +282,7 @@ export default function SeoLandingPage() {
               {paData.title}s in {cityData.name}
             </h2>
             <Button variant="outline" size="sm" asChild>
-              <Link to={`/client/find-lawyers?location=${encodeURIComponent(cityData.name + ", " + cityData.state)}&category=${encodeURIComponent(paData.name)}`}>
+              <Link to={`/client/find-lawyers?location=${encodeURIComponent(locationShort)}&category=${encodeURIComponent(paData.name)}`}>
                 View All <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
               </Link>
             </Button>
@@ -373,43 +394,45 @@ export default function SeoLandingPage() {
         </section>
 
         {/* ── FAQ Section ────────────────────────────────────────────── */}
-        <motion.section {...fadeUp} className="mb-12" aria-labelledby="faq-heading">
-          <h2 id="faq-heading" className="font-serif text-2xl text-foreground mb-6">
-            Frequently Asked Questions About {paData.title}s in {cityData.name}
-          </h2>
-          {/* Inject FAQ JSON-LD */}
-          <SeoHead
-            title={pageTitle}
-            description={pageDesc}
-            jsonLd={faqJsonLd}
-          />
-          <div className="space-y-3">
-            {paData.faqs.map((faq, i) => (
-              <div
-                key={i}
-                className="rounded-2xl border bg-card shadow-card overflow-hidden"
-              >
-                <button
-                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full flex items-center justify-between p-5 text-left hover:bg-muted/30 transition-colors"
-                  aria-expanded={openFaq === i}
+        {paData.faqs.length > 0 && (
+          <motion.section {...fadeUp} className="mb-12" aria-labelledby="faq-heading">
+            <h2 id="faq-heading" className="font-serif text-2xl text-foreground mb-6">
+              Frequently Asked Questions About {paData.title}s in {cityData.name}
+            </h2>
+            {/* Inject FAQ JSON-LD */}
+            <SeoHead
+              title={pageTitle}
+              description={pageDesc}
+              jsonLd={faqJsonLd}
+            />
+            <div className="space-y-3">
+              {paData.faqs.map((faq, i) => (
+                <div
+                  key={i}
+                  className="rounded-2xl border bg-card shadow-card overflow-hidden"
                 >
-                  <span className="text-sm font-semibold text-foreground pr-4">{faq.q}</span>
-                  <ChevronDown className={cn(
-                    "h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200",
-                    openFaq === i && "rotate-180"
-                  )} />
-                </button>
-                <div className={cn(
-                  "overflow-hidden transition-all duration-200",
-                  openFaq === i ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-                )}>
-                  <p className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">{faq.a}</p>
+                  <button
+                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                    className="w-full flex items-center justify-between p-5 text-left hover:bg-muted/30 transition-colors"
+                    aria-expanded={openFaq === i}
+                  >
+                    <span className="text-sm font-semibold text-foreground pr-4">{faq.q}</span>
+                    <ChevronDown className={cn(
+                      "h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200",
+                      openFaq === i && "rotate-180"
+                    )} />
+                  </button>
+                  <div className={cn(
+                    "overflow-hidden transition-all duration-200",
+                    openFaq === i ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                  )}>
+                    <p className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">{faq.a}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </motion.section>
+              ))}
+            </div>
+          </motion.section>
+        )}
 
         {/* ── Internal Links ─────────────────────────────────────────── */}
         <motion.section {...fadeUp} className="mb-12">
@@ -468,7 +491,7 @@ export default function SeoLandingPage() {
           </p>
           <div className="flex justify-center gap-3">
             <Button variant="gold" size="lg" asChild>
-              <Link to={`/client/find-lawyers?location=${encodeURIComponent(cityData.name + ", " + cityData.state)}&category=${encodeURIComponent(paData.name)}`}>
+              <Link to={`/client/find-lawyers?location=${encodeURIComponent(locationShort)}&category=${encodeURIComponent(paData.name)}`}>
                 Find Lawyers <ArrowRight className="ml-1.5 h-4 w-4" />
               </Link>
             </Button>
