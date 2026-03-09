@@ -390,7 +390,7 @@ export default function LawyerProfile() {
                 </section>
 
                 {/* Jurisdictions */}
-                {lawyer.jurisdictions.length > 0 && (
+                {(lawyer.jurisdictions || []).length > 0 && (
                   <section className="rounded-2xl border bg-card p-6 shadow-card">
                     <h2 className="font-serif text-xl text-foreground mb-4 flex items-center gap-2">
                       <MapPin className="h-5 w-5 text-accent" /> Jurisdictions
