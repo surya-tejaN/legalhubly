@@ -345,7 +345,7 @@ export default function SeoLandingPage() {
                         )}
                         <span className="flex items-center gap-1"><Briefcase className="h-3 w-3" /> {lawyer.experience_years} years</span>
                         <span className="flex items-center gap-1">
-                          <Star className="h-3 w-3 fill-accent text-accent" /> {lawyer.rating.toFixed(1)} ({lawyer.review_count})
+                          <Star className="h-3 w-3 fill-accent text-accent" /> {(lawyer.rating || 0).toFixed(1)} ({lawyer.review_count || 0})
                         </span>
                         <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {formatResponseTime(lawyer.avg_response_hours)}</span>
                       </div>
