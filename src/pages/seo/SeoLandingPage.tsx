@@ -426,10 +426,10 @@ export default function SeoLandingPage() {
         </section>
 
         {/* ── FAQ Section ────────────────────────────────────────────── */}
-        {(paData.faqs || []).length > 0 && (
+        {(paData?.faqs || []).length > 0 && (
           <motion.section {...fadeUp} className="mb-12" aria-labelledby="faq-heading">
             <h2 id="faq-heading" className="font-serif text-2xl text-foreground mb-6">
-              Frequently Asked Questions About {paData.title}s in {cityData.name}
+              Frequently Asked Questions About {paData?.title || "Lawyers"}s in {cityData?.name || "Your Area"}
             </h2>
             {/* Inject FAQ JSON-LD */}
             <SeoHead
@@ -438,7 +438,7 @@ export default function SeoLandingPage() {
               jsonLd={faqJsonLd}
             />
             <div className="space-y-3">
-              {paData.faqs.map((faq, i) => (
+              {(paData?.faqs || []).map((faq, i) => (
                 <div
                   key={i}
                   className="rounded-2xl border bg-card shadow-card overflow-hidden"
@@ -448,7 +448,7 @@ export default function SeoLandingPage() {
                     className="w-full flex items-center justify-between p-5 text-left hover:bg-muted/30 transition-colors"
                     aria-expanded={openFaq === i}
                   >
-                    <span className="text-sm font-semibold text-foreground pr-4">{faq.q}</span>
+                    <span className="text-sm font-semibold text-foreground pr-4">{faq?.q || ""}</span>
                     <ChevronDown className={cn(
                       "h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200",
                       openFaq === i && "rotate-180"
@@ -458,7 +458,7 @@ export default function SeoLandingPage() {
                     "overflow-hidden transition-all duration-200",
                     openFaq === i ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
                   )}>
-                    <p className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">{faq.a}</p>
+                    <p className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">{faq?.a || ""}</p>
                   </div>
                 </div>
               ))}
