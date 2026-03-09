@@ -8,7 +8,6 @@ import { lazy, Suspense } from "react";
 import PageTransition from "@/components/PageTransition";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import NotFound from "./pages/NotFound";
 
 // Client pages
 import ClientDashboard from "./pages/client/ClientDashboard";
