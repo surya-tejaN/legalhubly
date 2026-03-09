@@ -351,10 +351,10 @@ export default function SeoLandingPage() {
                       </div>
 
                       <div className="flex flex-wrap gap-1.5">
-                        {lawyer.practice_areas.slice(0, 4).map((area) => (
+                        {(lawyer.practice_areas || []).slice(0, 4).map((area) => (
                           <Badge key={area} variant="secondary" className="text-[11px] px-2 py-0.5">{area}</Badge>
                         ))}
-                        {lawyer.languages.filter((l) => l !== "English").map((lang) => (
+                        {(lawyer.languages || []).filter((l) => l !== "English").map((lang) => (
                           <Badge key={lang} className="bg-accent/10 text-accent border-accent/20 text-[11px] px-2 py-0.5">
                             <Globe className="h-2.5 w-2.5 mr-0.5" /> {lang}
                           </Badge>
