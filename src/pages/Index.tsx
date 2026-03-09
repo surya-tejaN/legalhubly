@@ -181,12 +181,31 @@ export default function Index() {
           </div>
 
           <div className="hidden lg:flex items-center gap-3">
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/client/dashboard">Sign In</Link>
-            </Button>
-            <Button variant="gold" size="sm" asChild>
-              <Link to="/client/find-lawyers">Find a Lawyer <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link>
-            </Button>
+            {user ? (
+              <>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to={dashboardPath}>Dashboard</Link>
+                </Button>
+                <Link to={dashboardPath} className="h-9 w-9 rounded-full bg-accent/15 flex items-center justify-center hover:bg-accent/25 transition-colors overflow-hidden">
+                  {profile?.profile_photo || profile?.avatar_url ? (
+                    <img src={profile.profile_photo || profile.avatar_url || ""} className="h-9 w-9 rounded-full object-cover" alt="" />
+                  ) : (
+                    <span className="text-xs font-bold text-accent">
+                      {(profile?.full_name || user.email || "U").charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </Link>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/login">Sign In</Link>
+                </Button>
+                <Button variant="nav-gold" size="sm" asChild>
+                  <Link to="/signup">Sign Up</Link>
+                </Button>
+              </>
+            )}
           </div>
 
           <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
