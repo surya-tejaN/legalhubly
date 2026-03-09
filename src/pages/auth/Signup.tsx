@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Scale, Mail, Lock, User } from "lucide-react";
+import { Scale, Mail, Lock, User, MapPin } from "lucide-react";
 
 const ROLES: { value: AppRole; label: string }[] = [
   { value: "client", label: "I need a lawyer" },
