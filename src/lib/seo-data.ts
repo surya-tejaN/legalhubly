@@ -116,7 +116,7 @@ export const SEO_PRACTICE_AREAS = [
     ],
   },
   {
-    slug: "estate-planning-lawyer",
+    slug: "estate-planning-lawyers",
     name: "Estate Planning",
     shortName: "Estate Planning",
     title: "Estate Planning Lawyer",
