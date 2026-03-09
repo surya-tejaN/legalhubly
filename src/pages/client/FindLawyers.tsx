@@ -399,6 +399,7 @@ export default function FindLawyers() {
   const [priceMax, setPriceMax] = useState(Infinity);
   const [ratingMin, setRatingMin] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  const debouncedSearch = useDebounce(searchQuery, 150);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
