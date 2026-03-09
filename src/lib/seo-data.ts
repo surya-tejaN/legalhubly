@@ -103,7 +103,7 @@ export const SEO_PRACTICE_AREAS = [
     ],
   },
   {
-    slug: "real-estate-lawyer",
+    slug: "real-estate-lawyers",
     name: "Real Estate Law",
     shortName: "Real Estate",
     title: "Real Estate Lawyer",
