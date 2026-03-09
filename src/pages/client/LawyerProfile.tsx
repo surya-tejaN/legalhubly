@@ -354,7 +354,7 @@ export default function LawyerProfile() {
                     <Scale className="h-5 w-5 text-accent" /> Practice Areas
                   </h2>
                   <div className="flex flex-wrap gap-2">
-                    {lawyer.practice_areas.map((area) => (
+                    {(lawyer.practice_areas || []).map((area) => (
                       <Badge key={area} variant="secondary" className="px-3 py-1.5 text-sm rounded-lg">
                         {area}
                       </Badge>
