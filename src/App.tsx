@@ -40,6 +40,8 @@ import PricingPlans from "./pages/shared/PricingPlans";
 
 // SEO pages
 import SeoLandingPage from "./pages/seo/SeoLandingPage";
+import CityExplorer from "./pages/CityExplorer";
+import CityDepartments from "./pages/CityDepartments";
 import SeoDirectory from "./pages/seo/SeoDirectory";
 
 const queryClient = new QueryClient({
