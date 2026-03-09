@@ -383,7 +383,7 @@ export default function SeoLandingPage() {
           ) : (
             <div className="text-center py-16 rounded-2xl border bg-card">
               <Search className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
-              <p className="text-muted-foreground mb-4">No {paData.shortName.toLowerCase()} lawyers found in {cityData.name} yet.</p>
+              <p className="text-muted-foreground mb-4">No lawyers available yet in this location. Check back soon as new attorneys join our platform.</p>
               <Button variant="gold" asChild>
                 <Link to={`/client/find-lawyers?category=${encodeURIComponent(paData.name)}`}>
                   Search Nationwide
