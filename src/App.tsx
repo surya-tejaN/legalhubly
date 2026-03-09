@@ -8,6 +8,7 @@ import { lazy, Suspense } from "react";
 import PageTransition from "@/components/PageTransition";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import AiChatPlaceholder from "@/components/AiChatPlaceholder";
 
 // Client pages
 import ClientDashboard from "./pages/client/ClientDashboard";
@@ -95,6 +96,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AnimatedRoutes />
+        <AiChatPlaceholder />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
