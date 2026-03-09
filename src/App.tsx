@@ -39,8 +39,6 @@ import SeoLandingPage from "./pages/seo/SeoLandingPage";
 import SeoDirectory from "./pages/seo/SeoDirectory";
 
 const queryClient = new QueryClient({
-
-const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5,
