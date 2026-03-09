@@ -195,6 +195,9 @@ export default function Index() {
                     </span>
                   )}
                 </Link>
+                <Button variant="ghost" size="sm" onClick={async () => { await signOut(); navigate("/"); }} className="text-muted-foreground">
+                  Logout
+                </Button>
               </>
             ) : (
               <>
