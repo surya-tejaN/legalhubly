@@ -3,10 +3,12 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { lawyerNavItems } from "@/lib/navigation";
 import { StatCard, SectionHeader, StatusBadge } from "@/components/DashboardComponents";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Users, Briefcase, DollarSign, CalendarDays, ArrowRight, TrendingUp,
   Clock, Bot, CheckCircle2, AlertTriangle, Timer, FileText, Plus,
-  Zap, Bell, ChevronRight, RefreshCw, Info,
+  Zap, Bell, ChevronRight, RefreshCw, Star, MessageSquare, User,
+  Settings, Edit, Mail, MapPin, BarChart3,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -14,45 +16,56 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import ReactMarkdown from "react-markdown";
 
+const anim = (delay: number) => ({
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0 },
+  transition: { delay, duration: 0.4 },
+});
+
 export default function LawyerDashboard() {
+  const { profile } = useAuth();
+  const firstName = profile?.full_name?.split(" ")[0] || "Counselor";
+
   const [leads, setLeads] = useState<any[]>([]);
   const [matters, setMatters] = useState<any[]>([]);
-  const [tasks, setTasks] = useState<any[]>([]);
   const [consultations, setConsultations] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]);
 
   useEffect(() => {
     const load = async () => {
-      const [leadsRes, mattersRes, tasksRes, consultsRes, paymentsRes] = await Promise.all([
-        supabase.from("leads" as any).select("*").order("created_at", { ascending: false }).limit(4),
-        supabase.from("matters" as any).select("*").order("created_at", { ascending: false }).limit(5),
-        supabase.from("tasks" as any).select("*").neq("status", "completed").order("due_date").limit(5),
-        supabase.from("consultations" as any).select("*").gte("scheduled_at", new Date().toISOString().split("T")[0]).order("scheduled_at").limit(4),
-        supabase.from("payments" as any).select("*"),
+      const [leadsRes, mattersRes, consultsRes, paymentsRes, reviewsRes] = await Promise.all([
+        supabase.from("leads").select("*").order("created_at", { ascending: false }).limit(5),
+        supabase.from("matters").select("*").order("created_at", { ascending: false }).limit(5),
+        supabase.from("consultations").select("*").gte("scheduled_at", new Date().toISOString().split("T")[0]).order("scheduled_at").limit(4),
+        supabase.from("payments").select("*"),
+        supabase.from("reviews").select("*").order("created_at", { ascending: false }).limit(5),
       ]);
       setLeads((leadsRes.data as any[]) || []);
       setMatters((mattersRes.data as any[]) || []);
-      setTasks((tasksRes.data as any[]) || []);
       setConsultations((consultsRes.data as any[]) || []);
       setPayments((paymentsRes.data as any[]) || []);
+      setReviews((reviewsRes.data as any[]) || []);
     };
     load();
   }, []);
 
   const hotLeads = leads.filter((l) => l.status === "hot").length;
   const activeMatters = matters.filter((m) => m.status === "active" || m.status === "discovery").length;
-  const pendingTasks = tasks.filter((t) => t.status !== "completed").length;
   const totalRevenue = payments.filter((p) => p.status === "paid").reduce((s, p) => s + Number(p.amount), 0);
-  const pendingPayments = payments.filter((p) => p.status === "pending" || p.status === "overdue").reduce((s, p) => s + Number(p.amount), 0);
+  const avgRating = reviews.length > 0 ? (reviews.reduce((s, r) => s + Number(r.rating), 0) / reviews.length).toFixed(1) : "—";
 
   const getLeadVariant = (s: string) => s === "hot" ? "destructive" : s === "warm" ? "warning" : s === "new" ? "info" : "default";
 
   return (
-    <DashboardLayout sidebarItems={lawyerNavItems} portalLabel="Lawyer Portal" userName="Sarah Chen" userRole="Attorney">
-      <SectionHeader
-        title="Good morning, Sarah"
-        subtitle="Here's your practice overview for today"
-        action={
+    <DashboardLayout sidebarItems={lawyerNavItems} portalLabel="Lawyer Portal" userName={profile?.full_name || "Attorney"} userRole="Attorney">
+      {/* Welcome */}
+      <motion.div {...anim(0)} className="mb-8">
+        <div className="flex items-start justify-between flex-wrap gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-serif text-foreground">Good morning, {firstName}</h1>
+            <p className="text-muted-foreground mt-1">Here's your practice overview for today.</p>
+          </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" asChild>
               <Link to="/lawyer/leads"><Bell className="mr-2 h-3.5 w-3.5" /> {hotLeads} urgent leads</Link>
@@ -61,315 +74,269 @@ export default function LawyerDashboard() {
               <Link to="/lawyer/cases"><Plus className="mr-2 h-3.5 w-3.5" /> New Matter</Link>
             </Button>
           </div>
-        }
-      />
+        </div>
+      </motion.div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
-          { icon: <Users className="h-5 w-5 text-accent" />, label: "New Leads", value: leads.length, change: `${hotLeads} hot`, changeType: "positive" as const },
-          { icon: <Briefcase className="h-5 w-5 text-accent" />, label: "Active Matters", value: activeMatters, change: `${pendingTasks} tasks due`, changeType: "neutral" as const },
-          { icon: <DollarSign className="h-5 w-5 text-accent" />, label: "Revenue MTD", value: `$${totalRevenue.toLocaleString()}`, change: `$${pendingPayments.toLocaleString()} pending`, changeType: "positive" as const },
-          { icon: <CalendarDays className="h-5 w-5 text-accent" />, label: "Today's Meetings", value: consultations.filter(c => new Date(c.scheduled_at).toDateString() === new Date().toDateString()).length || consultations.length },
+          { icon: <Users className="h-5 w-5 text-accent" />, label: "Incoming Requests", value: leads.length, change: `${hotLeads} hot`, changeType: "positive" as const },
+          { icon: <Briefcase className="h-5 w-5 text-accent" />, label: "Active Matters", value: activeMatters },
+          { icon: <DollarSign className="h-5 w-5 text-accent" />, label: "Revenue MTD", value: `$${totalRevenue.toLocaleString()}`, changeType: "positive" as const },
+          { icon: <Star className="h-5 w-5 text-accent" />, label: "Avg Rating", value: avgRating, change: `${reviews.length} reviews`, changeType: "positive" as const },
         ].map((stat, i) => (
-          <motion.div key={stat.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+          <motion.div key={stat.label} {...anim(i * 0.05)}>
             <StatCard {...stat} />
           </motion.div>
         ))}
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Left column: Leads + Matters */}
+        {/* Left column */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Lead Pipeline */}
-          <div className="rounded-xl bg-card border shadow-card">
-            <div className="flex items-center justify-between p-5 border-b">
-              <div className="flex items-center gap-2">
-                <h2 className="font-semibold text-foreground">Lead Pipeline</h2>
-                {leads.some(l => l.conflict_status === "pending") && (
-                  <span className="text-[10px] font-bold bg-warning/10 text-warning px-2 py-0.5 rounded-full flex items-center gap-1">
-                    <AlertTriangle className="h-3 w-3" /> Conflict checks pending
-                  </span>
-                )}
+          {/* Incoming Client Requests (Leads) */}
+          <motion.div {...anim(0.1)}>
+            <div className="rounded-xl bg-card border shadow-card">
+              <div className="flex items-center justify-between p-5 border-b">
+                <h2 className="font-semibold text-foreground flex items-center gap-2">
+                  <Users className="h-4 w-4 text-accent" /> Incoming Client Requests
+                </h2>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/lawyer/leads">View All <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link>
+                </Button>
               </div>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/lawyer/leads">View All <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link>
-              </Button>
-            </div>
-            <div className="divide-y">
-              {leads.slice(0, 4).map((lead) => (
-                <div key={lead.id} className="flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors">
-                  <div className="h-10 w-10 rounded-full bg-accent/10 flex items-center justify-center shrink-0 text-accent font-semibold text-sm">
-                    {lead.client_name.split(" ").map((n: string) => n[0]).join("")}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium text-sm text-foreground">{lead.client_name}</span>
-                      <StatusBadge status={lead.status} variant={getLeadVariant(lead.status)} />
-                      <span className="text-[10px] font-bold bg-accent/10 text-accent px-2 py-0.5 rounded-full">{lead.lead_score}%</span>
-                      {lead.conflict_status === "pending" && (
-                        <span className="text-[10px] font-bold bg-warning/10 text-warning px-1.5 py-0.5 rounded-full">⚠ Conflict</span>
-                      )}
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-0.5 truncate">{lead.issue}</div>
-                  </div>
-                  <Button variant="outline" size="sm" asChild>
-                    <Link to="/lawyer/leads">Review</Link>
-                  </Button>
+              {leads.length === 0 ? (
+                <div className="p-8 text-center">
+                  <Users className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
+                  <p className="text-sm text-muted-foreground">No incoming requests yet.</p>
                 </div>
-              ))}
+              ) : (
+                <div className="divide-y">
+                  {leads.slice(0, 4).map((lead) => (
+                    <div key={lead.id} className="flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors">
+                      <div className="h-10 w-10 rounded-full bg-accent/10 flex items-center justify-center shrink-0 text-accent font-semibold text-sm">
+                        {lead.client_name?.split(" ").map((n: string) => n[0]).join("") || "?"}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-medium text-sm text-foreground">{lead.client_name}</span>
+                          <StatusBadge status={lead.status} variant={getLeadVariant(lead.status)} />
+                          <span className="text-[10px] font-bold bg-accent/10 text-accent px-2 py-0.5 rounded-full">{lead.lead_score}%</span>
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-0.5 truncate">{lead.issue}</div>
+                        {lead.ai_summary && (
+                          <div className="text-xs text-muted-foreground/70 mt-0.5 truncate italic">AI: {lead.ai_summary}</div>
+                        )}
+                      </div>
+                      <Button variant="outline" size="sm" asChild>
+                        <Link to="/lawyer/leads">Respond</Link>
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
+          </motion.div>
 
-          {/* Active Matters */}
-          <div className="rounded-xl bg-card border shadow-card">
-            <div className="flex items-center justify-between p-5 border-b">
-              <h2 className="font-semibold text-foreground">Active Matters</h2>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/lawyer/cases">View All <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link>
-              </Button>
-            </div>
-            <div className="divide-y">
-              {matters.slice(0, 4).map((m: any) => (
-                <div key={m.id} className="flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-sm text-foreground">{m.title}</span>
-                      <StatusBadge
-                        status={m.status}
-                        variant={m.status === "active" ? "success" : m.status === "discovery" ? "info" : m.status === "pending" ? "warning" : "default"}
-                      />
-                    </div>
-                    <div className="text-xs text-muted-foreground mt-0.5">
-                      {m.client_name} · ${Number(m.total_billed).toLocaleString()} billed
-                      {m.next_deadline && ` · Due ${new Date(m.next_deadline).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`}
-                    </div>
-                  </div>
-                  <span className={`text-xs font-semibold ${m.priority === "high" ? "text-destructive" : m.priority === "medium" ? "text-warning" : "text-muted-foreground"}`}>
-                    {m.priority}
-                  </span>
+          {/* Consultation Bookings */}
+          <motion.div {...anim(0.15)}>
+            <div className="rounded-xl bg-card border shadow-card">
+              <div className="flex items-center justify-between p-5 border-b">
+                <h2 className="font-semibold text-foreground flex items-center gap-2">
+                  <CalendarDays className="h-4 w-4 text-accent" /> Consultation Bookings
+                </h2>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/lawyer/calendar">Full Calendar <ChevronRight className="ml-1 h-3.5 w-3.5" /></Link>
+                </Button>
+              </div>
+              {consultations.length === 0 ? (
+                <div className="p-8 text-center">
+                  <CalendarDays className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
+                  <p className="text-sm text-muted-foreground">No upcoming consultations.</p>
                 </div>
-              ))}
+              ) : (
+                <div className="p-4 space-y-3">
+                  {consultations.slice(0, 4).map((c: any) => (
+                    <div key={c.id} className="p-3 rounded-lg bg-muted/50 border border-border/50">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-accent">
+                          {new Date(c.scheduled_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+                        </span>
+                        <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
+                          c.status === "confirmed" ? "bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]" : "bg-accent/10 text-accent"
+                        }`}>{c.status}</span>
+                      </div>
+                      <div className="font-medium text-sm text-foreground mt-1">{c.client_name}</div>
+                      <div className="text-xs text-muted-foreground">{c.title} · {c.type} · {c.duration_minutes}min</div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
+          </motion.div>
 
-          {/* Tasks Due */}
-          <div className="rounded-xl bg-card border shadow-card">
-            <div className="flex items-center justify-between p-5 border-b">
-              <h2 className="font-semibold text-foreground">Upcoming Tasks</h2>
-              <span className="text-xs text-muted-foreground">{pendingTasks} pending</span>
+          {/* Messages / Responses */}
+          <motion.div {...anim(0.2)}>
+            <div className="rounded-xl bg-card border shadow-card">
+              <div className="flex items-center justify-between p-5 border-b">
+                <h2 className="font-semibold text-foreground flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4 text-accent" /> Response Messages
+                </h2>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/lawyer/messages">Open Inbox <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link>
+                </Button>
+              </div>
+              <div className="p-8 text-center">
+                <MessageSquare className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground">Client messages and your responses will appear here.</p>
+                <Button variant="outline" size="sm" className="mt-3" asChild>
+                  <Link to="/lawyer/messages">Go to Messages</Link>
+                </Button>
+              </div>
             </div>
-            <div className="divide-y">
-              {tasks.slice(0, 4).map((t: any) => (
-                <div key={t.id} className="flex items-center gap-3 p-4">
-                  <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                    t.status === "completed" ? "border-success bg-success/10" : t.status === "in_progress" ? "border-accent bg-accent/10" : "border-border"
-                  }`}>
-                    {t.status === "completed" && <CheckCircle2 className="h-3 w-3 text-success" />}
-                    {t.status === "in_progress" && <Timer className="h-3 w-3 text-accent" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <span className="text-sm text-foreground">{t.title}</span>
-                  </div>
-                  {t.due_date && (
-                    <span className={`text-xs font-medium ${new Date(t.due_date) < new Date() ? "text-destructive" : "text-muted-foreground"}`}>
-                      {new Date(t.due_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* Right column */}
         <div className="space-y-6">
-          {/* Today's Schedule */}
-          <div className="rounded-xl bg-card border shadow-card">
-            <div className="flex items-center justify-between p-5 border-b">
-              <h2 className="font-semibold text-foreground">Schedule</h2>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/lawyer/calendar">Full Calendar <ChevronRight className="ml-1 h-3.5 w-3.5" /></Link>
+          {/* Profile Card */}
+          <motion.div {...anim(0.05)}>
+            <div className="rounded-xl bg-card border shadow-card">
+              <div className="p-5 border-b">
+                <h2 className="font-semibold text-foreground flex items-center gap-2">
+                  <User className="h-4 w-4 text-accent" /> Your Profile
+                </h2>
+              </div>
+              <div className="p-4">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    {profile?.profile_photo ? (
+                      <img src={profile.profile_photo} className="h-14 w-14 rounded-full object-cover" alt="" />
+                    ) : (
+                      <User className="h-6 w-6 text-primary" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-foreground">{profile?.full_name || "Your Name"}</div>
+                    <div className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Mail className="h-3 w-3" /> {profile?.email || "Not set"}
+                    </div>
+                    {profile?.city && (
+                      <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                        <MapPin className="h-3 w-3" /> {profile.city}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+                  <Star className="h-4 w-4 text-accent fill-accent" />
+                  <span className="font-semibold text-foreground">{avgRating}</span>
+                  <span>({reviews.length} reviews)</span>
+                </div>
+                <Button variant="outline" size="sm" className="w-full" asChild>
+                  <Link to="/lawyer/settings"><Edit className="mr-2 h-3.5 w-3.5" /> Edit Profile</Link>
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Reviews */}
+          <motion.div {...anim(0.1)}>
+            <div className="rounded-xl bg-card border shadow-card">
+              <div className="p-5 border-b">
+                <h2 className="font-semibold text-foreground flex items-center gap-2">
+                  <Star className="h-4 w-4 text-accent" /> Recent Reviews
+                </h2>
+              </div>
+              {reviews.length === 0 ? (
+                <div className="p-6 text-center">
+                  <Star className="h-7 w-7 text-muted-foreground/30 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">No reviews yet.</p>
+                </div>
+              ) : (
+                <div className="p-4 space-y-3">
+                  {reviews.slice(0, 3).map((r: any) => (
+                    <div key={r.id} className="p-3 rounded-lg bg-muted/50">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium text-foreground">{r.reviewer_name}</span>
+                        <div className="flex items-center gap-0.5">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-3 w-3 ${i < Number(r.rating) ? "text-accent fill-accent" : "text-muted-foreground/20"}`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      {r.review_text && (
+                        <p className="text-xs text-muted-foreground line-clamp-2">{r.review_text}</p>
+                      )}
+                      <p className="text-[10px] text-muted-foreground/60 mt-1">
+                        {new Date(r.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </motion.div>
+
+          {/* Analytics Quick View */}
+          <motion.div {...anim(0.15)}>
+            <div className="rounded-xl bg-card border shadow-card p-5">
+              <h2 className="font-semibold text-foreground flex items-center gap-2 mb-4">
+                <BarChart3 className="h-4 w-4 text-accent" /> Analytics
+              </h2>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Revenue collected</span>
+                  <span className="text-sm font-semibold text-[hsl(var(--success))]">${totalRevenue.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Pending payments</span>
+                  <span className="text-sm font-semibold text-accent">${payments.filter(p => p.status === "pending").reduce((s, p) => s + Number(p.amount), 0).toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Active matters</span>
+                  <span className="text-sm font-semibold text-foreground">{activeMatters}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">Lead conversion</span>
+                  <span className="text-sm font-semibold text-foreground">
+                    {leads.length > 0 ? `${Math.round((leads.filter(l => l.status === "converted").length / leads.length) * 100)}%` : "—"}
+                  </span>
+                </div>
+              </div>
+              <Button variant="outline" size="sm" className="w-full mt-4" asChild>
+                <Link to="/lawyer/analytics"><BarChart3 className="mr-2 h-3.5 w-3.5" /> Full Analytics</Link>
               </Button>
             </div>
-            <div className="p-4 space-y-3">
-              {consultations.slice(0, 4).map((c: any) => (
-                <div key={c.id} className="p-3 rounded-lg bg-muted/50 border border-border/50">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-accent">
-                      {new Date(c.scheduled_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground">{c.duration_minutes} min</span>
-                  </div>
-                  <div className="font-medium text-sm text-foreground mt-1">{c.client_name}</div>
-                  <div className="text-xs text-muted-foreground">{c.title} · {c.type}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Revenue Summary */}
-          <div className="rounded-xl bg-card border shadow-card p-5">
-            <h2 className="font-semibold text-foreground mb-4">Revenue Summary</h2>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Collected</span>
-                <span className="text-sm font-semibold text-success">${totalRevenue.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Pending</span>
-                <span className="text-sm font-semibold text-warning">${payments.filter(p => p.status === "pending").reduce((s, p) => s + Number(p.amount), 0).toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Overdue</span>
-                <span className="text-sm font-semibold text-destructive">${payments.filter(p => p.status === "overdue").reduce((s, p) => s + Number(p.amount), 0).toLocaleString()}</span>
-              </div>
-              <div className="pt-3 border-t">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-semibold text-foreground">Total Outstanding</span>
-                  <span className="text-sm font-bold text-foreground">${pendingPayments.toLocaleString()}</span>
-                </div>
-              </div>
-            </div>
-          </div>
+          </motion.div>
 
           {/* AI Assistant */}
-          <div className="rounded-xl border border-accent/20 bg-accent/5 p-5">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="h-10 w-10 rounded-lg bg-accent/15 flex items-center justify-center">
-                <Bot className="h-5 w-5 text-accent" />
+          <motion.div {...anim(0.2)}>
+            <div className="rounded-xl border border-accent/20 bg-accent/5 p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="h-10 w-10 rounded-lg bg-accent/15 flex items-center justify-center">
+                  <Bot className="h-5 w-5 text-accent" />
+                </div>
+                <div>
+                  <div className="font-semibold text-sm text-foreground">AI Legal Assistant</div>
+                  <div className="text-xs text-muted-foreground">Research, draft & analyze</div>
+                </div>
               </div>
-              <div>
-                <div className="font-semibold text-sm text-foreground">AI Legal Assistant</div>
-                <div className="text-xs text-muted-foreground">Research, draft & analyze</div>
+              <div className="flex gap-2">
+                <Button variant="gold" size="sm" className="flex-1" asChild>
+                  <Link to="/lawyer/documents"><Bot className="mr-2 h-3.5 w-3.5" /> AI Studio</Link>
+                </Button>
+                <Button variant="outline" size="sm" className="flex-1" asChild>
+                  <Link to="/lawyer/messages"><Zap className="mr-2 h-3.5 w-3.5" /> Ask AI</Link>
+                </Button>
               </div>
-              <Zap className="h-4 w-4 text-accent ml-auto animate-pulse" />
             </div>
-            <div className="space-y-2 mb-4">
-              <div className="text-xs text-muted-foreground flex items-center gap-2">
-                <CheckCircle2 className="h-3 w-3 text-success" /> 3 case summaries generated today
-              </div>
-              <div className="text-xs text-muted-foreground flex items-center gap-2">
-                <FileText className="h-3 w-3 text-accent" /> 1 document draft in progress
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="gold" size="sm" className="flex-1" asChild>
-                <Link to="/lawyer/documents"><Bot className="mr-2 h-3.5 w-3.5" /> AI Studio</Link>
-              </Button>
-              <Button variant="outline" size="sm" className="flex-1" asChild>
-                <Link to="/lawyer/messages"><Zap className="mr-2 h-3.5 w-3.5" /> Ask AI</Link>
-              </Button>
-            </div>
-          </div>
-
-          {/* Follow-Up Agent */}
-          <FollowUpWidget />
+          </motion.div>
         </div>
       </div>
     </DashboardLayout>
-  );
-}
-
-function FollowUpWidget() {
-  const [output, setOutput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [action, setAction] = useState<string | null>(null);
-  const endRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (loading) endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [output, loading]);
-
-  const runFollowUp = async (act: string) => {
-    setAction(act);
-    setOutput("");
-    setLoading(true);
-
-    try {
-      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/follow-up-agent`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({ action: act }),
-      });
-
-      if (!resp.ok || !resp.body) {
-        toast({ title: "Error", description: "Follow-up agent failed.", variant: "destructive" });
-        setLoading(false);
-        return;
-      }
-
-      const reader = resp.body.getReader();
-      const decoder = new TextDecoder();
-      let textBuffer = "";
-      let content = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        textBuffer += decoder.decode(value, { stream: true });
-        let newlineIndex: number;
-        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
-          let line = textBuffer.slice(0, newlineIndex);
-          textBuffer = textBuffer.slice(newlineIndex + 1);
-          if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (!line.startsWith("data: ")) continue;
-          const jsonStr = line.slice(6).trim();
-          if (jsonStr === "[DONE]") break;
-          try {
-            const parsed = JSON.parse(jsonStr);
-            const delta = parsed.choices?.[0]?.delta?.content;
-            if (delta) { content += delta; setOutput(content); }
-          } catch {
-            textBuffer = line + "\n" + textBuffer;
-            break;
-          }
-        }
-      }
-    } catch (e) {
-      console.error(e);
-      toast({ title: "Error", description: "Connection failed.", variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="rounded-xl bg-card border shadow-card p-5">
-      <div className="flex items-center gap-2 mb-3">
-        <RefreshCw className="h-4 w-4 text-accent" />
-        <h3 className="font-semibold text-sm text-foreground">Follow-Up Agent</h3>
-        <span className="text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded-full font-medium">AI</span>
-      </div>
-      <div className="flex gap-2 mb-3">
-        <Button variant="outline" size="sm" onClick={() => runFollowUp("stale_leads")} disabled={loading}>
-          <Users className="mr-1.5 h-3.5 w-3.5" /> Stale Leads
-        </Button>
-        <Button variant="outline" size="sm" onClick={() => runFollowUp("no_show_consultations")} disabled={loading}>
-          <Clock className="mr-1.5 h-3.5 w-3.5" /> No-Shows
-        </Button>
-        <Button variant="outline" size="sm" onClick={() => runFollowUp("overdue_tasks")} disabled={loading}>
-          <AlertTriangle className="mr-1.5 h-3.5 w-3.5" /> Overdue Tasks
-        </Button>
-      </div>
-      {output ? (
-        <div className="max-h-64 overflow-y-auto rounded-lg bg-muted/30 p-3">
-          <div className="prose prose-sm max-w-none text-foreground text-xs [&_p]:mb-1.5 [&_li]:text-xs [&_h1]:text-sm [&_h2]:text-sm [&_h3]:text-xs [&_strong]:text-foreground">
-            <ReactMarkdown>{output}</ReactMarkdown>
-          </div>
-          {loading && <span className="h-2 w-2 bg-accent rounded-full animate-pulse inline-block mt-2" />}
-          <div ref={endRef} />
-        </div>
-      ) : (
-        <p className="text-xs text-muted-foreground">Run a follow-up check to get AI-generated action recommendations.</p>
-      )}
-      <div className="flex items-center gap-1 mt-2 text-[9px] text-muted-foreground">
-        <Info className="h-2.5 w-2.5" />
-        AI-generated suggestions — review before acting.
-      </div>
-    </div>
   );
 }
