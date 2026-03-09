@@ -59,7 +59,7 @@ const typeIcons: Record<string, React.ReactNode> = {
 // ─── Component ──────────────────────────────────────────────────────────────
 
 export default function SeoLandingPage() {
-  const { city: citySlug, practiceArea: paSlug } = useParams();
+  const { city: citySlug, practiceArea: paSlug } = useParams<{ city: string; practiceArea: string }>();
   const navigate = useNavigate();
   const [lawyers, setLawyers] = useState<Lawyer[]>([]);
   const [loading, setLoading] = useState(true);
