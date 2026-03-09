@@ -57,7 +57,7 @@ export default function SeoDirectory() {
               {SEO_CITIES.map((city) => (
                 <Link
                   key={city.slug}
-                  to={`/${city.slug}/${pa.slug}`}
+                  to={`/lawyers/${pa.slug}/${city.slug}`}
                   className="flex items-center gap-2.5 p-3.5 rounded-xl border bg-card hover:border-accent/30 hover:shadow-sm transition-all duration-200 group"
                 >
                   <MapPin className="h-3.5 w-3.5 text-muted-foreground group-hover:text-accent transition-colors shrink-0" />

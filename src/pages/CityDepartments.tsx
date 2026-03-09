@@ -91,7 +91,7 @@ export default function CityDepartments() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: index * 0.03 }}
               >
-                <Link to={`/${city.slug}/${area.slug}`}>
+                <Link to={`/lawyers/${area.slug}/${city.slug}`}>
                   <Card className="h-full hover:border-accent/40 hover:shadow-md transition-all duration-200 group cursor-pointer">
                     <CardContent className="p-5">
                       <div className="flex items-center gap-3 mb-2">
