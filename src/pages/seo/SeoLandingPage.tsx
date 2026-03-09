@@ -203,7 +203,7 @@ export default function SeoLandingPage() {
           <motion.div {...fadeUp}>
             <div className="flex items-center gap-2 mb-4">
               <Badge className="bg-accent/20 text-accent border-accent/30 gap-1 text-xs">
-                <MapPin className="h-3 w-3" /> {cityData.name}, {cityData.state}
+                <MapPin className="h-3 w-3" /> {locationShort}
               </Badge>
               <Badge className="bg-primary-foreground/10 text-primary-foreground/80 border-primary-foreground/20 text-xs">
                 {paData.shortName}
@@ -211,14 +211,14 @@ export default function SeoLandingPage() {
             </div>
             <h1 className="font-serif text-3xl md:text-5xl leading-tight mb-4 max-w-3xl">
               Top {paData.title}s in{" "}
-              <span className="text-accent">{cityData.name}</span>, {cityData.stateFullName}
+              <span className="text-accent">{cityData.name}</span>{cityData.stateFullName ? `, ${cityData.stateFullName}` : ""}
             </h1>
             <p className="text-primary-foreground/70 text-base md:text-lg max-w-2xl leading-relaxed mb-8">
               {paData.description} Compare {cityData.name}'s top-rated attorneys, read verified reviews, and book free consultations.
             </p>
             <div className="flex flex-wrap gap-3">
               <Button variant="gold" size="lg" asChild>
-                <Link to={`/client/find-lawyers?location=${encodeURIComponent(cityData.name + ", " + cityData.state)}&category=${encodeURIComponent(paData.name)}`}>
+                <Link to={`/client/find-lawyers?location=${encodeURIComponent(locationShort)}&category=${encodeURIComponent(paData.name)}`}>
                   Find {paData.title}s <ArrowRight className="ml-1.5 h-4 w-4" />
                 </Link>
               </Button>
