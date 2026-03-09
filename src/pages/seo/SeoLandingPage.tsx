@@ -491,7 +491,7 @@ export default function SeoLandingPage() {
           </p>
           <div className="flex justify-center gap-3">
             <Button variant="gold" size="lg" asChild>
-              <Link to={`/client/find-lawyers?location=${encodeURIComponent(cityData.name + ", " + cityData.state)}&category=${encodeURIComponent(paData.name)}`}>
+              <Link to={`/client/find-lawyers?location=${encodeURIComponent(locationShort)}&category=${encodeURIComponent(paData.name)}`}>
                 Find Lawyers <ArrowRight className="ml-1.5 h-4 w-4" />
               </Link>
             </Button>
