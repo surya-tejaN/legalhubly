@@ -394,7 +394,7 @@ export default function SeoLandingPage() {
         </section>
 
         {/* ── FAQ Section ────────────────────────────────────────────── */}
-        {paData.faqs.length > 0 && (
+        {(paData.faqs || []).length > 0 && (
           <motion.section {...fadeUp} className="mb-12" aria-labelledby="faq-heading">
             <h2 id="faq-heading" className="font-serif text-2xl text-foreground mb-6">
               Frequently Asked Questions About {paData.title}s in {cityData.name}
