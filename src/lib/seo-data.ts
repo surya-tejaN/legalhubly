@@ -25,7 +25,7 @@ export const SEO_CITIES = [
 
 export const SEO_PRACTICE_AREAS = [
   {
-    slug: "immigration-lawyer",
+    slug: "immigration-lawyers",
     name: "Immigration Law",
     shortName: "Immigration",
     title: "Immigration Lawyer",
