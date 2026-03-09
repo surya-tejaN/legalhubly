@@ -41,6 +41,8 @@ interface Lawyer {
   match_score: number;
   score_breakdown: Record<string, number>;
   match_explanation?: string;
+  is_top_match?: boolean;
+  profile_completion?: number;
 }
 
 // ─── Constants ───────────────────────────────────────────────────────────────
