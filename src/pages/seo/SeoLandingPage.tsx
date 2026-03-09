@@ -117,7 +117,7 @@ export default function SeoLandingPage() {
 
   const pageTitle = `${paData.title} in ${cityData.name}, ${cityData.state} | LegalBridge`;
   const pageDesc = `Find the best ${paData.title.toLowerCase()}s in ${cityData.name}, ${cityData.stateFullName}. Compare ratings, experience, and book free consultations on LegalBridge.`;
-  const canonicalUrl = `https://legalbridge.app/lawyers/${citySlug}/${paSlug}`;
+  const canonicalUrl = `https://legalbridge.app/${citySlug}/${paSlug}`;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -163,7 +163,7 @@ export default function SeoLandingPage() {
             <nav className="hidden sm:flex items-center gap-1 text-sm text-muted-foreground" aria-label="Breadcrumb">
               <Link to="/client/find-lawyers" className="hover:text-foreground transition-colors">Lawyers</Link>
               <ChevronRight className="h-3 w-3" />
-              <Link to={`/lawyers/${citySlug}/${paSlug}`} className="text-foreground font-medium">
+              <Link to={`/${citySlug}/${paSlug}`} className="text-foreground font-medium">
                 {cityData.name}
               </Link>
             </nav>
@@ -420,7 +420,7 @@ export default function SeoLandingPage() {
             {relatedCities.map((c) => (
               <Link
                 key={c.slug}
-                to={`/lawyers/${c.slug}/${paSlug}`}
+                to={`/${c.slug}/${paSlug}`}
                 className="flex items-center gap-3 p-4 rounded-xl border bg-card hover:border-accent/30 hover:shadow-sm transition-all duration-200 group"
               >
                 <MapPin className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors" />
@@ -443,7 +443,7 @@ export default function SeoLandingPage() {
             {relatedPAs.map((pa) => (
               <Link
                 key={pa.slug}
-                to={`/lawyers/${citySlug}/${pa.slug}`}
+                to={`/${citySlug}/${pa.slug}`}
                 className="flex items-center gap-3 p-4 rounded-xl border bg-card hover:border-accent/30 hover:shadow-sm transition-all duration-200 group"
               >
                 <Scale className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors" />
