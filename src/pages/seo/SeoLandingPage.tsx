@@ -163,7 +163,7 @@ export default function SeoLandingPage() {
             <nav className="hidden sm:flex items-center gap-1 text-sm text-muted-foreground" aria-label="Breadcrumb">
               <Link to="/client/find-lawyers" className="hover:text-foreground transition-colors">Lawyers</Link>
               <ChevronRight className="h-3 w-3" />
-              <Link to={`/lawyers/${citySlug}/${paSlug}`} className="text-foreground font-medium">
+              <Link to={`/${citySlug}/${paSlug}`} className="text-foreground font-medium">
                 {cityData.name}
               </Link>
             </nav>
