@@ -269,12 +269,12 @@ function LawyerCard({ lawyer, index, expanded, onToggle }: {
 
             {/* Practice areas */}
             <div className="flex flex-wrap gap-1.5">
-              {lawyer.practice_areas.slice(0, 4).map((pa) => (
+              {(lawyer.practice_areas || []).slice(0, 4).map((pa) => (
                 <Badge key={pa} variant="secondary" className="text-[11px] px-2.5 py-0.5 font-medium rounded-lg">
                   {pa}
                 </Badge>
               ))}
-              {lawyer.practice_areas.length > 4 && (
+              {(lawyer.practice_areas || []).length > 4 && (
                 <Badge variant="outline" className="text-[11px] px-2.5 py-0.5 rounded-lg">
                   +{lawyer.practice_areas.length - 4} more
                 </Badge>
