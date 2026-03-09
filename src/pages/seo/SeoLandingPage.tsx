@@ -190,13 +190,13 @@ export default function SeoLandingPage() {
     },
   };
 
-  const faqJsonLd = paData.faqs.length > 0 ? {
+  const faqJsonLd = (paData?.faqs || []).length > 0 ? {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: paData.faqs.map((f) => ({
+    mainEntity: (paData.faqs || []).map((f) => ({
       "@type": "Question",
-      name: f.q,
-      acceptedAnswer: { "@type": "Answer", text: f.a },
+      name: f?.q || "",
+      acceptedAnswer: { "@type": "Answer", text: f?.a || "" },
     })),
   } : undefined;
 
