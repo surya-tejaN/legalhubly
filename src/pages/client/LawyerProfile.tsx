@@ -292,7 +292,7 @@ export default function LawyerProfile() {
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-primary-foreground/70">Types</span>
                   <div className="flex gap-1.5">
-                    {lawyer.consultation_types.map((t) => (
+                    {(lawyer.consultation_types || []).map((t) => (
                       <span key={t} className="text-primary-foreground/60">{typeIcons[t]}</span>
                     ))}
                   </div>
