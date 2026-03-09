@@ -35,6 +35,24 @@ interface Lawyer {
   bio: string | null;
 }
 
+// ─── Fallback Data ──────────────────────────────────────────────────────────
+
+const DEFAULT_CITY: SeoCity = {
+  slug: "new-york",
+  name: "New York",
+  state: "NY",
+  stateFullName: "New York"
+};
+
+const DEFAULT_PRACTICE_AREA: SeoPracticeArea = {
+  slug: "general-practice",
+  name: "General Practice",
+  shortName: "General",
+  title: "Lawyer",
+  description: "Find qualified legal representation for your case. Compare experienced attorneys, read verified reviews, and book free consultations.",
+  faqs: []
+};
+
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 const fadeUp = {
@@ -44,8 +62,8 @@ const fadeUp = {
   transition: { duration: 0.5 },
 };
 
-function formatResponseTime(hours: number) {
-  if (hours < 1) return "< 1 hour";
+function formatResponseTime(hours: number | null | undefined) {
+  if (!hours || hours < 1) return "< 1 hour";
   if (hours <= 24) return `~${Math.round(hours)}hr`;
   return `${Math.round(hours / 24)} days`;
 }
@@ -65,17 +83,21 @@ export default function SeoLandingPage() {
   const [loading, setLoading] = useState(true);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
+  // Safe access to SEO data arrays with fallbacks
+  const safeCities = Array.isArray(SEO_CITIES) && SEO_CITIES.length > 0 ? SEO_CITIES : [DEFAULT_CITY];
+  const safePracticeAreas = Array.isArray(SEO_PRACTICE_AREAS) && SEO_PRACTICE_AREAS.length > 0 ? SEO_PRACTICE_AREAS : [DEFAULT_PRACTICE_AREA];
+
   const formatName = (slug?: string) => 
     (slug || "").split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
-  const cityData = SEO_CITIES.find((c) => c.slug === citySlug) || {
+  const cityData = safeCities.find((c) => c?.slug === citySlug) || {
     slug: citySlug || "city",
     name: formatName(citySlug) || "City",
     state: "",
     stateFullName: ""
   };
 
-  const paData = SEO_PRACTICE_AREAS.find((p) => p.slug === paSlug) || {
+  const paData = safePracticeAreas.find((p) => p?.slug === paSlug) || {
     slug: paSlug || "practice-area",
     name: formatName(paSlug) || "Practice Area",
     shortName: formatName(paSlug) || "Practice Area",
@@ -84,10 +106,16 @@ export default function SeoLandingPage() {
     faqs: []
   };
 
-  const locationString = cityData.stateFullName ? `${cityData.name}, ${cityData.stateFullName}` : cityData.name;
-  const locationShort = cityData.state ? `${cityData.name}, ${cityData.state}` : cityData.name;
+  const locationString = cityData?.stateFullName ? `${cityData.name}, ${cityData.stateFullName}` : (cityData?.name || "");
+  const locationShort = cityData?.state ? `${cityData.name}, ${cityData.state}` : (cityData?.name || "");
 
   useEffect(() => {
+    // Skip fetch if essential data is missing
+    if (!paData?.name) {
+      setLoading(false);
+      return;
+    }
+
     (async () => {
       setLoading(true);
       try {
@@ -98,15 +126,18 @@ export default function SeoLandingPage() {
           .order("rating", { ascending: false })
           .limit(20);
           
-        if (cityData.name && cityData.state) {
+        if (cityData?.name && cityData?.state) {
           query = query.or(`city.ilike.%${cityData.name}%,state.ilike.%${cityData.state}%`);
-        } else if (cityData.name) {
+        } else if (cityData?.name) {
           query = query.ilike("city", `%${cityData.name}%`);
         }
           
         const { data, error } = await query;
 
-        if (data && data.length > 0) {
+        if (error) {
+          console.error("Error fetching lawyers:", error);
+          setLawyers([]);
+        } else if (data && data.length > 0) {
           setLawyers(data as Lawyer[]);
         } else {
           // Fallback: show all lawyers with matching practice area
@@ -120,20 +151,21 @@ export default function SeoLandingPage() {
         }
       } catch (err) {
         console.error("Error fetching lawyers:", err);
+        setLawyers([]);
       } finally {
         setLoading(false);
       }
     })();
-  }, [cityData.name, cityData.state, paData.name]);
+  }, [cityData?.name, cityData?.state, paData?.name]);
 
-  // Related cities & practice areas for internal links
+  // Related cities & practice areas for internal links - safe filtering
   const relatedCities = useMemo(
-    () => SEO_CITIES.filter((c) => c.slug !== citySlug).slice(0, 6),
-    [citySlug]
+    () => safeCities.filter((c) => c?.slug && c.slug !== citySlug).slice(0, 6),
+    [citySlug, safeCities]
   );
   const relatedPAs = useMemo(
-    () => SEO_PRACTICE_AREAS.filter((p) => p.slug !== paSlug).slice(0, 6),
-    [paSlug]
+    () => safePracticeAreas.filter((p) => p?.slug && p.slug !== paSlug).slice(0, 6),
+    [paSlug, safePracticeAreas]
   );
 
   const pageTitle = `${paData.title} in ${locationShort} | LegalBridge`;
