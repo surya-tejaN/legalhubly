@@ -7,7 +7,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Maps legal categories to practice area keywords
+// ─── Category-to-practice mapping ────────────────────────────────────────────
 const CATEGORY_TO_PRACTICE: Record<string, string[]> = {
   "Personal Injury": ["Personal Injury", "Civil Litigation", "Medical Malpractice"],
   "Immigration": ["Immigration Law", "Asylum", "Visa Services"],
@@ -21,201 +21,244 @@ const CATEGORY_TO_PRACTICE: Record<string, string[]> = {
   "IP": ["Intellectual Property", "Patent Law", "Trademark Law"],
 };
 
-function computeMatchScore(lawyer: any, criteria: any): { score: number; breakdown: Record<string, number> } {
-  if (!lawyer) return { score: 0, breakdown: {} };
-  const breakdown: Record<string, number> = {};
+// ─── Ranking weights (total = 100) ───────────────────────────────────────────
+const WEIGHTS = {
+  years_experience: 20,
+  rating: 25,
+  review_count: 10,
+  response_time: 15,
+  profile_completion: 10,
+  location_proximity: 20,
+} as const;
+
+// ─── Safe number helper ──────────────────────────────────────────────────────
+function safeNum(val: unknown, fallback = 0): number {
+  const n = Number(val);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+// ─── Profile completeness scorer ─────────────────────────────────────────────
+function computeProfileCompletion(lawyer: any): number {
+  if (!lawyer) return 0;
+  const fields = [
+    { key: "bio", weight: 20 },
+    { key: "consultation_fee", weight: 10, check: (v: any) => v != null },
+    { key: "hourly_rate", weight: 10, check: (v: any) => v != null },
+    { key: "practice_areas", weight: 15, check: (v: any) => Array.isArray(v) && v.length > 0 },
+    { key: "languages", weight: 10, check: (v: any) => Array.isArray(v) && v.length > 0 },
+    { key: "jurisdictions", weight: 10, check: (v: any) => Array.isArray(v) && v.length > 0 },
+    { key: "specialization_tags", weight: 5, check: (v: any) => Array.isArray(v) && v.length > 0 },
+    { key: "consultation_types", weight: 10, check: (v: any) => Array.isArray(v) && v.length > 0 },
+    { key: "city", weight: 5 },
+    { key: "state", weight: 5 },
+  ];
+
+  let earned = 0;
   let total = 0;
-  let maxScore = 0;
-
-  // 1. Practice area fit (weight: 30)
-  maxScore += 30;
-  if (criteria.legal_category) {
-    const relevantAreas = CATEGORY_TO_PRACTICE[criteria.legal_category] || [criteria.legal_category];
-    const lawyerAreas = lawyer.practice_areas || [];
-    const overlap = lawyerAreas.filter((pa: string) =>
-      relevantAreas.some((ra: string) => pa.toLowerCase().includes(ra.toLowerCase()) || ra.toLowerCase().includes(pa.toLowerCase()))
-    );
-    breakdown.practice_area = Math.min(30, (overlap.length / Math.max(relevantAreas.length, 1)) * 30);
-  } else {
-    breakdown.practice_area = 15; // neutral
+  for (const f of fields) {
+    total += f.weight;
+    const val = lawyer[f.key];
+    const present = f.check ? f.check(val) : Boolean(val);
+    if (present) earned += f.weight;
   }
-  total += breakdown.practice_area;
+  return total > 0 ? Math.round((earned / total) * 100) : 0;
+}
 
-  // 2. Jurisdiction / location (weight: 20)
-  maxScore += 20;
-  if (criteria.location) {
+// ─── Main ranking algorithm ──────────────────────────────────────────────────
+function computeMatchScore(
+  lawyer: any,
+  criteria: any,
+): { score: number; breakdown: Record<string, number>; is_top_match: boolean } {
+  if (!lawyer) return { score: 0, breakdown: {}, is_top_match: false };
+
+  const breakdown: Record<string, number> = {};
+
+  // 1. Years of experience (weight: 20)
+  const years = safeNum(lawyer.experience_years);
+  if (years >= 25) breakdown.years_experience = 20;
+  else if (years >= 15) breakdown.years_experience = 16;
+  else if (years >= 10) breakdown.years_experience = 12;
+  else if (years >= 5) breakdown.years_experience = 8;
+  else if (years >= 2) breakdown.years_experience = 4;
+  else breakdown.years_experience = 1;
+
+  // 2. Rating (weight: 25)
+  const rating = safeNum(lawyer.rating);
+  if (rating >= 4.9) breakdown.rating = 25;
+  else if (rating >= 4.7) breakdown.rating = 22;
+  else if (rating >= 4.5) breakdown.rating = 18;
+  else if (rating >= 4.0) breakdown.rating = 14;
+  else if (rating >= 3.5) breakdown.rating = 8;
+  else breakdown.rating = 2;
+
+  // 3. Review count (weight: 10)
+  const reviews = safeNum(lawyer.review_count);
+  if (reviews >= 100) breakdown.review_count = 10;
+  else if (reviews >= 50) breakdown.review_count = 8;
+  else if (reviews >= 20) breakdown.review_count = 6;
+  else if (reviews >= 5) breakdown.review_count = 4;
+  else if (reviews >= 1) breakdown.review_count = 2;
+  else breakdown.review_count = 0;
+
+  // 4. Response time (weight: 15)
+  const hours = safeNum(lawyer.avg_response_hours, 48);
+  if (hours <= 1) breakdown.response_time = 15;
+  else if (hours <= 2) breakdown.response_time = 13;
+  else if (hours <= 4) breakdown.response_time = 10;
+  else if (hours <= 8) breakdown.response_time = 7;
+  else if (hours <= 24) breakdown.response_time = 4;
+  else breakdown.response_time = 1;
+
+  // 5. Profile completion (weight: 10)
+  const completionPct = computeProfileCompletion(lawyer);
+  breakdown.profile_completion = Math.round((completionPct / 100) * WEIGHTS.profile_completion);
+
+  // 6. Location proximity (weight: 20)
+  if (criteria?.location) {
     const loc = criteria.location.toLowerCase();
-    const stateMatch = lawyer.state && loc.includes(lawyer.state.toLowerCase());
     const cityMatch = lawyer.city && loc.includes(lawyer.city.toLowerCase());
-    const jurisdictionMatch = lawyer.jurisdictions?.some((j: string) => loc.includes(j.toLowerCase()));
-    breakdown.location = cityMatch ? 20 : stateMatch || jurisdictionMatch ? 14 : 5;
-  } else {
-    breakdown.location = 10;
-  }
-  total += breakdown.location;
-
-  // 3. Availability (weight: 12)
-  maxScore += 12;
-  breakdown.availability = lawyer.availability_status === "available" ? 12 : lawyer.availability_status === "busy" ? 4 : 0;
-  total += breakdown.availability;
-
-  // 4. Response speed (weight: 10)
-  maxScore += 10;
-  const hours = lawyer.avg_response_hours || 24;
-  breakdown.response_speed = hours <= 2 ? 10 : hours <= 4 ? 8 : hours <= 8 ? 6 : hours <= 24 ? 3 : 1;
-  total += breakdown.response_speed;
-
-  // 5. Consultation type match (weight: 5)
-  maxScore += 5;
-  if (criteria.consultation_preference && criteria.consultation_preference !== "any") {
-    const pref = criteria.consultation_preference.replace("_", "-");
-    breakdown.consultation_type = lawyer.consultation_types?.includes(pref) ? 5 : 1;
-  } else {
-    breakdown.consultation_type = 5;
-  }
-  total += breakdown.consultation_type;
-
-  // 6. Budget fit (weight: 8)
-  maxScore += 8;
-  if (criteria.budget_range) {
-    const budgetMatch = lawyer.budget_ranges?.some((br: string) =>
-      br.toLowerCase().includes(criteria.budget_range.toLowerCase()) || criteria.budget_range.toLowerCase().includes(br.toLowerCase())
+    const stateMatch = lawyer.state && loc.includes(lawyer.state.toLowerCase());
+    const jurisdictionMatch = (lawyer.jurisdictions || []).some(
+      (j: string) => loc.includes(j.toLowerCase()),
     );
-    breakdown.budget = budgetMatch ? 8 : lawyer.budget_ranges?.includes("contingency") ? 6 : 3;
+    breakdown.location_proximity = cityMatch ? 20 : stateMatch || jurisdictionMatch ? 14 : 5;
   } else {
-    breakdown.budget = 5;
+    breakdown.location_proximity = 10; // neutral when no location provided
   }
-  total += breakdown.budget;
 
-  // 7. Language match (weight: 5)
-  maxScore += 5;
-  if (criteria.language_preference) {
-    breakdown.language = lawyer.languages?.some((l: string) =>
-      l.toLowerCase() === criteria.language_preference.toLowerCase()
-    ) ? 5 : 1;
-  } else {
-    breakdown.language = 5;
+  // Sum
+  const total = Object.values(breakdown).reduce((s, v) => s + safeNum(v), 0);
+  const maxPossible = Object.values(WEIGHTS).reduce((s, v) => s + v, 0); // 100
+  const score = Math.min(100, Math.round((total / maxPossible) * 100));
+  const is_top_match = score >= 85;
+
+  return { score, breakdown, is_top_match };
+}
+
+// ─── Human-readable explanation ──────────────────────────────────────────────
+function buildExplanation(lawyer: any, breakdown: Record<string, number>, criteria: any): string {
+  const parts: string[] = [];
+
+  if (breakdown.years_experience >= 16)
+    parts.push(`${safeNum(lawyer.experience_years)}+ years of experience`);
+  if (breakdown.rating >= 18)
+    parts.push(`Highly rated (${safeNum(lawyer.rating).toFixed(1)}★)`);
+  if (breakdown.review_count >= 6)
+    parts.push(`${safeNum(lawyer.review_count)} verified reviews`);
+  if (breakdown.response_time >= 10)
+    parts.push(`Fast response (~${formatHours(safeNum(lawyer.avg_response_hours, 24))})`);
+  if (breakdown.profile_completion >= 8)
+    parts.push("Complete profile");
+  if (breakdown.location_proximity >= 16)
+    parts.push(`Located in ${[lawyer.city, lawyer.state].filter(Boolean).join(", ") || "your area"}`);
+  else if (breakdown.location_proximity >= 10)
+    parts.push(`Licensed in ${lawyer.state || "your region"}`);
+
+  if (criteria?.language_preference) {
+    const speaks = (lawyer.languages || []).some(
+      (l: string) => l.toLowerCase() === criteria.language_preference.toLowerCase(),
+    );
+    if (speaks) parts.push(`Speaks ${criteria.language_preference}`);
   }
-  total += breakdown.language;
 
-  // 8. Review quality (weight: 5)
-  maxScore += 5;
-  const rating = lawyer.rating || 0;
-  breakdown.reviews = rating >= 4.8 ? 5 : rating >= 4.5 ? 4 : rating >= 4.0 ? 3 : rating >= 3.5 ? 2 : 1;
-  total += breakdown.reviews;
-
-  // 9. Complexity fit (weight: 5)
-  maxScore += 5;
-  if (criteria.urgency === "emergency" || criteria.urgency === "urgent") {
-    breakdown.complexity = lawyer.complexity_levels?.includes("high-stakes") ? 5 : lawyer.complexity_levels?.includes("complex") ? 3 : 1;
-  } else {
-    breakdown.complexity = lawyer.complexity_levels?.includes("standard") ? 5 : 3;
-  }
-  total += breakdown.complexity;
-
-  const score = Math.round((total / maxScore) * 100);
-  return { score, breakdown };
+  return parts.length > 0 ? parts.join(" · ") : "General match based on profile";
 }
 
 function formatHours(hours: number): string {
-  if (hours < 1) return "< 1 hour";
-  if (hours <= 2) return `${hours}h`;
-  if (hours <= 24) return `${Math.round(hours)}h`;
+  if (hours < 1) return "< 1hr";
+  if (hours <= 2) return `${hours}hr`;
+  if (hours <= 24) return `${Math.round(hours)}hr`;
   return `${Math.round(hours / 24)}d`;
 }
 
+// ─── Server ──────────────────────────────────────────────────────────────────
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { criteria, sort_by, filters } = await req.json();
+    const body = await req.json().catch(() => ({}));
+    const criteria = body.criteria || {};
+    const sort_by = body.sort_by || "best_match";
+    const filters = body.filters || {};
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Fetch all lawyers
+    // Build query with filters
     let query = supabase.from("lawyers").select("*");
 
-    // Apply filters
-    if (filters?.practice_area && filters.practice_area !== "All") {
+    if (filters.practice_area && filters.practice_area !== "All") {
       query = query.contains("practice_areas", [filters.practice_area]);
     }
-    if (filters?.state) {
+    if (filters.state) {
       query = query.eq("state", filters.state);
     }
-    if (filters?.verified === true) {
+    if (filters.verified === true) {
       query = query.eq("verified", true);
     }
-    if (filters?.max_consultation_fee) {
+    if (filters.max_consultation_fee != null) {
       query = query.lte("consultation_fee", filters.max_consultation_fee);
     }
-    if (filters?.language) {
+    if (filters.language) {
       query = query.contains("languages", [filters.language]);
     }
-    if (filters?.availability === "available") {
+    if (filters.availability === "available") {
       query = query.eq("availability_status", "available");
     }
 
     const { data: lawyers, error } = await query;
     if (error) throw error;
 
-    // Score each lawyer and generate explanation
-    const scored = (lawyers || []).map((lawyer) => {
-      const { score, breakdown } = computeMatchScore(lawyer, criteria || {});
-      
-      // Generate human-readable explanation
-      const explanations: string[] = [];
-      if (breakdown.practice_area >= 20) explanations.push(`Strong practice area match in ${criteria?.legal_category || "your area"}`);
-      else if (breakdown.practice_area >= 10) explanations.push("Partial practice area overlap");
-      
-      if (breakdown.location >= 16) explanations.push(`Located in your area (${lawyer.city}, ${lawyer.state})`);
-      else if (breakdown.location >= 10) explanations.push(`Licensed in ${lawyer.state}`);
-      
-      if (breakdown.availability >= 10) explanations.push("Currently available for new clients");
-      if (breakdown.response_speed >= 8) explanations.push(`Fast response time (~${formatHours(lawyer.avg_response_hours)})`);
-      if (breakdown.language >= 5 && criteria?.language_preference) explanations.push(`Speaks ${criteria.language_preference}`);
-      if (breakdown.reviews >= 4) explanations.push(`Highly rated (${lawyer.rating}★ from ${lawyer.review_count} reviews)`);
-      if (breakdown.budget >= 6) explanations.push("Fee structure matches your budget");
-      
-      return { 
-        ...lawyer, 
-        match_score: score, 
+    // Empty dataset → return early with empty flag
+    if (!lawyers || lawyers.length === 0) {
+      return new Response(
+        JSON.stringify({ lawyers: [], empty: true, message: "No lawyers available yet in this location." }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
+    // Score & annotate
+    const scored = lawyers.map((lawyer) => {
+      const { score, breakdown, is_top_match } = computeMatchScore(lawyer, criteria);
+      return {
+        ...lawyer,
+        match_score: score,
         score_breakdown: breakdown,
-        match_explanation: explanations.length > 0 
-          ? explanations.join(" · ") 
-          : "General match based on availability and profile",
-        ai_disclaimer: "Match scores are AI-generated estimates based on profile data. Verify fit during consultation.",
+        is_top_match,
+        profile_completion: computeProfileCompletion(lawyer),
+        match_explanation: buildExplanation(lawyer, breakdown, criteria),
+        ai_disclaimer: "Match scores are algorithm-generated estimates. Verify fit during consultation.",
       };
     });
 
     // Sort
-    const sortKey = sort_by || "best_match";
     scored.sort((a, b) => {
-      switch (sortKey) {
+      switch (sort_by) {
         case "fastest_response":
-          return (a.avg_response_hours || 99) - (b.avg_response_hours || 99);
+          return safeNum(a.avg_response_hours, 99) - safeNum(b.avg_response_hours, 99);
         case "lowest_fee":
-          return (a.consultation_fee || 999) - (b.consultation_fee || 999);
+          return safeNum(a.consultation_fee, 999) - safeNum(b.consultation_fee, 999);
         case "highest_experience":
-          return (b.experience_years || 0) - (a.experience_years || 0);
+          return safeNum(b.experience_years) - safeNum(a.experience_years);
         case "highest_rated":
-          return (b.rating || 0) - (a.rating || 0);
+          return safeNum(b.rating) - safeNum(a.rating);
         default: // best_match
           return b.match_score - a.match_score;
       }
     });
 
-    return new Response(JSON.stringify({ lawyers: scored }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ lawyers: scored, empty: false }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
   } catch (e) {
     console.error("match-lawyers error:", e);
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error", lawyers: [], empty: true }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
 });
