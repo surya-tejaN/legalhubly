@@ -7,11 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Scale, Mail, Lock, User, MapPin } from "lucide-react";
+import { Scale, Mail, Lock, User, MapPin, Eye, EyeOff } from "lucide-react";
+import PasswordStrengthMeter, { validatePassword } from "@/components/PasswordStrengthMeter";
 
-const ROLES: { value: AppRole; label: string }[] = [
-  { value: "client", label: "I need a lawyer" },
-  { value: "lawyer", label: "I am a lawyer" },
+const ROLES: { value: AppRole; label: string; desc: string }[] = [
+  { value: "client", label: "I need a lawyer", desc: "Find and hire legal help" },
+  { value: "lawyer", label: "I am a lawyer", desc: "Manage clients and cases" },
 ];
 
 export default function Signup() {
@@ -20,6 +21,7 @@ export default function Signup() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [city, setCity] = useState("");
   const [role, setRole] = useState<AppRole>("client");
   const [submitting, setSubmitting] = useState(false);
@@ -28,13 +30,30 @@ export default function Signup() {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validatePassword(password)) {
+      toast.error("Password does not meet all requirements.");
+      return;
+    }
+
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedName = fullName.trim();
+    if (!trimmedName) {
+      toast.error("Please enter your full name.");
+      return;
+    }
+    if (trimmedName.length > 100) {
+      toast.error("Name must be less than 100 characters.");
+      return;
+    }
+
     setSubmitting(true);
     const { error } = await supabase.auth.signUp({
-      email,
+      email: trimmedEmail,
       password,
       options: {
         emailRedirectTo: window.location.origin,
-        data: { full_name: fullName, role, city },
+        data: { full_name: trimmedName, role, city: city.trim() },
       },
     });
     if (error) {
@@ -57,7 +76,7 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <Link to="/" className="inline-flex items-center gap-2 mb-6">
@@ -102,13 +121,14 @@ export default function Signup() {
                   key={r.value}
                   type="button"
                   onClick={() => setRole(r.value)}
-                  className={`rounded-xl border px-4 py-3 text-sm font-medium transition-all ${
+                  className={`rounded-xl border px-4 py-3 text-left transition-all ${
                     role === r.value
-                      ? "border-accent bg-accent/10 text-accent-foreground ring-1 ring-accent"
-                      : "border-border bg-card text-muted-foreground hover:bg-muted"
+                      ? "border-accent bg-accent/10 ring-1 ring-accent"
+                      : "border-border bg-card hover:bg-muted"
                   }`}
                 >
-                  {r.label}
+                  <div className={`text-sm font-medium ${role === r.value ? "text-accent-foreground" : "text-foreground"}`}>{r.label}</div>
+                  <div className="text-[11px] text-muted-foreground mt-0.5">{r.desc}</div>
                 </button>
               ))}
             </div>
@@ -125,6 +145,7 @@ export default function Signup() {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
+                maxLength={100}
               />
             </div>
           </div>
@@ -141,6 +162,7 @@ export default function Signup() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                maxLength={255}
               />
             </div>
           </div>
@@ -155,6 +177,7 @@ export default function Signup() {
                 className="pl-10"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
+                maxLength={100}
               />
             </div>
           </div>
@@ -165,18 +188,26 @@ export default function Signup() {
               <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 id="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
-                className="pl-10"
+                className="pl-10 pr-10"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                minLength={6}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
+            <PasswordStrengthMeter password={password} />
           </div>
 
-          <Button type="submit" className="w-full h-11" disabled={submitting}>
+          <Button type="submit" className="w-full h-11" disabled={submitting || !validatePassword(password)}>
             {submitting ? "Creating account…" : "Create account"}
           </Button>
         </form>

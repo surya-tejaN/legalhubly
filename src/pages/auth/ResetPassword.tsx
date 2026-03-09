@@ -5,32 +5,32 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Scale, Lock } from "lucide-react";
+import { Scale, Lock, Eye, EyeOff } from "lucide-react";
+import PasswordStrengthMeter, { validatePassword } from "@/components/PasswordStrengthMeter";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // Check for recovery token in URL hash
     const hash = window.location.hash;
-    if (hash.includes("type=recovery")) {
-      setReady(true);
-    }
+    if (hash.includes("type=recovery")) setReady(true);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") {
-        setReady(true);
-      }
+      if (event === "PASSWORD_RECOVERY") setReady(true);
     });
-
     return () => subscription.unsubscribe();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validatePassword(password)) {
+      toast.error("Password does not meet all requirements.");
+      return;
+    }
     setSubmitting(true);
     const { error } = await supabase.auth.updateUser({ password });
     if (error) {
@@ -74,17 +74,25 @@ export default function ResetPassword() {
               <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 id="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
-                className="pl-10"
+                className="pl-10 pr-10"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                minLength={6}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
+            <PasswordStrengthMeter password={password} />
           </div>
-          <Button type="submit" className="w-full h-11" disabled={submitting}>
+          <Button type="submit" className="w-full h-11" disabled={submitting || !validatePassword(password)}>
             {submitting ? "Updating…" : "Update password"}
           </Button>
         </form>
