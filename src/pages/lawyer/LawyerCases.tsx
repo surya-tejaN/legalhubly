@@ -4,7 +4,7 @@ import { lawyerNavItems } from "@/lib/navigation";
 import { SectionHeader, StatusBadge } from "@/components/DashboardComponents";
 import { Button } from "@/components/ui/button";
 import {
-  ArrowRight, Plus, Clock, CheckCircle2, Timer, StickyNote,
+  ArrowRight, Plus, Clock, CheckCircle2, Timer, StickyNote, Briefcase,
   ChevronDown, FileText, DollarSign, Tag, AlertTriangle,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
