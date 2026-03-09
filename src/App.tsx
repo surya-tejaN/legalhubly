@@ -31,6 +31,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 
 // Shared pages
 import CaseWorkspace from "./pages/shared/CaseWorkspace";
+import PricingPlans from "./pages/shared/PricingPlans";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +70,7 @@ const App = () => (
 
           {/* Platform Admin */}
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/pricing" element={<PricingPlans />} />
 
           <Route path="*" element={<NotFound />} />
         </Routes>
