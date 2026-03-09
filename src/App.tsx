@@ -40,6 +40,8 @@ import PricingPlans from "./pages/shared/PricingPlans";
 
 // SEO pages
 import SeoLandingPage from "./pages/seo/SeoLandingPage";
+import CityExplorer from "./pages/CityExplorer";
+import CityDepartments from "./pages/CityDepartments";
 import SeoDirectory from "./pages/seo/SeoDirectory";
 
 const queryClient = new QueryClient({
@@ -87,9 +89,13 @@ function AnimatedRoutes() {
         <Route path="/admin/dashboard" element={<PageTransition><AdminDashboard /></PageTransition>} />
         <Route path="/admin/pricing" element={<PageTransition><PricingPlans /></PageTransition>} />
 
+        {/* City Explorer */}
+        <Route path="/cities" element={<PageTransition><CityExplorer /></PageTransition>} />
+        <Route path="/cities/:citySlug" element={<PageTransition><CityDepartments /></PageTransition>} />
+        <Route path="/lawyers" element={<PageTransition><SeoDirectory /></PageTransition>} />
+
         {/* SEO Landing Pages - city/practice-area format */}
         <Route path="/:city/:practiceArea" element={<PageTransition><SeoLandingPage /></PageTransition>} />
-        <Route path="/lawyers" element={<PageTransition><SeoDirectory /></PageTransition>} />
 
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
       </Routes>
