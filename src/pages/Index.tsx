@@ -33,8 +33,10 @@ const CATEGORIES = [
 
 const POPULAR_LOCATIONS = [
   "New York, NY", "Los Angeles, CA", "Chicago, IL", "Houston, TX",
-  "Miami, FL", "Atlanta, GA", "Seattle, WA", "Phoenix, AZ",
-  "Boston, MA", "Denver, CO", "San Francisco, CA", "Dallas, TX",
+  "Phoenix, AZ", "Philadelphia, PA", "San Antonio, TX", "San Diego, CA",
+  "Dallas, TX", "San Jose, CA", "Austin, TX", "Jacksonville, FL",
+  "San Francisco, CA", "Columbus, OH", "Indianapolis, IN", "Charlotte, NC",
+  "Seattle, WA", "Denver, CO", "Boston, MA", "Atlanta, GA",
 ];
 
 const testimonials = [
