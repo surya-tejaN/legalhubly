@@ -26,6 +26,7 @@ import ClientMessages from "./pages/client/ClientMessages";
 import ClientDocuments from "./pages/client/ClientDocuments";
 import ClientPayments from "./pages/client/ClientPayments";
 import LawyerProfile from "./pages/client/LawyerProfile";
+import AccountSettings from "./pages/client/AccountSettings";
 
 // Lawyer pages
 import LawyerDashboard from "./pages/lawyer/LawyerDashboard";
@@ -83,6 +84,7 @@ function AnimatedRoutes() {
         <Route path="/client/documents" element={<ProtectedRoute allowedRoles={["client"]}><PageTransition><ClientDocuments /></PageTransition></ProtectedRoute>} />
         <Route path="/client/payments" element={<ProtectedRoute allowedRoles={["client"]}><PageTransition><ClientPayments /></PageTransition></ProtectedRoute>} />
         <Route path="/client/lawyer/:lawyerId" element={<ProtectedRoute allowedRoles={["client"]}><PageTransition><LawyerProfile /></PageTransition></ProtectedRoute>} />
+        <Route path="/client/settings" element={<ProtectedRoute allowedRoles={["client"]}><PageTransition><AccountSettings /></PageTransition></ProtectedRoute>} />
 
         {/* Lawyer Portal */}
         <Route path="/lawyer/dashboard" element={<ProtectedRoute allowedRoles={["lawyer", "firm_admin"]}><PageTransition><LawyerDashboard /></PageTransition></ProtectedRoute>} />
