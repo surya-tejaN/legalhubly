@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { useAuth, useDashboardPath } from "@/contexts/AuthContext";
 import {
   Scale, Shield, ArrowRight, Sparkles, MapPin, Briefcase,
   Menu, X, Star, Clock, BadgeCheck, Search, Locate,
@@ -82,6 +83,8 @@ type Step = "location" | "category";
 
 export default function Index() {
   const navigate = useNavigate();
+  const { user, profile } = useAuth();
+  const dashboardPath = useDashboardPath(profile?.role);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [step, setStep] = useState<Step>("location");
   const [locationInput, setLocationInput] = useState("");
@@ -178,12 +181,31 @@ export default function Index() {
           </div>
 
           <div className="hidden lg:flex items-center gap-3">
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/client/dashboard">Sign In</Link>
-            </Button>
-            <Button variant="gold" size="sm" asChild>
-              <Link to="/client/find-lawyers">Find a Lawyer <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link>
-            </Button>
+            {user ? (
+              <>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to={dashboardPath}>Dashboard</Link>
+                </Button>
+                <Link to={dashboardPath} className="h-9 w-9 rounded-full bg-accent/15 flex items-center justify-center hover:bg-accent/25 transition-colors overflow-hidden">
+                  {profile?.profile_photo || profile?.avatar_url ? (
+                    <img src={profile.profile_photo || profile.avatar_url || ""} className="h-9 w-9 rounded-full object-cover" alt="" />
+                  ) : (
+                    <span className="text-xs font-bold text-accent">
+                      {(profile?.full_name || user.email || "U").charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </Link>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/login">Sign In</Link>
+                </Button>
+                <Button variant="nav-gold" size="sm" asChild>
+                  <Link to="/signup">Sign Up</Link>
+                </Button>
+              </>
+            )}
           </div>
 
           <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
@@ -213,8 +235,20 @@ export default function Index() {
                   )
                 )}
                 <div className="pt-4 border-t mt-3 space-y-2">
-                  <Button variant="outline" className="w-full" asChild><Link to="/client/dashboard">Sign In</Link></Button>
-                  <Button variant="gold" className="w-full" asChild><Link to="/client/find-lawyers">Find a Lawyer</Link></Button>
+                  {user ? (
+                    <Button variant="gold" className="w-full" asChild>
+                      <Link to={dashboardPath} onClick={() => setMobileMenuOpen(false)}>Go to Dashboard</Link>
+                    </Button>
+                  ) : (
+                    <>
+                      <Button variant="outline" className="w-full" asChild>
+                        <Link to="/login" onClick={() => setMobileMenuOpen(false)}>Sign In</Link>
+                      </Button>
+                      <Button variant="gold" className="w-full" asChild>
+                        <Link to="/signup" onClick={() => setMobileMenuOpen(false)}>Sign Up</Link>
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </motion.div>
