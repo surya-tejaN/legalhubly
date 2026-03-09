@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Scale, MapPin, ArrowRight, Briefcase } from "lucide-react";
+import { Scale, MapPin, ArrowRight, Briefcase, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SeoHead from "@/components/SeoHead";
 import { SEO_CITIES, SEO_PRACTICE_AREAS } from "@/lib/seo-data";
@@ -12,7 +12,13 @@ const fadeUp = {
   transition: { duration: 0.5 },
 };
 
+// Safe access to data arrays with fallbacks
+const safeCities = Array.isArray(SEO_CITIES) && SEO_CITIES.length > 0 ? SEO_CITIES : [];
+const safePracticeAreas = Array.isArray(SEO_PRACTICE_AREAS) && SEO_PRACTICE_AREAS.length > 0 ? SEO_PRACTICE_AREAS : [];
+
 export default function SeoDirectory() {
+  const hasData = safeCities.length > 0 && safePracticeAreas.length > 0;
+
   return (
     <div className="min-h-screen bg-background">
       <SeoHead
@@ -47,28 +53,43 @@ export default function SeoDirectory() {
       </section>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 md:py-14">
-        {SEO_PRACTICE_AREAS.map((pa) => (
-          <motion.section key={pa.slug} {...fadeUp} className="mb-12">
-            <div className="flex items-center gap-2 mb-5">
-              <Briefcase className="h-5 w-5 text-accent" />
-              <h2 className="font-serif text-xl text-foreground">{pa.title}s</h2>
+        {!hasData ? (
+          <div className="text-center py-16">
+            <div className="h-16 w-16 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="h-7 w-7 text-muted-foreground/40" />
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-              {SEO_CITIES.map((city) => (
-                <Link
-                  key={city.slug}
-                  to={`/lawyers/${pa.slug}/${city.slug}`}
-                  className="flex items-center gap-2.5 p-3.5 rounded-xl border bg-card hover:border-accent/30 hover:shadow-sm transition-all duration-200 group"
-                >
-                  <MapPin className="h-3.5 w-3.5 text-muted-foreground group-hover:text-accent transition-colors shrink-0" />
-                  <span className="text-sm text-foreground group-hover:text-accent transition-colors truncate">
-                    {city.name}, {city.state}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </motion.section>
-        ))}
+            <h3 className="font-serif text-xl text-foreground mb-2">Directory loading</h3>
+            <p className="text-sm text-muted-foreground mb-6 max-w-sm mx-auto">
+              Practice area and city data is being loaded. Please check back soon or search directly.
+            </p>
+            <Button variant="outline" asChild>
+              <Link to="/client/find-lawyers">Search All Lawyers</Link>
+            </Button>
+          </div>
+        ) : (
+          safePracticeAreas.map((pa) => (
+            <motion.section key={pa?.slug || "unknown"} {...fadeUp} className="mb-12">
+              <div className="flex items-center gap-2 mb-5">
+                <Briefcase className="h-5 w-5 text-accent" />
+                <h2 className="font-serif text-xl text-foreground">{pa?.title || "Lawyers"}s</h2>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {safeCities.map((city) => (
+                  <Link
+                    key={city?.slug || "unknown"}
+                    to={`/lawyers/${pa?.slug || ""}/${city?.slug || ""}`}
+                    className="flex items-center gap-2.5 p-3.5 rounded-xl border bg-card hover:border-accent/30 hover:shadow-sm transition-all duration-200 group"
+                  >
+                    <MapPin className="h-3.5 w-3.5 text-muted-foreground group-hover:text-accent transition-colors shrink-0" />
+                    <span className="text-sm text-foreground group-hover:text-accent transition-colors truncate">
+                      {city?.name || "Unknown"}, {city?.state || ""}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </motion.section>
+          ))
+        )}
       </div>
 
       <footer className="border-t bg-card">
