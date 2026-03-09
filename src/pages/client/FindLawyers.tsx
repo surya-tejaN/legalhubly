@@ -353,7 +353,7 @@ function LawyerCard({ lawyer, index, expanded, onToggle }: {
                 <div>
                   <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Jurisdictions</h4>
                   <div className="flex flex-wrap gap-1.5">
-                    {lawyer.jurisdictions.map((j) => (
+                    {(lawyer.jurisdictions || []).map((j) => (
                       <Badge key={j} variant="outline" className="text-[11px] px-2.5 py-0.5 rounded-lg">{j}</Badge>
                     ))}
                   </div>
