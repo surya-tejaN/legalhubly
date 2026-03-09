@@ -364,7 +364,7 @@ export default function LawyerProfile() {
                     <div className="mt-4 pt-4 border-t">
                       <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Specializations</p>
                       <div className="flex flex-wrap gap-2">
-                        {lawyer.specialization_tags.map((tag) => (
+                        {(lawyer.specialization_tags || []).map((tag) => (
                           <Badge key={tag} className="bg-accent/10 text-accent border-accent/20 text-xs">
                             {tag}
                           </Badge>
