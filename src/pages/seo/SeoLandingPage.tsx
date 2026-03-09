@@ -158,7 +158,7 @@ export default function SeoLandingPage() {
     },
   };
 
-  const faqJsonLd = {
+  const faqJsonLd = paData.faqs.length > 0 ? {
     "@context": "https://schema.org",
     "@type": "FAQPage",
     mainEntity: paData.faqs.map((f) => ({
@@ -166,7 +166,7 @@ export default function SeoLandingPage() {
       name: f.q,
       acceptedAnswer: { "@type": "Answer", text: f.a },
     })),
-  };
+  } : undefined;
 
   return (
     <div className="min-h-screen bg-background">
