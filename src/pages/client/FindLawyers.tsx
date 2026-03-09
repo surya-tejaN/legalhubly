@@ -205,7 +205,7 @@ function LawyerCard({ lawyer, index, expanded, onToggle }: {
             {/* Name row */}
             <div>
               <div className="flex items-center gap-2.5 flex-wrap">
-                <h3 className="text-lg font-semibold text-foreground font-sans">{lawyer.name}</h3>
+                <Link to={`/client/lawyer/${lawyer.id}`} className="text-lg font-semibold text-foreground font-sans hover:text-accent transition-colors">{lawyer.name}</Link>
                 {lawyer.verified && (
                   <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-success/10 text-success px-2 py-0.5 rounded-full border border-success/20">
                     <Shield className="h-3 w-3" /> Verified
