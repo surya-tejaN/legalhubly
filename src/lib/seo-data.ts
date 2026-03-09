@@ -90,7 +90,7 @@ export const SEO_PRACTICE_AREAS = [
     ],
   },
   {
-    slug: "business-lawyer",
+    slug: "business-lawyers",
     name: "Business Law",
     shortName: "Business",
     title: "Business Lawyer",
