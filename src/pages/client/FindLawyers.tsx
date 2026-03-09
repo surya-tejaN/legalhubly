@@ -293,7 +293,7 @@ function LawyerCard({ lawyer, index, expanded, onToggle }: {
                 <span className="text-muted-foreground">({lawyer.review_count} reviews)</span>
               </div>
               <div className="hidden sm:flex items-center gap-1.5 text-muted-foreground">
-                {lawyer.consultation_types.map((ct) => {
+                {(lawyer.consultation_types || []).map((ct) => {
                   const Icon = getConsultIcon(ct);
                   return (
                     <div key={ct} className="flex items-center gap-1 text-xs">
