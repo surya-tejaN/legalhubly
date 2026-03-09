@@ -443,7 +443,7 @@ export default function SeoLandingPage() {
             {relatedCities.map((c) => (
               <Link
                 key={c.slug}
-                to={`/${c.slug}/${paSlug}`}
+                to={`/lawyers/${paSlug}/${c.slug}`}
                 className="flex items-center gap-3 p-4 rounded-xl border bg-card hover:border-accent/30 hover:shadow-sm transition-all duration-200 group"
               >
                 <MapPin className="h-4 w-4 text-muted-foreground group-hover:text-accent transition-colors" />
