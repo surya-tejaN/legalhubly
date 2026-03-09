@@ -259,9 +259,9 @@ export default function SeoLandingPage() {
             </h2>
             <div className="prose prose-sm max-w-none text-muted-foreground space-y-4">
               <p>
-                When facing {paData.shortName.toLowerCase()} legal matters in {cityData.name}, {cityData.stateFullName}, having the right attorney can make all the difference. 
+                When facing {paData.shortName.toLowerCase()} legal matters in {locationString}, having the right attorney can make all the difference. 
                 Whether you're dealing with a complex case or need straightforward legal guidance, LegalBridge connects you with verified, 
-                experienced {paData.title.toLowerCase()}s who understand {cityData.stateFullName} law.
+                experienced {paData.title.toLowerCase()}s who understand {cityData.stateFullName || cityData.name} law.
               </p>
               <p>
                 Our platform makes it easy to compare attorneys based on experience, client reviews, response times, and consultation availability. 
