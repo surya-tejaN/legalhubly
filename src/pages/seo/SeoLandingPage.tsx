@@ -539,9 +539,9 @@ export default function SeoLandingPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
             <Link to="/" className="font-serif text-foreground text-base">
-              Legal<span className="text-accent">Bridge</span>
+              Legal<span className="text-accent">hubly</span>
             </Link>
-            <p>© {new Date().getFullYear()} LegalBridge. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} Legalhubly. All rights reserved.</p>
           </div>
         </div>
       </footer>
