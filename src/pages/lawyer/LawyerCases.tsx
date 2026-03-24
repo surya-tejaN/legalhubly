@@ -25,6 +25,10 @@ export default function LawyerCases() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [newNote, setNewNote] = useState("");
+  const [showNewMatter, setShowNewMatter] = useState(false);
+  const [showNewTask, setShowNewTask] = useState<string | null>(null);
+  const [matterForm, setMatterForm] = useState({ title: "", client_name: "", legal_category: "", priority: "medium" });
+  const [taskForm, setTaskForm] = useState({ title: "", due_date: "" });
 
   useEffect(() => {
     const load = async () => {
