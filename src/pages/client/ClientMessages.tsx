@@ -128,10 +128,10 @@ export default function ClientMessages() {
   if (convos.length === 0) {
     return (
       <DashboardLayout sidebarItems={clientNavItems} portalLabel="Client Portal" userName={profile?.full_name || "User"} userRole="Client">
-        <SectionHeader title="Secure Messages" subtitle="End-to-end encrypted communication with your legal team" />
+        <SectionHeader title="Secure Messages" subtitle="Private communication with your legal team" />
         <div className="flex items-center gap-2 p-2.5 rounded-lg bg-success/5 border border-success/20 mb-4 text-xs text-muted-foreground">
           <Lock className="h-3.5 w-3.5 text-success shrink-0" />
-          Messages are encrypted and only visible to you and your assigned lawyers
+          Messages are encrypted in transit and at rest, visible only to you and your assigned lawyers
         </div>
         <div className="text-center py-20 rounded-xl bg-card border">
           <MessageSquare className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
