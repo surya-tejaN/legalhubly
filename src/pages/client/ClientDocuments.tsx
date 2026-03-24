@@ -27,16 +27,24 @@ interface Doc {
 
 const ALLOWED_TYPES = [
   "application/pdf",
+  "application/msword",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   "image/jpeg",
   "image/png",
+  "image/webp",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 ];
 
 const fileTypeStyles: Record<string, string> = {
   "application/pdf": "bg-destructive/10 text-destructive",
+  "application/msword": "bg-info/10 text-info",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "bg-info/10 text-info",
   "image/jpeg": "bg-success/10 text-success",
   "image/png": "bg-success/10 text-success",
+  "image/webp": "bg-success/10 text-success",
+  "application/vnd.ms-excel": "bg-warning/10 text-warning",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "bg-warning/10 text-warning",
 };
 
 function formatBytes(bytes: number): string {
@@ -47,9 +55,13 @@ function formatBytes(bytes: number): string {
 
 function getTypeLabel(ct: string): string {
   if (ct.includes("pdf")) return "PDF";
+  if (ct.includes("msword")) return "DOC";
   if (ct.includes("wordprocessingml")) return "DOCX";
   if (ct.includes("jpeg")) return "JPG";
   if (ct.includes("png")) return "PNG";
+  if (ct.includes("webp")) return "WEBP";
+  if (ct.includes("ms-excel")) return "XLS";
+  if (ct.includes("spreadsheetml")) return "XLSX";
   return "FILE";
 }
 
@@ -166,15 +178,15 @@ export default function ClientDocuments() {
         type="file"
         className="hidden"
         multiple
-        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp,.xls,.xlsx"
         onChange={(e) => { handleUpload(e.target.files); e.target.value = ""; }}
       />
 
       <div className="flex items-center gap-3 p-3.5 rounded-xl bg-success/5 border border-success/20 mb-6">
         <Lock className="h-5 w-5 text-success shrink-0" />
         <div>
-          <div className="text-sm font-medium text-foreground">End-to-end encrypted storage</div>
-          <div className="text-xs text-muted-foreground">Files are securely stored and only accessible by you and your assigned lawyers.</div>
+          <div className="text-sm font-medium text-foreground">Secure storage</div>
+          <div className="text-xs text-muted-foreground">Files are encrypted in transit and at rest, accessible only by you and your assigned lawyers.</div>
         </div>
       </div>
 
@@ -225,7 +237,7 @@ export default function ClientDocuments() {
           <h3 className="font-serif text-lg text-foreground mb-2">
             {documents.length === 0 ? "No documents yet" : "No files match your search"}
           </h3>
-          <p className="text-sm text-muted-foreground mb-4">Upload PDF, DOCX, JPG, or PNG files (max 25MB each)</p>
+          <p className="text-sm text-muted-foreground mb-4">Upload PDF, DOC, DOCX, JPG, PNG, WEBP, XLS, or XLSX files (max 25MB each)</p>
           {documents.length === 0 && (
             <Button variant="gold" size="sm" onClick={() => fileInputRef.current?.click()}>
               <Upload className="mr-2 h-3.5 w-3.5" /> Upload First Document
