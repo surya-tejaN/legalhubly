@@ -173,8 +173,8 @@ export default function ClientDocuments() {
       <div className="flex items-center gap-3 p-3.5 rounded-xl bg-success/5 border border-success/20 mb-6">
         <Lock className="h-5 w-5 text-success shrink-0" />
         <div>
-          <div className="text-sm font-medium text-foreground">End-to-end encrypted storage</div>
-          <div className="text-xs text-muted-foreground">Files are securely stored and only accessible by you and your assigned lawyers.</div>
+          <div className="text-sm font-medium text-foreground">Secure storage</div>
+          <div className="text-xs text-muted-foreground">Files are encrypted in transit and at rest, accessible only by you and your assigned lawyers.</div>
         </div>
       </div>
 
