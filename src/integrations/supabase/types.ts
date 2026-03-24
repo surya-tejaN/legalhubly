@@ -101,6 +101,89 @@ export type Database = {
           },
         ]
       }
+      conversation_participants: {
+        Row: {
+          conversation_id: string
+          joined_at: string | null
+          last_read_at: string | null
+          role: string | null
+          user_id: string
+        }
+        Insert: {
+          conversation_id: string
+          joined_at?: string | null
+          last_read_at?: string | null
+          role?: string | null
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          joined_at?: string | null
+          last_read_at?: string | null
+          role?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_participants_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          created_at: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      documents: {
+        Row: {
+          bucket: string
+          content_type: string
+          created_at: string | null
+          filename: string
+          id: string
+          owner_user_id: string
+          path: string
+          size_bytes: number
+        }
+        Insert: {
+          bucket?: string
+          content_type: string
+          created_at?: string | null
+          filename: string
+          id?: string
+          owner_user_id: string
+          path: string
+          size_bytes: number
+        }
+        Update: {
+          bucket?: string
+          content_type?: string
+          created_at?: string | null
+          filename?: string
+          id?: string
+          owner_user_id?: string
+          path?: string
+          size_bytes?: number
+        }
+        Relationships: []
+      }
       intake_cases: {
         Row: {
           ai_case_summary: string | null
@@ -589,6 +672,38 @@ export type Database = {
           },
         ]
       }
+      messages: {
+        Row: {
+          body: string
+          conversation_id: string
+          created_at: string | null
+          id: string
+          sender_user_id: string
+        }
+        Insert: {
+          body: string
+          conversation_id: string
+          created_at?: string | null
+          id?: string
+          sender_user_id: string
+        }
+        Update: {
+          body?: string
+          conversation_id?: string
+          created_at?: string | null
+          id?: string
+          sender_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount: number
@@ -743,19 +858,19 @@ export type Database = {
           created_at: string
           id: string
           lawyer_id: string
-          session_id: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
           id?: string
           lawyer_id: string
-          session_id: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
           id?: string
           lawyer_id?: string
-          session_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
