@@ -27,12 +27,11 @@ export default function ClientDashboard() {
   const { data: savedLawyers = [] } = useQuery({
     queryKey: ["saved-lawyers", user?.id],
     queryFn: async () => {
-      const sessionId = user?.id || localStorage.getItem("session_id") || "";
-      if (!sessionId) return [];
+      if (!user?.id) return [];
       const { data } = await supabase
         .from("saved_lawyers")
         .select("*, lawyers(*)")
-        .eq("session_id", sessionId)
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(4);
       return data || [];
