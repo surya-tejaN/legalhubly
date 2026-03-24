@@ -28,6 +28,7 @@ import ClientPayments from "./pages/client/ClientPayments";
 import LawyerProfile from "./pages/client/LawyerProfile";
 import AccountSettings from "./pages/client/AccountSettings";
 import SavedLawyers from "./pages/client/SavedLawyers";
+import ClientConsultations from "./pages/client/ClientConsultations";
 
 // Lawyer pages
 import LawyerDashboard from "./pages/lawyer/LawyerDashboard";
