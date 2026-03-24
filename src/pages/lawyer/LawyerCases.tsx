@@ -18,6 +18,7 @@ const filterTabs = ["All", "active", "discovery", "pending", "under-review", "cl
 const filterLabels: Record<string, string> = { All: "All Cases", active: "Active", discovery: "Discovery", pending: "Pending", "under-review": "Under Review", closed: "Closed" };
 
 export default function LawyerCases() {
+  const { profile } = useAuth();
   const [matters, setMatters] = useState<any[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
   const [notes, setNotes] = useState<any[]>([]);
