@@ -151,12 +151,13 @@ export default function LawyerProfile() {
 
   useEffect(() => {
     if (!lawyerId) return;
-    const sessionId = localStorage.getItem("legal_session_id") || "anon";
+    const userId = (await supabase.auth.getUser()).data.user?.id;
+    if (!userId) return;
     supabase
       .from("saved_lawyers")
       .select("id")
       .eq("lawyer_id", lawyerId)
-      .eq("session_id", sessionId)
+      .eq("user_id", userId)
       .then(({ data }) => {
         if (data && data.length > 0) setSaved(true);
       });
