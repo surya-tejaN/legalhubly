@@ -408,6 +408,7 @@ function LawyerResults({ lawyers, loading, city, practiceArea, sortBy, onSortCha
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
 export default function FindLawyers() {
+  const { user } = useAuth();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [cities, setCities] = useState<City[]>([]);
   const [practiceAreas, setPracticeAreas] = useState<PracticeArea[]>([]);
@@ -418,6 +419,29 @@ export default function FindLawyers() {
   const [loadingAreas, setLoadingAreas] = useState(true);
   const [loadingLawyers, setLoadingLawyers] = useState(false);
   const [sortBy, setSortBy] = useState<SortKey>("rating");
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+
+  // Load saved lawyer IDs
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("saved_lawyers").select("lawyer_id").eq("user_id", user.id).then(({ data }) => {
+      setSavedIds(new Set((data || []).map((d: any) => d.lawyer_id)));
+    });
+  }, [user]);
+
+  const toggleSave = async (lawyerId: string) => {
+    if (!user) { toast.error("Please sign in to save lawyers"); return; }
+    const isSaved = savedIds.has(lawyerId);
+    if (isSaved) {
+      await supabase.from("saved_lawyers").delete().eq("user_id", user.id).eq("lawyer_id", lawyerId);
+      setSavedIds((prev) => { const next = new Set(prev); next.delete(lawyerId); return next; });
+      toast.success("Removed from saved");
+    } else {
+      await supabase.from("saved_lawyers").insert({ user_id: user.id, lawyer_id: lawyerId });
+      setSavedIds((prev) => new Set(prev).add(lawyerId));
+      toast.success("Lawyer saved!");
+    }
+  };
 
   // Fetch cities
   useEffect(() => {
