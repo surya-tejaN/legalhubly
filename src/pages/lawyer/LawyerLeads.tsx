@@ -9,6 +9,7 @@ import {
   CheckCircle2, X, Zap, MapPin, DollarSign, Eye,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 
 const stages = ["All", "hot", "warm", "new", "cold"];
