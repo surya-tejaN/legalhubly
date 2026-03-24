@@ -34,6 +34,7 @@ interface SavedRow {
 
 export default function SavedLawyers() {
   const { user, profile } = useAuth();
+  const queryClient = useQueryClient();
   const [saved, setSaved] = useState<SavedRow[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -62,6 +63,7 @@ export default function SavedLawyers() {
     }
     setSaved((prev) => prev.filter((s) => s.id !== savedId));
     toast.success("Lawyer removed from saved");
+    queryClient.invalidateQueries({ queryKey: ["saved-lawyers"] });
   };
 
   return (
