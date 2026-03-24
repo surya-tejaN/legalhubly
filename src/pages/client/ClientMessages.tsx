@@ -3,7 +3,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { clientNavItems } from "@/lib/navigation";
 import { SectionHeader } from "@/components/DashboardComponents";
 import { Button } from "@/components/ui/button";
-import { Send, Bot, User, Lock, Phone, Video, Search, X, MessageSquare, Loader2 } from "lucide-react";
+import { Send, Bot, User, Lock, Phone, Video, Search, X, MessageSquare, Loader2, Paperclip } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -43,6 +43,7 @@ export default function ClientMessages() {
   const [showMobileList, setShowMobileList] = useState(true);
   const [searchConvo, setSearchConvo] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load conversations
   useEffect(() => {
@@ -113,6 +114,31 @@ export default function ClientMessages() {
     }
     setNewMessage("");
     setSending(false);
+  };
+
+  const handleFileAttach = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user || !selectedId) return;
+    if (file.size > 25 * 1024 * 1024) { toast.error("Max 25MB"); return; }
+
+    const ext = file.name.split(".").pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
+    const filePath = `${user.id}/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage.from("documents").upload(filePath, file);
+    if (uploadError) { toast.error("Upload failed"); return; }
+
+    const { data: urlData } = await supabase.storage.from("documents").createSignedUrl(filePath, 86400);
+    const url = urlData?.signedUrl || filePath;
+
+    const { error } = await supabase.from("messages").insert({
+      conversation_id: selectedId,
+      sender_user_id: user.id,
+      body: `📎 [${file.name}](${url})`,
+    });
+    if (error) toast.error("Failed to send attachment");
+    else toast.success("File sent");
+    e.target.value = "";
   };
 
   if (loading) {
@@ -250,7 +276,12 @@ export default function ClientMessages() {
 
             {/* Input */}
             <div className="p-3 border-t">
+              <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileAttach}
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp,.xls,.xlsx" />
               <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" className="shrink-0" onClick={() => fileInputRef.current?.click()}>
+                  <Paperclip className="h-4 w-4" />
+                </Button>
                 <input
                   type="text"
                   value={newMessage}

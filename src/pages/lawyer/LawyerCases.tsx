@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -18,6 +19,7 @@ const filterTabs = ["All", "active", "discovery", "pending", "under-review", "cl
 const filterLabels: Record<string, string> = { All: "All Cases", active: "Active", discovery: "Discovery", pending: "Pending", "under-review": "Under Review", closed: "Closed" };
 
 export default function LawyerCases() {
+  const { profile } = useAuth();
   const [matters, setMatters] = useState<any[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
   const [notes, setNotes] = useState<any[]>([]);
@@ -52,7 +54,7 @@ export default function LawyerCases() {
 
   const addNote = async (matterId: string) => {
     if (!newNote.trim()) return;
-    const { data } = await supabase.from("internal_notes" as any).insert({ matter_id: matterId, content: newNote, author_name: "Sarah Chen" } as any).select();
+    const { data } = await supabase.from("internal_notes" as any).insert({ matter_id: matterId, content: newNote, author_name: profile?.full_name || "Attorney" } as any).select();
     if (data) setNotes((prev) => [...(data as any[]), ...prev]);
     setNewNote("");
   };
@@ -94,7 +96,7 @@ export default function LawyerCases() {
   };
 
   return (
-    <DashboardLayout sidebarItems={lawyerNavItems} portalLabel="Lawyer Portal" userName="Sarah Chen" userRole="Attorney">
+    <DashboardLayout sidebarItems={lawyerNavItems} portalLabel="Lawyer Portal" userName={profile?.full_name || "Attorney"} userRole="Attorney">
       <SectionHeader
         title="Case Management"
         subtitle="Manage and track all your active matters"

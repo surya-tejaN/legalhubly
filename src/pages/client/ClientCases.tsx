@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Scale, ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
 import ClientSupportChat from "@/components/ClientSupportChat";
 
 const cases = [
@@ -16,9 +17,10 @@ const cases = [
 
 export default function ClientCases() {
   const navigate = useNavigate();
+  const { profile } = useAuth();
 
   return (
-    <DashboardLayout sidebarItems={clientNavItems} portalLabel="Client Portal" userName="Alex Johnson" userRole="Client">
+    <DashboardLayout sidebarItems={clientNavItems} portalLabel="Client Portal" userName={profile?.full_name || "Client"} userRole="Client">
       <SectionHeader
         title="My Cases"
         subtitle="Track and manage all your legal matters"

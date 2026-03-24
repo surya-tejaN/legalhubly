@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, ChevronLeft, ChevronRight, Clock, Video, Phone, Users, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 const typeIcon = (type: string) => {
@@ -23,6 +24,7 @@ const typeColor = (type: string) => {
 };
 
 export default function LawyerCalendar() {
+  const { profile } = useAuth();
   const [consultations, setConsultations] = useState<any[]>([]);
   const [weekOffset, setWeekOffset] = useState(0);
   const [showNewEvent, setShowNewEvent] = useState(false);
@@ -78,7 +80,7 @@ export default function LawyerCalendar() {
   const isToday = (d: Date) => d.toDateString() === new Date().toDateString();
 
   return (
-    <DashboardLayout sidebarItems={lawyerNavItems} portalLabel="Lawyer Portal" userName="Sarah Chen" userRole="Attorney">
+    <DashboardLayout sidebarItems={lawyerNavItems} portalLabel="Lawyer Portal" userName={profile?.full_name || "Attorney"} userRole="Attorney">
       <SectionHeader
         title="Calendar"
         subtitle="Manage your schedule and appointments"

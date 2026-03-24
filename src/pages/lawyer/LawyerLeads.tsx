@@ -9,12 +9,14 @@ import {
   CheckCircle2, X, Zap, MapPin, DollarSign, Eye,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 
 const stages = ["All", "hot", "warm", "new", "cold"];
 const stageLabels: Record<string, string> = { All: "All", hot: "🔥 Hot", warm: "☀️ Warm", new: "🆕 New", cold: "❄️ Cold" };
 
 export default function LawyerLeads() {
+  const { profile } = useAuth();
   const [leads, setLeads] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeStage, setActiveStage] = useState("All");
@@ -56,7 +58,7 @@ export default function LawyerLeads() {
   };
 
   return (
-    <DashboardLayout sidebarItems={lawyerNavItems} portalLabel="Lawyer Portal" userName="Sarah Chen" userRole="Attorney">
+    <DashboardLayout sidebarItems={lawyerNavItems} portalLabel="Lawyer Portal" userName={profile?.full_name || "Attorney"} userRole="Attorney">
       <SectionHeader
         title="Lead Management"
         subtitle="AI-qualified leads waiting for your review"
@@ -143,7 +145,7 @@ export default function LawyerLeads() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <Button variant="ghost" size="icon" className="h-9 w-9" asChild><a href={`tel:${lead.client_email || ''}`}><Phone className="h-4 w-4" /></a></Button>
+                    <Button variant="ghost" size="icon" className="h-9 w-9" disabled={!lead.client_email} asChild={!!lead.client_email}>{lead.client_email ? <a href={`tel:${lead.client_email}`}><Phone className="h-4 w-4" /></a> : <Phone className="h-4 w-4" />}</Button>
                     <Button variant="ghost" size="icon" className="h-9 w-9" asChild><a href={`mailto:${lead.client_email || ''}`}><Mail className="h-4 w-4" /></a></Button>
                     <div className="w-px h-6 bg-border mx-1" />
                     {lead.conflict_status === "pending" ? (
