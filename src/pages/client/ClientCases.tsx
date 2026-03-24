@@ -16,9 +16,10 @@ const cases = [
 
 export default function ClientCases() {
   const navigate = useNavigate();
+  const { profile } = useAuth();
 
   return (
-    <DashboardLayout sidebarItems={clientNavItems} portalLabel="Client Portal" userName="Alex Johnson" userRole="Client">
+    <DashboardLayout sidebarItems={clientNavItems} portalLabel="Client Portal" userName={profile?.full_name || "Client"} userRole="Client">
       <SectionHeader
         title="My Cases"
         subtitle="Track and manage all your legal matters"
