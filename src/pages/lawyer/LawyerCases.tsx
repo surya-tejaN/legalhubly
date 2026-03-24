@@ -94,7 +94,7 @@ export default function LawyerCases() {
   };
 
   return (
-    <DashboardLayout sidebarItems={lawyerNavItems} portalLabel="Lawyer Portal" userName="Sarah Chen" userRole="Attorney">
+    <DashboardLayout sidebarItems={lawyerNavItems} portalLabel="Lawyer Portal" userName={profile?.full_name || "Attorney"} userRole="Attorney">
       <SectionHeader
         title="Case Management"
         subtitle="Manage and track all your active matters"
