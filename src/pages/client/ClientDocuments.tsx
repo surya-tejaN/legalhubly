@@ -38,9 +38,13 @@ const ALLOWED_TYPES = [
 
 const fileTypeStyles: Record<string, string> = {
   "application/pdf": "bg-destructive/10 text-destructive",
+  "application/msword": "bg-info/10 text-info",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "bg-info/10 text-info",
   "image/jpeg": "bg-success/10 text-success",
   "image/png": "bg-success/10 text-success",
+  "image/webp": "bg-success/10 text-success",
+  "application/vnd.ms-excel": "bg-warning/10 text-warning",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "bg-warning/10 text-warning",
 };
 
 function formatBytes(bytes: number): string {
