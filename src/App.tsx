@@ -87,6 +87,7 @@ function AnimatedRoutes() {
         <Route path="/client/payments" element={<ProtectedRoute allowedRoles={["client"]}><PageTransition><ClientPayments /></PageTransition></ProtectedRoute>} />
         <Route path="/client/lawyer/:lawyerId" element={<ProtectedRoute allowedRoles={["client"]}><PageTransition><LawyerProfile /></PageTransition></ProtectedRoute>} />
         <Route path="/client/saved-lawyers" element={<ProtectedRoute allowedRoles={["client"]}><PageTransition><SavedLawyers /></PageTransition></ProtectedRoute>} />
+        <Route path="/client/consultations" element={<ProtectedRoute allowedRoles={["client"]}><PageTransition><ClientConsultations /></PageTransition></ProtectedRoute>} />
         <Route path="/client/settings" element={<ProtectedRoute allowedRoles={["client"]}><PageTransition><AccountSettings /></PageTransition></ProtectedRoute>} />
 
         {/* Lawyer Portal */}
