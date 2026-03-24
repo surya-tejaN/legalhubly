@@ -23,6 +23,7 @@ const typeColor = (type: string) => {
 };
 
 export default function LawyerCalendar() {
+  const { profile } = useAuth();
   const [consultations, setConsultations] = useState<any[]>([]);
   const [weekOffset, setWeekOffset] = useState(0);
   const [showNewEvent, setShowNewEvent] = useState(false);
