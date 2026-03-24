@@ -260,6 +260,36 @@ export default function LawyerCases() {
           })
         )}
       </div>
+
+      {/* New Matter Dialog */}
+      <Dialog open={showNewMatter} onOpenChange={setShowNewMatter}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Create New Matter</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div><Label>Title</Label><Input value={matterForm.title} onChange={(e) => setMatterForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. Smith Employment Dispute" /></div>
+            <div><Label>Client Name</Label><Input value={matterForm.client_name} onChange={(e) => setMatterForm(f => ({ ...f, client_name: e.target.value }))} placeholder="Client full name" /></div>
+            <div><Label>Legal Category</Label><Input value={matterForm.legal_category} onChange={(e) => setMatterForm(f => ({ ...f, legal_category: e.target.value }))} placeholder="e.g. Employment Law" /></div>
+            <div><Label>Priority</Label>
+              <select value={matterForm.priority} onChange={(e) => setMatterForm(f => ({ ...f, priority: e.target.value }))} className="w-full rounded-lg border bg-background px-3 py-2 text-sm">
+                <option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option>
+              </select>
+            </div>
+            <Button variant="gold" className="w-full" onClick={createMatter}>Create Matter</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Task Dialog */}
+      <Dialog open={!!showNewTask} onOpenChange={() => setShowNewTask(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Add Task</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div><Label>Task Title</Label><Input value={taskForm.title} onChange={(e) => setTaskForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. Draft response letter" /></div>
+            <div><Label>Due Date</Label><Input type="date" value={taskForm.due_date} onChange={(e) => setTaskForm(f => ({ ...f, due_date: e.target.value }))} /></div>
+            <Button variant="gold" className="w-full" onClick={() => showNewTask && createTask(showNewTask)}>Add Task</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
