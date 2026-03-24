@@ -82,7 +82,7 @@ export default function LawyerCalendar() {
       <SectionHeader
         title="Calendar"
         subtitle="Manage your schedule and appointments"
-        action={<Button variant="gold" size="sm"><Plus className="mr-2 h-3.5 w-3.5" /> New Event</Button>}
+        action={<Button variant="gold" size="sm" onClick={() => setShowNewEvent(true)}><Plus className="mr-2 h-3.5 w-3.5" /> New Event</Button>}
       />
 
       <div className="flex items-center justify-between mb-6">
