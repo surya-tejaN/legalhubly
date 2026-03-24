@@ -410,6 +410,7 @@ function LawyerResults({ lawyers, loading, city, practiceArea, sortBy, onSortCha
 
 export default function FindLawyers() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [cities, setCities] = useState<City[]>([]);
   const [practiceAreas, setPracticeAreas] = useState<PracticeArea[]>([]);
