@@ -5,9 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import {
   Star, MapPin, Clock, Shield, Calendar, ArrowUpDown,
   Briefcase, ChevronDown, Scale, ArrowLeft, ArrowRight,
-  User, Building2, Award, Search, Info, Video, Phone,
+  User, Building2, Award, Search, Info, Video, Phone, Heart,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
