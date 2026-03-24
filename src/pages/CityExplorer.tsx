@@ -35,9 +35,9 @@ export default function CityExplorer() {
   return (
     <div className="min-h-screen bg-background">
       <SeoHead
-        title="Find Lawyers by City | LegalBridge"
+        title="Find Lawyers by City | Legalhubly"
         description="Browse lawyers in major US cities. Find top-rated attorneys in New York, Los Angeles, Chicago, Houston, and more."
-        canonical="https://legalbridge.app/cities"
+        canonical="https://legalhubly.com/cities"
       />
 
       <nav className="sticky top-0 z-50 glass-nav border-b">
