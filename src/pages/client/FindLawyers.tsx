@@ -381,7 +381,7 @@ function LawyerResults({ lawyers, loading, city, practiceArea, sortBy, onSortCha
             </div>
           ))
         ) : sorted.length > 0 ? (
-          sorted.map((lawyer, i) => <LawyerCard key={lawyer.id} lawyer={lawyer} index={i} />)
+          sorted.map((lawyer, i) => <LawyerCard key={lawyer.id} lawyer={lawyer} index={i} savedIds={savedIds} onToggleSave={onToggleSave} />)
         ) : (
           <div className="text-center py-12">
             <div className="h-16 w-16 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
