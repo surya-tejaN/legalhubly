@@ -55,9 +55,13 @@ function formatBytes(bytes: number): string {
 
 function getTypeLabel(ct: string): string {
   if (ct.includes("pdf")) return "PDF";
+  if (ct.includes("msword")) return "DOC";
   if (ct.includes("wordprocessingml")) return "DOCX";
   if (ct.includes("jpeg")) return "JPG";
   if (ct.includes("png")) return "PNG";
+  if (ct.includes("webp")) return "WEBP";
+  if (ct.includes("ms-excel")) return "XLS";
+  if (ct.includes("spreadsheetml")) return "XLSX";
   return "FILE";
 }
 
