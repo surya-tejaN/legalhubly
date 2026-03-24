@@ -185,8 +185,8 @@ export default function SeoLandingPage() {
     url: canonicalUrl,
     provider: {
       "@type": "Organization",
-      name: "LegalBridge",
-      url: "https://legalbridge.app",
+      name: "Legalhubly",
+      url: "https://legalhubly.com",
     },
   };
 
