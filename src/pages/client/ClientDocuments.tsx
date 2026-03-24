@@ -237,7 +237,7 @@ export default function ClientDocuments() {
           <h3 className="font-serif text-lg text-foreground mb-2">
             {documents.length === 0 ? "No documents yet" : "No files match your search"}
           </h3>
-          <p className="text-sm text-muted-foreground mb-4">Upload PDF, DOCX, JPG, or PNG files (max 25MB each)</p>
+          <p className="text-sm text-muted-foreground mb-4">Upload PDF, DOC, DOCX, JPG, PNG, WEBP, XLS, or XLSX files (max 25MB each)</p>
           {documents.length === 0 && (
             <Button variant="gold" size="sm" onClick={() => fileInputRef.current?.click()}>
               <Upload className="mr-2 h-3.5 w-3.5" /> Upload First Document
