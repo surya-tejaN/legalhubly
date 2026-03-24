@@ -139,7 +139,14 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
         <p className="text-xs text-muted-foreground mb-4">
           <span className="inline-flex items-center gap-1 bg-success/10 text-success font-bold px-2 py-0.5 rounded-full text-[10px]">FREE CONSULTATION (MVP)</span>
         </p>
-        <Button variant="gold" onClick={onClose}>Done</Button>
+        <div className="flex gap-3 justify-center">
+          {conversationId && (
+            <Button variant="gold" onClick={() => { onClose(); navigate(`/client/messages?conversationId=${conversationId}`); }}>
+              Open Chat
+            </Button>
+          )}
+          <Button variant={conversationId ? "outline" : "gold"} onClick={onClose}>Done</Button>
+        </div>
       </motion.div>
     );
   }
