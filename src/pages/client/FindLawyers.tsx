@@ -298,7 +298,7 @@ function LawyerCard({ lawyer, index, savedIds, onToggleSave }: { lawyer: Lawyer;
   );
 }
 
-function LawyerResults({ lawyers, loading, city, practiceArea, sortBy, onSortChange, onBack }: {
+function LawyerResults({ lawyers, loading, city, practiceArea, sortBy, onSortChange, onBack, savedIds, onToggleSave }: {
   lawyers: Lawyer[];
   loading: boolean;
   city: City;
@@ -306,6 +306,8 @@ function LawyerResults({ lawyers, loading, city, practiceArea, sortBy, onSortCha
   sortBy: SortKey;
   onSortChange: (s: SortKey) => void;
   onBack: () => void;
+  savedIds: Set<string>;
+  onToggleSave: (id: string) => void;
 }) {
   const sorted = useMemo(() => {
     const arr = [...lawyers];
