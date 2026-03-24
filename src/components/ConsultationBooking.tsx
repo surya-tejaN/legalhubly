@@ -49,14 +49,17 @@ function getAvailableDates() {
 }
 
 export default function ConsultationBooking({ lawyerName, lawyerId, consultationTypes, consultationFee, onClose, onBooked }: BookingProps) {
+  const { user, profile } = useAuth();
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [selectedType, setSelectedType] = useState(consultationTypes[0] || "video");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState("");
-  const [clientName, setClientName] = useState("");
+  const [clientName, setClientName] = useState(profile?.full_name || "");
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [booked, setBooked] = useState(false);
+  const [conversationId, setConversationId] = useState<string | null>(null);
 
   const dates = getAvailableDates();
 
