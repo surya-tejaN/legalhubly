@@ -3,7 +3,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { clientNavItems } from "@/lib/navigation";
 import { SectionHeader } from "@/components/DashboardComponents";
 import { Button } from "@/components/ui/button";
-import { Send, Bot, User, Lock, Phone, Video, Search, X, MessageSquare, Loader2 } from "lucide-react";
+import { Send, Bot, User, Lock, Phone, Video, Search, X, MessageSquare, Loader2, Paperclip } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
