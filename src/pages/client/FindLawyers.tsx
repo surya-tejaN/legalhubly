@@ -550,6 +550,8 @@ export default function FindLawyers() {
                 sortBy={sortBy}
                 onSortChange={setSortBy}
                 onBack={() => setStep(2)}
+                savedIds={savedIds}
+                onToggleSave={toggleSave}
               />
             </motion.div>
           )}
