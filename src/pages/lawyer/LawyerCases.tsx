@@ -3,11 +3,15 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { lawyerNavItems } from "@/lib/navigation";
 import { SectionHeader, StatusBadge } from "@/components/DashboardComponents";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   ArrowRight, Plus, Clock, CheckCircle2, Timer, StickyNote, Briefcase,
-  ChevronDown, FileText, DollarSign, Tag, AlertTriangle,
+  ChevronDown, FileText, DollarSign, Tag, AlertTriangle, X, Trash2,
 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
 const filterTabs = ["All", "active", "discovery", "pending", "under-review", "closed"];
@@ -21,6 +25,10 @@ export default function LawyerCases() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [newNote, setNewNote] = useState("");
+  const [showNewMatter, setShowNewMatter] = useState(false);
+  const [showNewTask, setShowNewTask] = useState<string | null>(null);
+  const [matterForm, setMatterForm] = useState({ title: "", client_name: "", legal_category: "", priority: "medium" });
+  const [taskForm, setTaskForm] = useState({ title: "", due_date: "" });
 
   useEffect(() => {
     const load = async () => {
@@ -58,12 +66,39 @@ export default function LawyerCases() {
   const statusVariant = (s: string) =>
     s === "active" ? "success" : s === "discovery" ? "info" : s === "pending" ? "warning" : "default";
 
+  const createMatter = async () => {
+    if (!matterForm.title.trim() || !matterForm.client_name.trim()) { toast.error("Title and client name required"); return; }
+    const { data, error } = await supabase.from("matters" as any).insert(matterForm as any).select();
+    if (error) { toast.error("Failed to create matter"); return; }
+    if (data) setMatters((prev) => [...(data as any[]), ...prev]);
+    setMatterForm({ title: "", client_name: "", legal_category: "", priority: "medium" });
+    setShowNewMatter(false);
+    toast.success("Matter created");
+  };
+
+  const createTask = async (matterId: string) => {
+    if (!taskForm.title.trim()) { toast.error("Task title required"); return; }
+    const { data, error } = await supabase.from("tasks" as any).insert({ matter_id: matterId, title: taskForm.title, due_date: taskForm.due_date || null } as any).select();
+    if (error) { toast.error("Failed to create task"); return; }
+    if (data) setTasks((prev) => [...prev, ...(data as any[])]);
+    setTaskForm({ title: "", due_date: "" });
+    setShowNewTask(null);
+    toast.success("Task added");
+  };
+
+  const deleteTask = async (taskId: string) => {
+    if (!confirm("Delete this task?")) return;
+    await supabase.from("tasks" as any).delete().eq("id", taskId);
+    setTasks((prev) => prev.filter((t) => t.id !== taskId));
+    toast.success("Task deleted");
+  };
+
   return (
     <DashboardLayout sidebarItems={lawyerNavItems} portalLabel="Lawyer Portal" userName="Sarah Chen" userRole="Attorney">
       <SectionHeader
         title="Case Management"
         subtitle="Manage and track all your active matters"
-        action={<Button variant="gold" size="sm"><Plus className="mr-2 h-3.5 w-3.5" /> New Matter</Button>}
+        action={<Button variant="gold" size="sm" onClick={() => setShowNewMatter(true)}><Plus className="mr-2 h-3.5 w-3.5" /> New Matter</Button>}
       />
 
       <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
@@ -167,26 +202,30 @@ export default function LawyerCases() {
                           <div className="space-y-1.5">
                             {mt.length === 0 && <p className="text-xs text-muted-foreground">No tasks yet</p>}
                             {mt.map((t) => (
-                              <button
-                                key={t.id}
-                                onClick={() => toggleTask(t.id, t.status)}
-                                className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors text-left"
-                              >
-                                <div className={`h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                                  t.status === "completed" ? "border-success bg-success/10" : t.status === "in_progress" ? "border-accent" : "border-border"
-                                }`}>
-                                  {t.status === "completed" && <CheckCircle2 className="h-2.5 w-2.5 text-success" />}
-                                  {t.status === "in_progress" && <Timer className="h-2.5 w-2.5 text-accent" />}
-                                </div>
+                              <div key={t.id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                                <button onClick={() => toggleTask(t.id, t.status)} className="shrink-0">
+                                  <div className={`h-4 w-4 rounded-full border-2 flex items-center justify-center ${
+                                    t.status === "completed" ? "border-success bg-success/10" : t.status === "in_progress" ? "border-accent" : "border-border"
+                                  }`}>
+                                    {t.status === "completed" && <CheckCircle2 className="h-2.5 w-2.5 text-success" />}
+                                    {t.status === "in_progress" && <Timer className="h-2.5 w-2.5 text-accent" />}
+                                  </div>
+                                </button>
                                 <span className={`text-xs flex-1 ${t.status === "completed" ? "line-through text-muted-foreground" : "text-foreground"}`}>{t.title}</span>
                                 {t.due_date && (
                                   <span className={`text-[10px] ${new Date(t.due_date) < new Date() && t.status !== "completed" ? "text-destructive" : "text-muted-foreground"}`}>
                                     {new Date(t.due_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                                   </span>
                                 )}
-                              </button>
+                                <button onClick={() => deleteTask(t.id)} className="text-muted-foreground hover:text-destructive shrink-0">
+                                  <Trash2 className="h-3 w-3" />
+                                </button>
+                              </div>
                             ))}
                           </div>
+                          <Button variant="outline" size="sm" className="h-7 text-xs mt-2" onClick={() => setShowNewTask(m.id)}>
+                            <Plus className="mr-1 h-3 w-3" /> Add Task
+                          </Button>
                         </div>
 
                         {/* Notes */}
@@ -221,6 +260,36 @@ export default function LawyerCases() {
           })
         )}
       </div>
+
+      {/* New Matter Dialog */}
+      <Dialog open={showNewMatter} onOpenChange={setShowNewMatter}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Create New Matter</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div><Label>Title</Label><Input value={matterForm.title} onChange={(e) => setMatterForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. Smith Employment Dispute" /></div>
+            <div><Label>Client Name</Label><Input value={matterForm.client_name} onChange={(e) => setMatterForm(f => ({ ...f, client_name: e.target.value }))} placeholder="Client full name" /></div>
+            <div><Label>Legal Category</Label><Input value={matterForm.legal_category} onChange={(e) => setMatterForm(f => ({ ...f, legal_category: e.target.value }))} placeholder="e.g. Employment Law" /></div>
+            <div><Label>Priority</Label>
+              <select value={matterForm.priority} onChange={(e) => setMatterForm(f => ({ ...f, priority: e.target.value }))} className="w-full rounded-lg border bg-background px-3 py-2 text-sm">
+                <option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option>
+              </select>
+            </div>
+            <Button variant="gold" className="w-full" onClick={createMatter}>Create Matter</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Task Dialog */}
+      <Dialog open={!!showNewTask} onOpenChange={() => setShowNewTask(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Add Task</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div><Label>Task Title</Label><Input value={taskForm.title} onChange={(e) => setTaskForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. Draft response letter" /></div>
+            <div><Label>Due Date</Label><Input type="date" value={taskForm.due_date} onChange={(e) => setTaskForm(f => ({ ...f, due_date: e.target.value }))} /></div>
+            <Button variant="gold" className="w-full" onClick={() => showNewTask && createTask(showNewTask)}>Add Task</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }

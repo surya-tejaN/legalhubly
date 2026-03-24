@@ -5,9 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import {
   Star, MapPin, Clock, Shield, Calendar, ArrowUpDown,
   Briefcase, ChevronDown, Scale, ArrowLeft, ArrowRight,
-  User, Building2, Award, Search, Info, Video, Phone,
+  User, Building2, Award, Search, Info, Video, Phone, Heart,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -194,7 +196,8 @@ function PracticeAreaStep({ areas, loading, city, onSelect, onBack }: {
 
 // ─── Step 3: Lawyer Results ──────────────────────────────────────────────────
 
-function LawyerCard({ lawyer, index }: { lawyer: Lawyer; index: number }) {
+function LawyerCard({ lawyer, index, savedIds, onToggleSave }: { lawyer: Lawyer; index: number; savedIds: Set<string>; onToggleSave: (id: string) => void }) {
+  const isSaved = savedIds.has(lawyer.id);
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -232,6 +235,13 @@ function LawyerCard({ lawyer, index }: { lawyer: Lawyer; index: number }) {
                     <Shield className="h-3 w-3" /> Verified
                   </span>
                 )}
+                <button
+                  onClick={() => onToggleSave(lawyer.id)}
+                  className="ml-auto sm:ml-0"
+                  title={isSaved ? "Remove from saved" : "Save lawyer"}
+                >
+                  <Heart className={`h-5 w-5 transition-colors ${isSaved ? "fill-destructive text-destructive" : "text-muted-foreground hover:text-destructive"}`} />
+                </button>
               </div>
               <div className="text-sm text-muted-foreground flex items-center gap-1.5">
                 <Building2 className="h-3.5 w-3.5" /> {lawyer.firm}
@@ -288,7 +298,7 @@ function LawyerCard({ lawyer, index }: { lawyer: Lawyer; index: number }) {
   );
 }
 
-function LawyerResults({ lawyers, loading, city, practiceArea, sortBy, onSortChange, onBack }: {
+function LawyerResults({ lawyers, loading, city, practiceArea, sortBy, onSortChange, onBack, savedIds, onToggleSave }: {
   lawyers: Lawyer[];
   loading: boolean;
   city: City;
@@ -296,6 +306,8 @@ function LawyerResults({ lawyers, loading, city, practiceArea, sortBy, onSortCha
   sortBy: SortKey;
   onSortChange: (s: SortKey) => void;
   onBack: () => void;
+  savedIds: Set<string>;
+  onToggleSave: (id: string) => void;
 }) {
   const sorted = useMemo(() => {
     const arr = [...lawyers];
@@ -369,7 +381,7 @@ function LawyerResults({ lawyers, loading, city, practiceArea, sortBy, onSortCha
             </div>
           ))
         ) : sorted.length > 0 ? (
-          sorted.map((lawyer, i) => <LawyerCard key={lawyer.id} lawyer={lawyer} index={i} />)
+          sorted.map((lawyer, i) => <LawyerCard key={lawyer.id} lawyer={lawyer} index={i} savedIds={savedIds} onToggleSave={onToggleSave} />)
         ) : (
           <div className="text-center py-12">
             <div className="h-16 w-16 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
@@ -396,6 +408,7 @@ function LawyerResults({ lawyers, loading, city, practiceArea, sortBy, onSortCha
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
 export default function FindLawyers() {
+  const { user } = useAuth();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [cities, setCities] = useState<City[]>([]);
   const [practiceAreas, setPracticeAreas] = useState<PracticeArea[]>([]);
@@ -406,6 +419,29 @@ export default function FindLawyers() {
   const [loadingAreas, setLoadingAreas] = useState(true);
   const [loadingLawyers, setLoadingLawyers] = useState(false);
   const [sortBy, setSortBy] = useState<SortKey>("rating");
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+
+  // Load saved lawyer IDs
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("saved_lawyers").select("lawyer_id").eq("user_id", user.id).then(({ data }) => {
+      setSavedIds(new Set((data || []).map((d: any) => d.lawyer_id)));
+    });
+  }, [user]);
+
+  const toggleSave = async (lawyerId: string) => {
+    if (!user) { toast.error("Please sign in to save lawyers"); return; }
+    const isSaved = savedIds.has(lawyerId);
+    if (isSaved) {
+      await supabase.from("saved_lawyers").delete().eq("user_id", user.id).eq("lawyer_id", lawyerId);
+      setSavedIds((prev) => { const next = new Set(prev); next.delete(lawyerId); return next; });
+      toast.success("Removed from saved");
+    } else {
+      await supabase.from("saved_lawyers").insert({ user_id: user.id, lawyer_id: lawyerId });
+      setSavedIds((prev) => new Set(prev).add(lawyerId));
+      toast.success("Lawyer saved!");
+    }
+  };
 
   // Fetch cities
   useEffect(() => {
@@ -514,6 +550,8 @@ export default function FindLawyers() {
                 sortBy={sortBy}
                 onSortChange={setSortBy}
                 onBack={() => setStep(2)}
+                savedIds={savedIds}
+                onToggleSave={toggleSave}
               />
             </motion.div>
           )}

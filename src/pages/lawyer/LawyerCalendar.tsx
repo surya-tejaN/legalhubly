@@ -3,8 +3,12 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { lawyerNavItems } from "@/lib/navigation";
 import { SectionHeader } from "@/components/DashboardComponents";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, ChevronLeft, ChevronRight, Clock, Video, Phone, Users, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const typeIcon = (type: string) => {
   if (type === "video") return <Video className="h-3 w-3" />;
@@ -21,6 +25,20 @@ const typeColor = (type: string) => {
 export default function LawyerCalendar() {
   const [consultations, setConsultations] = useState<any[]>([]);
   const [weekOffset, setWeekOffset] = useState(0);
+  const [showNewEvent, setShowNewEvent] = useState(false);
+  const [eventForm, setEventForm] = useState({ title: "", client_name: "", scheduled_at: "", type: "video", duration_minutes: 30 });
+
+  const createEvent = async () => {
+    if (!eventForm.title.trim() || !eventForm.client_name.trim() || !eventForm.scheduled_at) {
+      toast.error("Fill in all required fields"); return;
+    }
+    const { data, error } = await supabase.from("consultations" as any).insert(eventForm as any).select();
+    if (error) { toast.error("Failed to create event"); return; }
+    if (data) setConsultations((prev) => [...prev, ...(data as any[])]);
+    setEventForm({ title: "", client_name: "", scheduled_at: "", type: "video", duration_minutes: 30 });
+    setShowNewEvent(false);
+    toast.success("Event created");
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -64,7 +82,7 @@ export default function LawyerCalendar() {
       <SectionHeader
         title="Calendar"
         subtitle="Manage your schedule and appointments"
-        action={<Button variant="gold" size="sm"><Plus className="mr-2 h-3.5 w-3.5" /> New Event</Button>}
+        action={<Button variant="gold" size="sm" onClick={() => setShowNewEvent(true)}><Plus className="mr-2 h-3.5 w-3.5" /> New Event</Button>}
       />
 
       <div className="flex items-center justify-between mb-6">
@@ -114,6 +132,26 @@ export default function LawyerCalendar() {
           ))}
         </div>
       </div>
+
+      <Dialog open={showNewEvent} onOpenChange={setShowNewEvent}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>New Calendar Event</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div><Label>Title</Label><Input value={eventForm.title} onChange={(e) => setEventForm(f => ({ ...f, title: e.target.value }))} placeholder="e.g. Initial Consultation" /></div>
+            <div><Label>Client Name</Label><Input value={eventForm.client_name} onChange={(e) => setEventForm(f => ({ ...f, client_name: e.target.value }))} placeholder="Client full name" /></div>
+            <div><Label>Date & Time</Label><Input type="datetime-local" value={eventForm.scheduled_at} onChange={(e) => setEventForm(f => ({ ...f, scheduled_at: e.target.value }))} /></div>
+            <div className="grid grid-cols-2 gap-4">
+              <div><Label>Type</Label>
+                <select value={eventForm.type} onChange={(e) => setEventForm(f => ({ ...f, type: e.target.value }))} className="w-full rounded-lg border bg-background px-3 py-2 text-sm">
+                  <option value="video">Video</option><option value="phone">Phone</option><option value="in-person">In Person</option>
+                </select>
+              </div>
+              <div><Label>Duration (min)</Label><Input type="number" value={eventForm.duration_minutes} onChange={(e) => setEventForm(f => ({ ...f, duration_minutes: parseInt(e.target.value) || 30 }))} /></div>
+            </div>
+            <Button variant="gold" className="w-full" onClick={createEvent}>Create Event</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
