@@ -66,6 +66,33 @@ export default function LawyerCases() {
   const statusVariant = (s: string) =>
     s === "active" ? "success" : s === "discovery" ? "info" : s === "pending" ? "warning" : "default";
 
+  const createMatter = async () => {
+    if (!matterForm.title.trim() || !matterForm.client_name.trim()) { toast.error("Title and client name required"); return; }
+    const { data, error } = await supabase.from("matters" as any).insert(matterForm as any).select();
+    if (error) { toast.error("Failed to create matter"); return; }
+    if (data) setMatters((prev) => [...(data as any[]), ...prev]);
+    setMatterForm({ title: "", client_name: "", legal_category: "", priority: "medium" });
+    setShowNewMatter(false);
+    toast.success("Matter created");
+  };
+
+  const createTask = async (matterId: string) => {
+    if (!taskForm.title.trim()) { toast.error("Task title required"); return; }
+    const { data, error } = await supabase.from("tasks" as any).insert({ matter_id: matterId, title: taskForm.title, due_date: taskForm.due_date || null } as any).select();
+    if (error) { toast.error("Failed to create task"); return; }
+    if (data) setTasks((prev) => [...prev, ...(data as any[])]);
+    setTaskForm({ title: "", due_date: "" });
+    setShowNewTask(null);
+    toast.success("Task added");
+  };
+
+  const deleteTask = async (taskId: string) => {
+    if (!confirm("Delete this task?")) return;
+    await supabase.from("tasks" as any).delete().eq("id", taskId);
+    setTasks((prev) => prev.filter((t) => t.id !== taskId));
+    toast.success("Task deleted");
+  };
+
   return (
     <DashboardLayout sidebarItems={lawyerNavItems} portalLabel="Lawyer Portal" userName="Sarah Chen" userRole="Attorney">
       <SectionHeader
