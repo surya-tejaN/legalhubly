@@ -196,7 +196,8 @@ function PracticeAreaStep({ areas, loading, city, onSelect, onBack }: {
 
 // ─── Step 3: Lawyer Results ──────────────────────────────────────────────────
 
-function LawyerCard({ lawyer, index }: { lawyer: Lawyer; index: number }) {
+function LawyerCard({ lawyer, index, savedIds, onToggleSave }: { lawyer: Lawyer; index: number; savedIds: Set<string>; onToggleSave: (id: string) => void }) {
+  const isSaved = savedIds.has(lawyer.id);
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -234,6 +235,13 @@ function LawyerCard({ lawyer, index }: { lawyer: Lawyer; index: number }) {
                     <Shield className="h-3 w-3" /> Verified
                   </span>
                 )}
+                <button
+                  onClick={() => onToggleSave(lawyer.id)}
+                  className="ml-auto sm:ml-0"
+                  title={isSaved ? "Remove from saved" : "Save lawyer"}
+                >
+                  <Heart className={`h-5 w-5 transition-colors ${isSaved ? "fill-destructive text-destructive" : "text-muted-foreground hover:text-destructive"}`} />
+                </button>
               </div>
               <div className="text-sm text-muted-foreground flex items-center gap-1.5">
                 <Building2 className="h-3.5 w-3.5" /> {lawyer.firm}
