@@ -15,6 +15,7 @@ const stages = ["All", "hot", "warm", "new", "cold"];
 const stageLabels: Record<string, string> = { All: "All", hot: "🔥 Hot", warm: "☀️ Warm", new: "🆕 New", cold: "❄️ Cold" };
 
 export default function LawyerLeads() {
+  const { profile } = useAuth();
   const [leads, setLeads] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeStage, setActiveStage] = useState("All");
