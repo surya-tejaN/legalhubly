@@ -3,11 +3,15 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { lawyerNavItems } from "@/lib/navigation";
 import { SectionHeader, StatusBadge } from "@/components/DashboardComponents";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   ArrowRight, Plus, Clock, CheckCircle2, Timer, StickyNote, Briefcase,
-  ChevronDown, FileText, DollarSign, Tag, AlertTriangle,
+  ChevronDown, FileText, DollarSign, Tag, AlertTriangle, X, Trash2,
 } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
 const filterTabs = ["All", "active", "discovery", "pending", "under-review", "closed"];
