@@ -202,26 +202,30 @@ export default function LawyerCases() {
                           <div className="space-y-1.5">
                             {mt.length === 0 && <p className="text-xs text-muted-foreground">No tasks yet</p>}
                             {mt.map((t) => (
-                              <button
-                                key={t.id}
-                                onClick={() => toggleTask(t.id, t.status)}
-                                className="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors text-left"
-                              >
-                                <div className={`h-4 w-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                                  t.status === "completed" ? "border-success bg-success/10" : t.status === "in_progress" ? "border-accent" : "border-border"
-                                }`}>
-                                  {t.status === "completed" && <CheckCircle2 className="h-2.5 w-2.5 text-success" />}
-                                  {t.status === "in_progress" && <Timer className="h-2.5 w-2.5 text-accent" />}
-                                </div>
+                              <div key={t.id} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                                <button onClick={() => toggleTask(t.id, t.status)} className="shrink-0">
+                                  <div className={`h-4 w-4 rounded-full border-2 flex items-center justify-center ${
+                                    t.status === "completed" ? "border-success bg-success/10" : t.status === "in_progress" ? "border-accent" : "border-border"
+                                  }`}>
+                                    {t.status === "completed" && <CheckCircle2 className="h-2.5 w-2.5 text-success" />}
+                                    {t.status === "in_progress" && <Timer className="h-2.5 w-2.5 text-accent" />}
+                                  </div>
+                                </button>
                                 <span className={`text-xs flex-1 ${t.status === "completed" ? "line-through text-muted-foreground" : "text-foreground"}`}>{t.title}</span>
                                 {t.due_date && (
                                   <span className={`text-[10px] ${new Date(t.due_date) < new Date() && t.status !== "completed" ? "text-destructive" : "text-muted-foreground"}`}>
                                     {new Date(t.due_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                                   </span>
                                 )}
-                              </button>
+                                <button onClick={() => deleteTask(t.id)} className="text-muted-foreground hover:text-destructive shrink-0">
+                                  <Trash2 className="h-3 w-3" />
+                                </button>
+                              </div>
                             ))}
                           </div>
+                          <Button variant="outline" size="sm" className="h-7 text-xs mt-2" onClick={() => setShowNewTask(m.id)}>
+                            <Plus className="mr-1 h-3 w-3" /> Add Task
+                          </Button>
                         </div>
 
                         {/* Notes */}
