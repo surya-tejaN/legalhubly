@@ -276,7 +276,12 @@ export default function ClientMessages() {
 
             {/* Input */}
             <div className="p-3 border-t">
+              <input ref={fileInputRef} type="file" className="hidden" onChange={handleFileAttach}
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp,.xls,.xlsx" />
               <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" className="shrink-0" onClick={() => fileInputRef.current?.click()}>
+                  <Paperclip className="h-4 w-4" />
+                </Button>
                 <input
                   type="text"
                   value={newMessage}
