@@ -76,6 +76,7 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
       if (period === "AM" && h === 12) h = 0;
       scheduledAt.setHours(h, parseInt(minutes), 0, 0);
 
+      // Create consultation
       const { error } = await supabase.from("consultations").insert({
         lawyer_id: lawyerId,
         client_name: clientName.trim(),
@@ -86,8 +87,31 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
         status: "scheduled",
         duration_minutes: 30,
       });
-
       if (error) throw error;
+
+      // Create conversation + add participants if user is logged in
+      let newConvoId: string | null = null;
+      if (user) {
+        const { data: convo, error: convoErr } = await supabase
+          .from("conversations")
+          .insert({})
+          .select("id")
+          .single();
+        if (!convoErr && convo) {
+          newConvoId = convo.id;
+          await supabase.from("conversation_participants").insert([
+            { conversation_id: convo.id, user_id: user.id },
+          ]);
+          // Send initial message
+          await supabase.from("messages").insert({
+            conversation_id: convo.id,
+            sender_user_id: user.id,
+            body: `📅 Consultation booked: ${typeLabels[selectedType]} with ${lawyerName} on ${scheduledAt.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })} at ${selectedTime}.`,
+          });
+        }
+      }
+
+      setConversationId(newConvoId);
       setBooked(true);
       toast.success("Consultation booked successfully!");
       onBooked?.();
