@@ -168,9 +168,9 @@ export default function SeoLandingPage() {
     [paSlug, safePracticeAreas]
   );
 
-  const pageTitle = `${paData.title} in ${locationShort} | LegalBridge`;
-  const pageDesc = `Find the best ${paData.title.toLowerCase()}s in ${locationString}. Compare ratings, experience, and book free consultations on LegalBridge.`;
-  const canonicalUrl = `https://legalbridge.app/lawyers/${paSlug}/${citySlug}`;
+  const pageTitle = `${paData.title} in ${locationShort} | Legalhubly`;
+  const pageDesc = `Find the best ${paData.title.toLowerCase()}s in ${locationString}. Compare ratings, experience, and book free consultations on Legalhubly.`;
+  const canonicalUrl = `https://legalhubly.com/lawyers/${paSlug}/${citySlug}`;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -185,8 +185,8 @@ export default function SeoLandingPage() {
     url: canonicalUrl,
     provider: {
       "@type": "Organization",
-      name: "LegalBridge",
-      url: "https://legalbridge.app",
+      name: "Legalhubly",
+      url: "https://legalhubly.com",
     },
   };
 
@@ -210,7 +210,7 @@ export default function SeoLandingPage() {
           <div className="flex items-center gap-4">
             <Link to="/" className="flex items-center gap-2">
               <Scale className="h-5 w-5 text-accent" />
-              <span className="font-serif text-lg text-foreground">LegalBridge</span>
+              <span className="font-serif text-lg text-foreground">Legalhubly</span>
             </Link>
             <ChevronRight className="h-4 w-4 text-muted-foreground hidden sm:block" />
             <nav className="hidden sm:flex items-center gap-1 text-sm text-muted-foreground" aria-label="Breadcrumb">
@@ -292,7 +292,7 @@ export default function SeoLandingPage() {
             <div className="prose prose-sm max-w-none text-muted-foreground space-y-4">
               <p>
                 When facing {paData.shortName.toLowerCase()} legal matters in {locationString}, having the right attorney can make all the difference. 
-                Whether you're dealing with a complex case or need straightforward legal guidance, LegalBridge connects you with verified, 
+                Whether you're dealing with a complex case or need straightforward legal guidance, Legalhubly connects you with verified, 
                 experienced {paData.title.toLowerCase()}s who understand {cityData.stateFullName || cityData.name} law.
               </p>
               <p>
@@ -539,9 +539,9 @@ export default function SeoLandingPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
             <Link to="/" className="font-serif text-foreground text-base">
-              Legal<span className="text-accent">Bridge</span>
+              Legal<span className="text-accent">hubly</span>
             </Link>
-            <p>© {new Date().getFullYear()} LegalBridge. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} Legalhubly. All rights reserved.</p>
           </div>
         </div>
       </footer>

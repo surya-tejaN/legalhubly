@@ -22,16 +22,16 @@ export default function SeoDirectory() {
   return (
     <div className="min-h-screen bg-background">
       <SeoHead
-        title="Find Lawyers by City & Practice Area | LegalBridge"
+        title="Find Lawyers by City & Practice Area | Legalhubly"
         description="Browse lawyers by city and practice area. Find immigration lawyers, divorce lawyers, criminal defense attorneys, and more in cities across the US."
-        canonical="https://legalbridge.app/lawyers"
+        canonical="https://legalhubly.com/lawyers"
       />
 
       <nav className="sticky top-0 z-50 glass-nav border-b">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <Scale className="h-5 w-5 text-accent" />
-            <span className="font-serif text-lg text-foreground">LegalBridge</span>
+            <span className="font-serif text-lg text-foreground">Legalhubly</span>
           </Link>
           <Button variant="gold" size="sm" asChild>
             <Link to="/client/find-lawyers">Search Lawyers <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link>
@@ -94,7 +94,7 @@ export default function SeoDirectory() {
 
       <footer className="border-t bg-card">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} LegalBridge. All rights reserved.
+          © {new Date().getFullYear()} Legalhubly. All rights reserved.
         </div>
       </footer>
     </div>

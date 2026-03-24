@@ -24,7 +24,7 @@ export default function AiChatPlaceholder() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-primary-foreground">AI Legal Assistant</p>
-                  <p className="text-xs text-primary-foreground/60">Powered by LegalBridge</p>
+                  <p className="text-xs text-primary-foreground/60">Powered by Legalhubly</p>
                 </div>
               </div>
             </div>

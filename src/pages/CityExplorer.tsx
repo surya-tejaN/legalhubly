@@ -35,16 +35,16 @@ export default function CityExplorer() {
   return (
     <div className="min-h-screen bg-background">
       <SeoHead
-        title="Find Lawyers by City | LegalBridge"
+        title="Find Lawyers by City | Legalhubly"
         description="Browse lawyers in major US cities. Find top-rated attorneys in New York, Los Angeles, Chicago, Houston, and more."
-        canonical="https://legalbridge.app/cities"
+        canonical="https://legalhubly.com/cities"
       />
 
       <nav className="sticky top-0 z-50 glass-nav border-b">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <Scale className="h-5 w-5 text-accent" />
-            <span className="font-serif text-lg text-foreground">LegalBridge</span>
+            <span className="font-serif text-lg text-foreground">Legalhubly</span>
           </Link>
           <Button variant="gold" size="sm" asChild>
             <Link to="/client/find-lawyers">Search All <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link>
@@ -129,7 +129,7 @@ export default function CityExplorer() {
 
       <footer className="border-t bg-card">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} LegalBridge. All rights reserved.
+          © {new Date().getFullYear()} Legalhubly. All rights reserved.
         </div>
       </footer>
     </div>

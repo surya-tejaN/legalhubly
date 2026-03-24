@@ -10,7 +10,7 @@ type Msg = { role: "user" | "assistant"; content: string };
 export default function ClientSupportChat() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([
-    { role: "assistant", content: "Hi! I'm your LegalBridge support assistant. I can help you understand how the platform works, explain legal processes, and guide you through your journey.\n\nWhat can I help you with?" },
+    { role: "assistant", content: "Hi! I'm your Legalhubly support assistant. I can help you understand how the platform works, explain legal processes, and guide you through your journey.\n\nWhat can I help you with?" },
   ]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);

@@ -472,7 +472,7 @@ export default function FindLawyers() {
           </Button>
           <Link to="/" className="flex items-center gap-2">
             <Scale className="h-5 w-5 text-accent" />
-            <span className="font-serif text-base text-foreground hidden sm:inline">LegalHub</span>
+            <span className="font-serif text-base text-foreground hidden sm:inline">Legalhubly</span>
           </Link>
           <div className="flex-1" />
           {/* Step indicator */}

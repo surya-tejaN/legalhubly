@@ -32,7 +32,7 @@ export default function ForgotPassword() {
         <div className="text-center">
           <Link to="/" className="inline-flex items-center gap-2 mb-6">
             <Scale className="h-8 w-8 text-accent" />
-            <span className="font-serif text-2xl font-bold text-foreground">LegalHub</span>
+            <span className="font-serif text-2xl font-bold text-foreground">Legalhubly</span>
           </Link>
           <h1 className="font-serif text-3xl font-bold text-foreground">Reset password</h1>
           <p className="mt-2 text-muted-foreground">

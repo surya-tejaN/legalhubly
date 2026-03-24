@@ -163,7 +163,7 @@ export default function Index() {
             <div className="h-9 w-9 rounded-xl bg-accent/10 flex items-center justify-center group-hover:bg-accent/15 transition-colors">
               <Scale className="h-5 w-5 text-accent" />
             </div>
-            <span className="font-serif text-xl tracking-tight text-foreground">LegalBridge</span>
+            <span className="font-serif text-xl tracking-tight text-foreground">Legalhubly</span>
           </Link>
 
           <div className="hidden lg:flex items-center gap-1">
@@ -577,7 +577,7 @@ export default function Index() {
             <div className="col-span-2 md:col-span-1">
               <Link to="/" className="flex items-center gap-2 mb-4">
                 <Scale className="h-5 w-5 text-accent" />
-                <span className="font-serif text-lg text-foreground">LegalBridge</span>
+                <span className="font-serif text-lg text-foreground">Legalhubly</span>
               </Link>
               <p className="text-xs text-muted-foreground leading-relaxed max-w-[200px]">
                 AI-powered legal marketplace connecting clients with verified attorneys.
@@ -601,7 +601,7 @@ export default function Index() {
             ))}
           </div>
           <div className="pt-8 border-t flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-muted-foreground">© 2026 LegalBridge. All rights reserved.</p>
+            <p className="text-xs text-muted-foreground">© 2026 Legalhubly. All rights reserved.</p>
             <div className="flex items-center gap-4">
               <a href="#" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Privacy</a>
               <a href="#" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Terms</a>

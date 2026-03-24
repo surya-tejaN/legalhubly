@@ -47,16 +47,16 @@ export default function CityDepartments() {
   return (
     <div className="min-h-screen bg-background">
       <SeoHead
-        title={`Find Lawyers in ${city.name}, ${city.state} | LegalBridge`}
+        title={`Find Lawyers in ${city.name}, ${city.state} | Legalhubly`}
         description={`Browse lawyers by practice area in ${city.name}, ${city.state}. Find immigration, divorce, criminal defense, and more legal services.`}
-        canonical={`https://legalbridge.app/cities/${city.slug}`}
+        canonical={`https://legalhubly.com/cities/${city.slug}`}
       />
 
       <nav className="sticky top-0 z-50 glass-nav border-b">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <Scale className="h-5 w-5 text-accent" />
-            <span className="font-serif text-lg text-foreground">LegalBridge</span>
+            <span className="font-serif text-lg text-foreground">Legalhubly</span>
           </Link>
           <Button variant="outline" size="sm" asChild>
             <Link to="/cities"><ArrowLeft className="mr-1 h-3.5 w-3.5" /> All Cities</Link>
@@ -137,7 +137,7 @@ export default function CityDepartments() {
 
       <footer className="border-t bg-card">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} LegalBridge. All rights reserved.
+          © {new Date().getFullYear()} Legalhubly. All rights reserved.
         </div>
       </footer>
     </div>
