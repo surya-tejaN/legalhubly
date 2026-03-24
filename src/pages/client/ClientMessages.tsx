@@ -43,6 +43,7 @@ export default function ClientMessages() {
   const [showMobileList, setShowMobileList] = useState(true);
   const [searchConvo, setSearchConvo] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load conversations
   useEffect(() => {
