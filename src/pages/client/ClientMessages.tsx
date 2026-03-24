@@ -116,6 +116,31 @@ export default function ClientMessages() {
     setSending(false);
   };
 
+  const handleFileAttach = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user || !selectedId) return;
+    if (file.size > 25 * 1024 * 1024) { toast.error("Max 25MB"); return; }
+
+    const ext = file.name.split(".").pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
+    const filePath = `${user.id}/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage.from("documents").upload(filePath, file);
+    if (uploadError) { toast.error("Upload failed"); return; }
+
+    const { data: urlData } = await supabase.storage.from("documents").createSignedUrl(filePath, 86400);
+    const url = urlData?.signedUrl || filePath;
+
+    const { error } = await supabase.from("messages").insert({
+      conversation_id: selectedId,
+      sender_user_id: user.id,
+      body: `📎 [${file.name}](${url})`,
+    });
+    if (error) toast.error("Failed to send attachment");
+    else toast.success("File sent");
+    e.target.value = "";
+  };
+
   if (loading) {
     return (
       <DashboardLayout sidebarItems={clientNavItems} portalLabel="Client Portal" userName={profile?.full_name || "User"} userRole="Client">
