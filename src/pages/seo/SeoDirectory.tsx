@@ -94,7 +94,7 @@ export default function SeoDirectory() {
 
       <footer className="border-t bg-card">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} LegalBridge. All rights reserved.
+          © {new Date().getFullYear()} Legalhubly. All rights reserved.
         </div>
       </footer>
     </div>

@@ -41,7 +41,7 @@ export default function DashboardLayout({ children, sidebarItems, portalLabel, u
         </div>
         {!collapsed && (
           <div className="min-w-0">
-            <span className="font-serif text-[17px] text-sidebar-accent-foreground tracking-tight block leading-tight">LegalBridge</span>
+            <span className="font-serif text-[17px] text-sidebar-accent-foreground tracking-tight block leading-tight">Legalhubly</span>
             <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-accent/70">{portalLabel}</span>
           </div>
         )}
