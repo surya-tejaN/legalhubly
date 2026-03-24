@@ -27,9 +27,13 @@ interface Doc {
 
 const ALLOWED_TYPES = [
   "application/pdf",
+  "application/msword",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   "image/jpeg",
   "image/png",
+  "image/webp",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 ];
 
 const fileTypeStyles: Record<string, string> = {
