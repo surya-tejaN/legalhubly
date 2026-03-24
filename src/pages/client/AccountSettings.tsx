@@ -123,10 +123,19 @@ export default function AccountSettings() {
     if (deleteText !== "DELETE") return;
     setDeleting(true);
 
-    // Sign out and let user know
-    // Note: Full account deletion requires admin/edge function for security
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        await supabase.functions.invoke("delete-account", {
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+      }
+    } catch (e) {
+      console.error("Delete account error:", e);
+    }
+
     await signOut();
-    toast.success("You've been signed out. Contact support to complete account deletion.");
+    toast.success("Your account has been deleted.");
     navigate("/");
   };
 
