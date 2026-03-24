@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import { clientNavItems } from "@/lib/navigation";
 import { SectionHeader } from "@/components/DashboardComponents";
