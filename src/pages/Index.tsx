@@ -163,7 +163,7 @@ export default function Index() {
             <div className="h-9 w-9 rounded-xl bg-accent/10 flex items-center justify-center group-hover:bg-accent/15 transition-colors">
               <Scale className="h-5 w-5 text-accent" />
             </div>
-            <span className="font-serif text-xl tracking-tight text-foreground">LegalBridge</span>
+            <span className="font-serif text-xl tracking-tight text-foreground">Legalhubly</span>
           </Link>
 
           <div className="hidden lg:flex items-center gap-1">
