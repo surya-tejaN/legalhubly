@@ -44,7 +44,7 @@ export default function CityExplorer() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <Scale className="h-5 w-5 text-accent" />
-            <span className="font-serif text-lg text-foreground">LegalBridge</span>
+            <span className="font-serif text-lg text-foreground">Legalhubly</span>
           </Link>
           <Button variant="gold" size="sm" asChild>
             <Link to="/client/find-lawyers">Search All <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link>
