@@ -443,6 +443,8 @@ export default function FindLawyers() {
       setSavedIds((prev) => new Set(prev).add(lawyerId));
       toast.success("Lawyer saved!");
     }
+    // Invalidate dashboard saved lawyers count
+    queryClient.invalidateQueries({ queryKey: ["saved-lawyers"] });
   };
 
   // Fetch cities
