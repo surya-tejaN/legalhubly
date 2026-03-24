@@ -25,6 +25,20 @@ const typeColor = (type: string) => {
 export default function LawyerCalendar() {
   const [consultations, setConsultations] = useState<any[]>([]);
   const [weekOffset, setWeekOffset] = useState(0);
+  const [showNewEvent, setShowNewEvent] = useState(false);
+  const [eventForm, setEventForm] = useState({ title: "", client_name: "", scheduled_at: "", type: "video", duration_minutes: 30 });
+
+  const createEvent = async () => {
+    if (!eventForm.title.trim() || !eventForm.client_name.trim() || !eventForm.scheduled_at) {
+      toast.error("Fill in all required fields"); return;
+    }
+    const { data, error } = await supabase.from("consultations" as any).insert(eventForm as any).select();
+    if (error) { toast.error("Failed to create event"); return; }
+    if (data) setConsultations((prev) => [...prev, ...(data as any[])]);
+    setEventForm({ title: "", client_name: "", scheduled_at: "", type: "video", duration_minutes: 30 });
+    setShowNewEvent(false);
+    toast.success("Event created");
+  };
 
   useEffect(() => {
     const load = async () => {
