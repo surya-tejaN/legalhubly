@@ -577,7 +577,7 @@ export default function Index() {
             <div className="col-span-2 md:col-span-1">
               <Link to="/" className="flex items-center gap-2 mb-4">
                 <Scale className="h-5 w-5 text-accent" />
-                <span className="font-serif text-lg text-foreground">LegalBridge</span>
+                <span className="font-serif text-lg text-foreground">Legalhubly</span>
               </Link>
               <p className="text-xs text-muted-foreground leading-relaxed max-w-[200px]">
                 AI-powered legal marketplace connecting clients with verified attorneys.
