@@ -54,7 +54,7 @@ export default function LawyerCases() {
 
   const addNote = async (matterId: string) => {
     if (!newNote.trim()) return;
-    const { data } = await supabase.from("internal_notes" as any).insert({ matter_id: matterId, content: newNote, author_name: "Sarah Chen" } as any).select();
+    const { data } = await supabase.from("internal_notes" as any).insert({ matter_id: matterId, content: newNote, author_name: profile?.full_name || "Attorney" } as any).select();
     if (data) setNotes((prev) => [...(data as any[]), ...prev]);
     setNewNote("");
   };

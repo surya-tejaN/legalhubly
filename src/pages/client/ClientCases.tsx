@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Scale, ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
 import ClientSupportChat from "@/components/ClientSupportChat";
 
 const cases = [

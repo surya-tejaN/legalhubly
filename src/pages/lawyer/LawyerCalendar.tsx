@@ -80,7 +80,7 @@ export default function LawyerCalendar() {
   const isToday = (d: Date) => d.toDateString() === new Date().toDateString();
 
   return (
-    <DashboardLayout sidebarItems={lawyerNavItems} portalLabel="Lawyer Portal" userName="Sarah Chen" userRole="Attorney">
+    <DashboardLayout sidebarItems={lawyerNavItems} portalLabel="Lawyer Portal" userName={profile?.full_name || "Attorney"} userRole="Attorney">
       <SectionHeader
         title="Calendar"
         subtitle="Manage your schedule and appointments"

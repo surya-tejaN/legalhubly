@@ -145,7 +145,7 @@ export default function LawyerLeads() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <Button variant="ghost" size="icon" className="h-9 w-9" asChild><a href={`tel:${lead.client_email || ''}`}><Phone className="h-4 w-4" /></a></Button>
+                    <Button variant="ghost" size="icon" className="h-9 w-9" disabled={!lead.client_email} asChild={!!lead.client_email}>{lead.client_email ? <a href={`tel:${lead.client_email}`}><Phone className="h-4 w-4" /></a> : <Phone className="h-4 w-4" />}</Button>
                     <Button variant="ghost" size="icon" className="h-9 w-9" asChild><a href={`mailto:${lead.client_email || ''}`}><Mail className="h-4 w-4" /></a></Button>
                     <div className="w-px h-6 bg-border mx-1" />
                     {lead.conflict_status === "pending" ? (
