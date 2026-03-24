@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Heart, Trash2, Star, MapPin, Briefcase, ArrowRight, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import ClientSupportChat from "@/components/ClientSupportChat";
@@ -33,6 +34,7 @@ interface SavedRow {
 
 export default function SavedLawyers() {
   const { user, profile } = useAuth();
+  const queryClient = useQueryClient();
   const [saved, setSaved] = useState<SavedRow[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -61,6 +63,7 @@ export default function SavedLawyers() {
     }
     setSaved((prev) => prev.filter((s) => s.id !== savedId));
     toast.success("Lawyer removed from saved");
+    queryClient.invalidateQueries({ queryKey: ["saved-lawyers"] });
   };
 
   return (

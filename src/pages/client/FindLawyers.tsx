@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -409,6 +410,7 @@ function LawyerResults({ lawyers, loading, city, practiceArea, sortBy, onSortCha
 
 export default function FindLawyers() {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [cities, setCities] = useState<City[]>([]);
   const [practiceAreas, setPracticeAreas] = useState<PracticeArea[]>([]);
@@ -441,6 +443,8 @@ export default function FindLawyers() {
       setSavedIds((prev) => new Set(prev).add(lawyerId));
       toast.success("Lawyer saved!");
     }
+    // Invalidate dashboard saved lawyers count
+    queryClient.invalidateQueries({ queryKey: ["saved-lawyers"] });
   };
 
   // Fetch cities

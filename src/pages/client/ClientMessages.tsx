@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import { clientNavItems } from "@/lib/navigation";
 import { SectionHeader } from "@/components/DashboardComponents";
@@ -34,6 +35,8 @@ interface ConvoWithMeta {
 
 export default function ClientMessages() {
   const { user, profile } = useAuth();
+  const [searchParams] = useSearchParams();
+  const urlConvoId = searchParams.get("conversationId");
   const [convos, setConvos] = useState<ConvoWithMeta[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -62,10 +65,17 @@ export default function ClientMessages() {
         .filter((d: any) => d.conversations)
         .map((d: any) => ({ conversation: d.conversations }));
       setConvos(items);
-      if (items.length > 0) setSelectedId(items[0].conversation.id);
+      // Auto-select from URL param or first
+      const target = urlConvoId && items.find((i) => i.conversation.id === urlConvoId);
+      if (target) {
+        setSelectedId(target.conversation.id);
+        setShowMobileList(false);
+      } else if (items.length > 0) {
+        setSelectedId(items[0].conversation.id);
+      }
       setLoading(false);
     })();
-  }, [user]);
+  }, [user, urlConvoId]);
 
   // Load messages for selected conversation
   useEffect(() => {

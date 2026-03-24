@@ -215,7 +215,7 @@ export default function LawyerProfile() {
             <ArrowLeft className="h-4 w-4" /> Back to results
           </button>
           <Link to="/" className="font-serif text-lg text-foreground">
-            Legal<span className="text-accent">Bridge</span>
+            Legalhubly
           </Link>
         </div>
       </nav>

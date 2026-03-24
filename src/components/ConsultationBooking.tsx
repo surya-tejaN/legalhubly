@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Calendar, Clock, Video, Phone, Building2, CheckCircle2, ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -47,14 +49,17 @@ function getAvailableDates() {
 }
 
 export default function ConsultationBooking({ lawyerName, lawyerId, consultationTypes, consultationFee, onClose, onBooked }: BookingProps) {
+  const { user, profile } = useAuth();
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [selectedType, setSelectedType] = useState(consultationTypes[0] || "video");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState("");
-  const [clientName, setClientName] = useState("");
+  const [clientName, setClientName] = useState(profile?.full_name || "");
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [booked, setBooked] = useState(false);
+  const [conversationId, setConversationId] = useState<string | null>(null);
 
   const dates = getAvailableDates();
 
@@ -71,6 +76,7 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
       if (period === "AM" && h === 12) h = 0;
       scheduledAt.setHours(h, parseInt(minutes), 0, 0);
 
+      // Create consultation
       const { error } = await supabase.from("consultations").insert({
         lawyer_id: lawyerId,
         client_name: clientName.trim(),
@@ -81,8 +87,31 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
         status: "scheduled",
         duration_minutes: 30,
       });
-
       if (error) throw error;
+
+      // Create conversation + add participants if user is logged in
+      let newConvoId: string | null = null;
+      if (user) {
+        const { data: convo, error: convoErr } = await supabase
+          .from("conversations")
+          .insert({})
+          .select("id")
+          .single();
+        if (!convoErr && convo) {
+          newConvoId = convo.id;
+          await supabase.from("conversation_participants").insert([
+            { conversation_id: convo.id, user_id: user.id },
+          ]);
+          // Send initial message
+          await supabase.from("messages").insert({
+            conversation_id: convo.id,
+            sender_user_id: user.id,
+            body: `📅 Consultation booked: ${typeLabels[selectedType]} with ${lawyerName} on ${scheduledAt.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })} at ${selectedTime}.`,
+          });
+        }
+      }
+
+      setConversationId(newConvoId);
       setBooked(true);
       toast.success("Consultation booked successfully!");
       onBooked?.();
@@ -110,7 +139,14 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
         <p className="text-xs text-muted-foreground mb-4">
           <span className="inline-flex items-center gap-1 bg-success/10 text-success font-bold px-2 py-0.5 rounded-full text-[10px]">FREE CONSULTATION (MVP)</span>
         </p>
-        <Button variant="gold" onClick={onClose}>Done</Button>
+        <div className="flex gap-3 justify-center">
+          {conversationId && (
+            <Button variant="gold" onClick={() => { onClose(); navigate(`/client/messages?conversationId=${conversationId}`); }}>
+              Open Chat
+            </Button>
+          )}
+          <Button variant={conversationId ? "outline" : "gold"} onClick={onClose}>Done</Button>
+        </div>
       </motion.div>
     );
   }
