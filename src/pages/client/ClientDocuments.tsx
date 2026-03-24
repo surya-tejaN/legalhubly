@@ -178,7 +178,7 @@ export default function ClientDocuments() {
         type="file"
         className="hidden"
         multiple
-        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp,.xls,.xlsx"
         onChange={(e) => { handleUpload(e.target.files); e.target.value = ""; }}
       />
 
