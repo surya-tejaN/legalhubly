@@ -151,16 +151,16 @@ export default function LawyerProfile() {
 
   useEffect(() => {
     if (!lawyerId) return;
-    const userId = (await supabase.auth.getUser()).data.user?.id;
-    if (!userId) return;
-    supabase
-      .from("saved_lawyers")
-      .select("id")
-      .eq("lawyer_id", lawyerId)
-      .eq("user_id", userId)
-      .then(({ data }) => {
-        if (data && data.length > 0) setSaved(true);
-      });
+    (async () => {
+      const userId = (await supabase.auth.getUser()).data.user?.id;
+      if (!userId) return;
+      const { data } = await supabase
+        .from("saved_lawyers")
+        .select("id")
+        .eq("lawyer_id", lawyerId)
+        .eq("user_id", userId);
+      if (data && data.length > 0) setSaved(true);
+    })();
   }, [lawyerId]);
 
   const handleSave = async () => {
