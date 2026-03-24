@@ -98,7 +98,7 @@ export default function LawyerCases() {
       <SectionHeader
         title="Case Management"
         subtitle="Manage and track all your active matters"
-        action={<Button variant="gold" size="sm"><Plus className="mr-2 h-3.5 w-3.5" /> New Matter</Button>}
+        action={<Button variant="gold" size="sm" onClick={() => setShowNewMatter(true)}><Plus className="mr-2 h-3.5 w-3.5" /> New Matter</Button>}
       />
 
       <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
