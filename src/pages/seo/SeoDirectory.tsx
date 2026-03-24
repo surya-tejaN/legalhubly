@@ -22,9 +22,9 @@ export default function SeoDirectory() {
   return (
     <div className="min-h-screen bg-background">
       <SeoHead
-        title="Find Lawyers by City & Practice Area | LegalBridge"
+        title="Find Lawyers by City & Practice Area | Legalhubly"
         description="Browse lawyers by city and practice area. Find immigration lawyers, divorce lawyers, criminal defense attorneys, and more in cities across the US."
-        canonical="https://legalbridge.app/lawyers"
+        canonical="https://legalhubly.com/lawyers"
       />
 
       <nav className="sticky top-0 z-50 glass-nav border-b">
