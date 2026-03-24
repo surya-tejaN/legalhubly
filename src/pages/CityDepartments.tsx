@@ -47,9 +47,9 @@ export default function CityDepartments() {
   return (
     <div className="min-h-screen bg-background">
       <SeoHead
-        title={`Find Lawyers in ${city.name}, ${city.state} | LegalBridge`}
+        title={`Find Lawyers in ${city.name}, ${city.state} | Legalhubly`}
         description={`Browse lawyers by practice area in ${city.name}, ${city.state}. Find immigration, divorce, criminal defense, and more legal services.`}
-        canonical={`https://legalbridge.app/cities/${city.slug}`}
+        canonical={`https://legalhubly.com/cities/${city.slug}`}
       />
 
       <nav className="sticky top-0 z-50 glass-nav border-b">
