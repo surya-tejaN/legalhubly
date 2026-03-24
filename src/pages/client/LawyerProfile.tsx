@@ -165,15 +165,15 @@ export default function LawyerProfile() {
 
   const handleSave = async () => {
     if (!lawyerId) return;
-    const sessionId = localStorage.getItem("legal_session_id") || crypto.randomUUID();
-    localStorage.setItem("legal_session_id", sessionId);
+    const userId = (await supabase.auth.getUser()).data.user?.id;
+    if (!userId) { toast.error("Please sign in to save lawyers"); return; }
 
     if (saved) {
-      await supabase.from("saved_lawyers").delete().eq("lawyer_id", lawyerId).eq("session_id", sessionId);
+      await supabase.from("saved_lawyers").delete().eq("lawyer_id", lawyerId).eq("user_id", userId);
       setSaved(false);
       toast.success("Lawyer removed from saved");
     } else {
-      await supabase.from("saved_lawyers").insert({ lawyer_id: lawyerId, session_id: sessionId });
+      await supabase.from("saved_lawyers").insert({ lawyer_id: lawyerId, user_id: userId });
       setSaved(true);
       toast.success("Lawyer saved!");
     }
