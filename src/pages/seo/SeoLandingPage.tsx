@@ -292,7 +292,7 @@ export default function SeoLandingPage() {
             <div className="prose prose-sm max-w-none text-muted-foreground space-y-4">
               <p>
                 When facing {paData.shortName.toLowerCase()} legal matters in {locationString}, having the right attorney can make all the difference. 
-                Whether you're dealing with a complex case or need straightforward legal guidance, LegalBridge connects you with verified, 
+                Whether you're dealing with a complex case or need straightforward legal guidance, Legalhubly connects you with verified, 
                 experienced {paData.title.toLowerCase()}s who understand {cityData.stateFullName || cityData.name} law.
               </p>
               <p>
