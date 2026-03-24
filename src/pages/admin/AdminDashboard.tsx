@@ -54,7 +54,7 @@ export default function AdminDashboard() {
 
   return (
     <DashboardLayout sidebarItems={adminNavItems} portalLabel="Platform Admin" userName="Platform Admin" userRole="Super Admin">
-      <SectionHeader title="Admin Control Center" subtitle="LegalBridge platform operations & revenue analytics" />
+      <SectionHeader title="Admin Control Center" subtitle="Legalhubly platform operations & revenue analytics" />
 
       {/* MVP Banner */}
       <motion.div

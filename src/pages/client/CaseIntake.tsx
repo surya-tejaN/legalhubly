@@ -331,7 +331,7 @@ export default function CaseIntake() {
                     </div>
                     <div className="bg-muted/50 rounded-xl rounded-tl-sm p-4 max-w-[85%]">
                       <p className="text-sm text-foreground leading-relaxed">
-                        Welcome to LegalBridge! I'm your AI legal intake assistant. I'll help you describe your legal matter and connect you with the right lawyer.
+                        Welcome to Legalhubly! I'm your AI legal intake assistant. I'll help you describe your legal matter and connect you with the right lawyer.
                       </p>
                       <p className="text-sm text-foreground leading-relaxed mt-2">
                         To get started, what type of legal issue are you facing? You can select a category below or describe your situation in your own words.
