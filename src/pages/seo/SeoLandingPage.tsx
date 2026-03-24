@@ -210,7 +210,7 @@ export default function SeoLandingPage() {
           <div className="flex items-center gap-4">
             <Link to="/" className="flex items-center gap-2">
               <Scale className="h-5 w-5 text-accent" />
-              <span className="font-serif text-lg text-foreground">LegalBridge</span>
+              <span className="font-serif text-lg text-foreground">Legalhubly</span>
             </Link>
             <ChevronRight className="h-4 w-4 text-muted-foreground hidden sm:block" />
             <nav className="hidden sm:flex items-center gap-1 text-sm text-muted-foreground" aria-label="Breadcrumb">
