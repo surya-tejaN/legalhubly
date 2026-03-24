@@ -6,7 +6,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const SYSTEM_PROMPT = `You are the Document Drafting Agent for LegalBridge. You generate professional legal documents based on case context and attorney instructions.
+const SYSTEM_PROMPT = `You are the Document Drafting Agent for Legalhubly. You generate professional legal documents based on case context and attorney instructions.
 
 ## Document Types You Can Draft
 - Engagement letters
