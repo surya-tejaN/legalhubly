@@ -11,7 +11,9 @@ import PasswordStrengthMeter, { validatePassword } from "@/components/PasswordSt
 export default function ResetPassword() {
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [ready, setReady] = useState(false);
 
@@ -31,12 +33,16 @@ export default function ResetPassword() {
       toast.error("Password does not meet all requirements.");
       return;
     }
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match.");
+      return;
+    }
     setSubmitting(true);
     const { error } = await supabase.auth.updateUser({ password });
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("Password updated! Redirecting…");
+      toast.success("Password updated successfully! Please login with your new password.");
       setTimeout(() => navigate("/login"), 1500);
     }
     setSubmitting(false);
@@ -65,6 +71,7 @@ export default function ResetPassword() {
             <span className="font-serif text-2xl font-bold text-foreground">Legalhubly</span>
           </Link>
           <h1 className="font-serif text-3xl font-bold text-foreground">Set new password</h1>
+          <p className="mt-2 text-muted-foreground">Choose a strong password for your account</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -81,18 +88,36 @@ export default function ResetPassword() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
-                tabIndex={-1}
-              >
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors" tabIndex={-1}>
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
             <PasswordStrengthMeter password={password} />
           </div>
-          <Button type="submit" className="w-full h-11" disabled={submitting || !validatePassword(password)}>
+
+          <div className="space-y-2">
+            <Label htmlFor="confirm-password">Confirm new password</Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="confirm-password"
+                type={showConfirm ? "text" : "password"}
+                placeholder="••••••••"
+                className="pl-10 pr-10"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+              <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors" tabIndex={-1}>
+                {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+            {confirmPassword && password !== confirmPassword && (
+              <p className="text-xs text-destructive">Passwords do not match</p>
+            )}
+          </div>
+
+          <Button type="submit" className="w-full h-11" disabled={submitting || !validatePassword(password) || password !== confirmPassword}>
             {submitting ? "Updating…" : "Update password"}
           </Button>
         </form>

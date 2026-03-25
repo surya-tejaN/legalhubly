@@ -7,13 +7,34 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Scale, Mail, Lock, User, MapPin, Eye, EyeOff, CheckCircle, ArrowLeft } from "lucide-react";
+import { Scale, Mail, Lock, User, MapPin, Eye, EyeOff, CheckCircle, ArrowLeft, RefreshCw } from "lucide-react";
 import PasswordStrengthMeter, { validatePassword } from "@/components/PasswordStrengthMeter";
 
 const ROLES: { value: AppRole; label: string; desc: string }[] = [
   { value: "client", label: "I need a lawyer", desc: "Find and hire legal help" },
   { value: "lawyer", label: "I am a lawyer", desc: "Manage clients and cases" },
 ];
+
+const BLOCKED_EMAILS = [
+  "test@test.com", "test@example.com", "user@example.com",
+  "admin@admin.com", "fake@fake.com", "a@a.com",
+];
+
+const BLOCKED_DOMAINS = [
+  "mailinator.com", "guerrillamail.com", "tempmail.com", "throwaway.email",
+  "fakeinbox.com", "sharklasers.com", "guerrillamailblock.com", "grr.la",
+  "dispostable.com", "yopmail.com",
+];
+
+function isValidEmailDomain(email: string): boolean {
+  const domain = email.split("@")[1]?.toLowerCase();
+  if (!domain) return false;
+  if (BLOCKED_DOMAINS.includes(domain)) return false;
+  if (BLOCKED_EMAILS.includes(email.toLowerCase())) return false;
+  // Basic domain validation - must have at least one dot
+  if (!domain.includes(".")) return false;
+  return true;
+}
 
 export default function Signup() {
   const { user, profile, loading } = useAuth();
@@ -25,10 +46,31 @@ export default function Signup() {
   const [city, setCity] = useState("");
   const [role, setRole] = useState<AppRole>("client");
   const [submitting, setSubmitting] = useState(false);
-
   const [showVerification, setShowVerification] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
   if (!loading && user) return <Navigate to={dashboardPath} replace />;
+
+  const handleResendEmail = async () => {
+    if (resendCooldown > 0) return;
+    const trimmedEmail = email.trim().toLowerCase();
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email: trimmedEmail,
+    });
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Verification email resent!");
+      setResendCooldown(60);
+      const interval = setInterval(() => {
+        setResendCooldown((prev) => {
+          if (prev <= 1) { clearInterval(interval); return 0; }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+  };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +91,11 @@ export default function Signup() {
       return;
     }
 
+    if (!isValidEmailDomain(trimmedEmail)) {
+      toast.error("Please use a valid email address from a real email provider.");
+      return;
+    }
+
     setSubmitting(true);
     const { data: signUpData, error } = await supabase.auth.signUp({
       email: trimmedEmail,
@@ -58,13 +105,25 @@ export default function Signup() {
         data: { full_name: trimmedName, role, city: city.trim() },
       },
     });
+
     if (error) {
-      toast.error(error.message);
+      if (error.message.includes("already registered") || error.message.includes("already been registered")) {
+        toast.error("This email is already registered. Please login instead.");
+      } else if (error.message.includes("rate")) {
+        toast.error("Too many signup attempts. Please try again in a few minutes.");
+      } else {
+        toast.error(error.message);
+      }
     } else if (signUpData.user && !signUpData.session) {
-      // Email confirmation required
-      setShowVerification(true);
+      // Check if user already existed (Supabase returns user with identities=[] for existing emails)
+      if (signUpData.user.identities && signUpData.user.identities.length === 0) {
+        toast.error("This email is already registered. Please login or reset your password.");
+      } else {
+        setShowVerification(true);
+        toast.success("Account created! Check your email to verify.");
+      }
     } else {
-      toast.success("Account created! Signing you in…");
+      toast.success("Account created! Welcome to Legalhubly ✓");
     }
     setSubmitting(false);
   };
@@ -111,7 +170,16 @@ export default function Signup() {
           </div>
           <div className="space-y-3">
             <p className="text-xs text-muted-foreground">Didn't receive the email? Check your spam folder.</p>
-            <Button variant="outline" className="w-full" onClick={() => setShowVerification(false)}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleResendEmail}
+              disabled={resendCooldown > 0}
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend Verification Email"}
+            </Button>
+            <Button variant="ghost" className="w-full" onClick={() => setShowVerification(false)}>
               <ArrowLeft className="mr-2 h-4 w-4" /> Back to Sign Up
             </Button>
           </div>
@@ -137,12 +205,7 @@ export default function Signup() {
         </div>
 
         <div className="space-y-3">
-          <Button
-            variant="outline"
-            className="w-full h-12 text-base font-medium"
-            onClick={handleGoogleSignup}
-            disabled={submitting}
-          >
+          <Button variant="outline" className="w-full h-12 text-base font-medium" onClick={handleGoogleSignup} disabled={submitting}>
             <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
               <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
@@ -151,13 +214,7 @@ export default function Signup() {
             </svg>
             Continue with Google
           </Button>
-
-          <Button
-            variant="outline"
-            className="w-full h-12 text-base font-medium"
-            onClick={handleAppleSignup}
-            disabled={submitting}
-          >
+          <Button variant="outline" className="w-full h-12 text-base font-medium" onClick={handleAppleSignup} disabled={submitting}>
             <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
               <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
             </svg>
@@ -166,30 +223,19 @@ export default function Signup() {
         </div>
 
         <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-border" />
-          </div>
+          <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-border" /></div>
           <div className="relative flex justify-center text-xs uppercase">
             <span className="bg-background px-2 text-muted-foreground">or sign up with email</span>
           </div>
         </div>
 
         <form onSubmit={handleSignup} className="space-y-4">
-          {/* Role selector */}
           <div className="space-y-2">
             <Label>I am a…</Label>
             <div className="grid grid-cols-2 gap-3">
               {ROLES.map((r) => (
-                <button
-                  key={r.value}
-                  type="button"
-                  onClick={() => setRole(r.value)}
-                  className={`rounded-xl border px-4 py-3 text-left transition-all ${
-                    role === r.value
-                      ? "border-accent bg-accent/10 ring-1 ring-accent"
-                      : "border-border bg-card hover:bg-muted"
-                  }`}
-                >
+                <button key={r.value} type="button" onClick={() => setRole(r.value)}
+                  className={`rounded-xl border px-4 py-3 text-left transition-all ${role === r.value ? "border-accent bg-accent/10 ring-1 ring-accent" : "border-border bg-card hover:bg-muted"}`}>
                   <div className={`text-sm font-medium ${role === r.value ? "text-accent-foreground" : "text-foreground"}`}>{r.label}</div>
                   <div className="text-[11px] text-muted-foreground mt-0.5">{r.desc}</div>
                 </button>
@@ -201,15 +247,7 @@ export default function Signup() {
             <Label htmlFor="name">Full name</Label>
             <div className="relative">
               <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="name"
-                placeholder="Jane Doe"
-                className="pl-10"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-                maxLength={100}
-              />
+              <Input id="name" placeholder="Jane Doe" className="pl-10" value={fullName} onChange={(e) => setFullName(e.target.value)} required maxLength={100} />
             </div>
           </div>
 
@@ -217,16 +255,7 @@ export default function Signup() {
             <Label htmlFor="email">Email</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                className="pl-10"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                maxLength={255}
-              />
+              <Input id="email" type="email" placeholder="you@example.com" className="pl-10" value={email} onChange={(e) => setEmail(e.target.value)} required maxLength={255} />
             </div>
           </div>
 
@@ -234,14 +263,7 @@ export default function Signup() {
             <Label htmlFor="city">City</Label>
             <div className="relative">
               <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="city"
-                placeholder="New York, NY"
-                className="pl-10"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                maxLength={100}
-              />
+              <Input id="city" placeholder="New York, NY" className="pl-10" value={city} onChange={(e) => setCity(e.target.value)} maxLength={100} />
             </div>
           </div>
 
@@ -249,21 +271,8 @@ export default function Signup() {
             <Label htmlFor="password">Password</Label>
             <div className="relative">
               <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
-                className="pl-10 pr-10"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
-                tabIndex={-1}
-              >
+              <Input id="password" type={showPassword ? "text" : "password"} placeholder="••••••••" className="pl-10 pr-10" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors" tabIndex={-1}>
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
@@ -277,9 +286,7 @@ export default function Signup() {
 
         <p className="text-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link to="/login" className="text-accent font-semibold hover:underline">
-            Sign in
-          </Link>
+          <Link to="/login" className="text-accent font-semibold hover:underline">Sign in</Link>
         </p>
       </div>
     </div>
