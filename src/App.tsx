@@ -16,6 +16,7 @@ import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
+import VerifyEmailSuccess from "./pages/auth/VerifyEmailSuccess";
 
 // Client pages
 import ClientDashboard from "./pages/client/ClientDashboard";

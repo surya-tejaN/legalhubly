@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -7,9 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Scale, Mail, Lock, User, MapPin, Eye, EyeOff, ArrowLeft, RefreshCw, Loader2 } from "lucide-react";
+import { Scale, Mail, Lock, User, MapPin, Eye, EyeOff, Loader2, CheckCircle } from "lucide-react";
 import PasswordStrengthMeter, { validatePassword } from "@/components/PasswordStrengthMeter";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 const ROLES: { value: AppRole; label: string; desc: string }[] = [
   { value: "client", label: "I need a lawyer", desc: "Find and hire legal help" },
