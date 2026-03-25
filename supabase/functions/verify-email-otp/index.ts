@@ -13,6 +13,70 @@ function generateOtp(): string {
   return String(num % 1000000).padStart(6, '0')
 }
 
+async function sendOtpEmailNow({
+  supabaseUrl,
+  serviceRoleKey,
+  email,
+  userId,
+  code,
+}: {
+  supabaseUrl: string
+  serviceRoleKey: string
+  email: string
+  userId: string
+  code: string
+}) {
+  const startedAt = Date.now()
+
+  const response = await fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${serviceRoleKey}`,
+      apikey: serviceRoleKey,
+    },
+    body: JSON.stringify({
+      templateName: 'otp-verification',
+      recipientEmail: email.toLowerCase(),
+      idempotencyKey: `otp-${userId}-${Date.now()}`,
+      templateData: { code },
+    }),
+  })
+
+  const durationMs = Date.now() - startedAt
+  const responseText = await response.text()
+
+  if (!response.ok) {
+    console.error('Failed to send OTP email', {
+      status: response.status,
+      statusText: response.statusText,
+      responseText,
+      durationMs,
+      email: email.toLowerCase(),
+    })
+
+    return {
+      ok: false,
+      durationMs,
+      error: `Email send failed (${response.status} ${response.statusText})`,
+    }
+  }
+
+  console.log('OTP email accepted by send-transactional-email', {
+    email: email.toLowerCase(),
+    durationMs,
+  })
+
+  if (durationMs > 10000) {
+    console.warn('OTP email enqueue took longer than expected', {
+      email: email.toLowerCase(),
+      durationMs,
+    })
+  }
+
+  return { ok: true, durationMs, responseText }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -87,25 +151,26 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Send OTP email via transactional email system
-    const { error: emailError } = await supabase.functions.invoke('send-transactional-email', {
-      body: {
-        templateName: 'otp-verification',
-        recipientEmail: email.toLowerCase(),
-        idempotencyKey: `otp-${userId}-${Date.now()}`,
-        templateData: { code },
-      },
+    const emailResult = await sendOtpEmailNow({
+      supabaseUrl,
+      serviceRoleKey: supabaseServiceKey,
+      email,
+      userId,
+      code,
     })
 
-    if (emailError) {
-      console.error('Failed to send OTP email', emailError)
+    if (!emailResult.ok) {
       return new Response(JSON.stringify({ error: 'Failed to send verification email' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    console.log('OTP generated and email queued', { email: email.toLowerCase(), expiresAt })
+    console.log('OTP generated and email queued', {
+      email: email.toLowerCase(),
+      expiresAt,
+      durationMs: emailResult.durationMs,
+    })
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
