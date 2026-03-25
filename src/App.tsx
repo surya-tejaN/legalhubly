@@ -77,6 +77,7 @@ function AnimatedRoutes() {
         <Route path="/signup" element={<PageTransition><Signup /></PageTransition>} />
         <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
         <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
+        <Route path="/verify-email-success" element={<PageTransition><VerifyEmailSuccess /></PageTransition>} />
 
         {/* Client Portal */}
         <Route path="/client/dashboard" element={<ProtectedRoute allowedRoles={["client"]}><PageTransition><ClientDashboard /></PageTransition></ProtectedRoute>} />
