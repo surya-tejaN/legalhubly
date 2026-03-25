@@ -33,3 +33,5 @@ project_id = "agmkgxmjktbfzpzpkqez"
     verify_jwt = true
   [functions.stripe-webhook]
     verify_jwt = false
+  [functions.verify-email-otp]
+    verify_jwt = false
