@@ -53,6 +53,7 @@ import SeoLandingPage from "./pages/seo/SeoLandingPage";
 import CityExplorer from "./pages/CityExplorer";
 import CityDepartments from "./pages/CityDepartments";
 import SeoDirectory from "./pages/seo/SeoDirectory";
+import Unsubscribe from "./pages/Unsubscribe";
 
 const queryClient = new QueryClient({
   defaultOptions: {
