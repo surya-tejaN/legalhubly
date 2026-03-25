@@ -113,7 +113,28 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
 
       setConversationId(newConvoId);
       setBooked(true);
-      toast.success("Consultation booked successfully!");
+
+      // Send booking confirmation email
+      if (user?.email) {
+        const bookingId = crypto.randomUUID();
+        supabase.functions.invoke("send-transactional-email", {
+          body: {
+            templateName: "booking-confirmation",
+            recipientEmail: user.email,
+            idempotencyKey: `booking-confirm-${bookingId}`,
+            templateData: {
+              clientName: clientName.trim(),
+              lawyerName,
+              consultationType: typeLabels[selectedType],
+              date: selectedDate?.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" }),
+              time: selectedTime,
+              duration: "30 minutes",
+            },
+          },
+        }).catch(console.error);
+      }
+
+      toast.success("Consultation booked! Check your email for confirmation.");
       onBooked?.();
     } catch (e) {
       console.error(e);
