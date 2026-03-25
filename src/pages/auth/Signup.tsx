@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Scale, Mail, Lock, User, MapPin, Eye, EyeOff, CheckCircle, ArrowLeft, RefreshCw } from "lucide-react";
+import { Scale, Mail, Lock, User, MapPin, Eye, EyeOff, ArrowLeft, RefreshCw, Loader2 } from "lucide-react";
 import PasswordStrengthMeter, { validatePassword } from "@/components/PasswordStrengthMeter";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 const ROLES: { value: AppRole; label: string; desc: string }[] = [
   { value: "client", label: "I need a lawyer", desc: "Find and hire legal help" },
@@ -31,7 +32,6 @@ function isValidEmailDomain(email: string): boolean {
   if (!domain) return false;
   if (BLOCKED_DOMAINS.includes(domain)) return false;
   if (BLOCKED_EMAILS.includes(email.toLowerCase())) return false;
-  // Basic domain validation - must have at least one dot
   if (!domain.includes(".")) return false;
   return true;
 }
@@ -46,30 +46,41 @@ export default function Signup() {
   const [city, setCity] = useState("");
   const [role, setRole] = useState<AppRole>("client");
   const [submitting, setSubmitting] = useState(false);
-  const [showVerification, setShowVerification] = useState(false);
+
+  // OTP state
+  const [showOtp, setShowOtp] = useState(false);
+  const [otpValue, setOtpValue] = useState("");
+  const [otpUserId, setOtpUserId] = useState("");
+  const [otpEmail, setOtpEmail] = useState("");
+  const [otpPassword, setOtpPassword] = useState("");
+  const [verifying, setVerifying] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
+  const [otpError, setOtpError] = useState("");
+  const [shake, setShake] = useState(false);
 
   if (!loading && user) return <Navigate to={dashboardPath} replace />;
 
-  const handleResendEmail = async () => {
-    if (resendCooldown > 0) return;
-    const trimmedEmail = email.trim().toLowerCase();
-    const { error } = await supabase.auth.resend({
-      type: "signup",
-      email: trimmedEmail,
+  // Resend cooldown timer
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => {
+        if (prev <= 1) { clearInterval(timer); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+  const sendOtp = async (userId: string, emailAddr: string) => {
+    const { error } = await supabase.functions.invoke("verify-email-otp", {
+      body: { action: "generate", userId, email: emailAddr },
     });
     if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success("Verification email resent!");
-      setResendCooldown(60);
-      const interval = setInterval(() => {
-        setResendCooldown((prev) => {
-          if (prev <= 1) { clearInterval(interval); return 0; }
-          return prev - 1;
-        });
-      }, 1000);
+      toast.error("Failed to send verification code. Please try again.");
+      return false;
     }
+    return true;
   };
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -82,15 +93,8 @@ export default function Signup() {
 
     const trimmedEmail = email.trim().toLowerCase();
     const trimmedName = fullName.trim();
-    if (!trimmedName) {
-      toast.error("Please enter your full name.");
-      return;
-    }
-    if (trimmedName.length > 100) {
-      toast.error("Name must be less than 100 characters.");
-      return;
-    }
-
+    if (!trimmedName) { toast.error("Please enter your full name."); return; }
+    if (trimmedName.length > 100) { toast.error("Name must be less than 100 characters."); return; }
     if (!isValidEmailDomain(trimmedEmail)) {
       toast.error("Please use a valid email address from a real email provider.");
       return;
@@ -114,18 +118,73 @@ export default function Signup() {
       } else {
         toast.error(error.message);
       }
-    } else if (signUpData.user && !signUpData.session) {
-      // Check if user already existed (Supabase returns user with identities=[] for existing emails)
+      setSubmitting(false);
+      return;
+    }
+
+    if (signUpData.user) {
+      // Check for existing user (identities=[] means already registered)
       if (signUpData.user.identities && signUpData.user.identities.length === 0) {
         toast.error("This email is already registered. Please login or reset your password.");
-      } else {
-        setShowVerification(true);
-        toast.success("Account created! Check your email to verify.");
+        setSubmitting(false);
+        return;
       }
-    } else {
-      toast.success("Account created! Welcome to Legalhubly ✓");
+
+      // Send OTP
+      const sent = await sendOtp(signUpData.user.id, trimmedEmail);
+      if (sent) {
+        setOtpUserId(signUpData.user.id);
+        setOtpEmail(trimmedEmail);
+        setOtpPassword(password);
+        setShowOtp(true);
+        setResendCooldown(60);
+        toast.success("Verification code sent! Check your email.");
+      }
     }
     setSubmitting(false);
+  };
+
+  const handleOtpComplete = async (code: string) => {
+    if (code.length !== 6 || verifying) return;
+    setVerifying(true);
+    setOtpError("");
+
+    const { data, error } = await supabase.functions.invoke("verify-email-otp", {
+      body: { action: "verify", email: otpEmail, code },
+    });
+
+    if (error || !data?.verified) {
+      const errMsg = data?.error || error?.message || "Invalid code. Please try again.";
+      setOtpError(errMsg);
+      setOtpValue("");
+      setShake(true);
+      setTimeout(() => setShake(false), 600);
+      setVerifying(false);
+      return;
+    }
+
+    // OTP verified! Sign in the user
+    toast.success("Email verified! Welcome to Legalhubly ✓");
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: otpEmail,
+      password: otpPassword,
+    });
+
+    if (signInError) {
+      toast.error("Verified but login failed. Please sign in manually.");
+    }
+    setVerifying(false);
+  };
+
+  const handleResendOtp = async () => {
+    if (resendCooldown > 0) return;
+    const sent = await sendOtp(otpUserId, otpEmail);
+    if (sent) {
+      toast.success("New code sent! Check your email.");
+      setResendCooldown(60);
+      setOtpValue("");
+      setOtpError("");
+    }
   };
 
   const handleGoogleSignup = async () => {
@@ -150,39 +209,88 @@ export default function Signup() {
     }
   };
 
-  if (showVerification) {
+  // ── OTP VERIFICATION SCREEN ──
+  if (showOtp) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background px-4 py-12">
         <div className="w-full max-w-md text-center space-y-6">
-          <div className="mx-auto h-20 w-20 rounded-full bg-success/10 flex items-center justify-center">
-            <CheckCircle className="h-10 w-10 text-success" />
+          <div className="mx-auto h-20 w-20 rounded-full bg-accent/10 flex items-center justify-center">
+            <Mail className="h-10 w-10 text-accent" />
           </div>
+
           <div>
-            <h1 className="font-serif text-3xl font-bold text-foreground mb-2">Check Your Email!</h1>
-            <p className="text-muted-foreground">We sent a verification link to:</p>
-            <p className="text-foreground font-semibold mt-1">{email.trim().toLowerCase()}</p>
+            <h1 className="font-serif text-3xl font-bold text-foreground mb-2">Check Your Email</h1>
+            <p className="text-muted-foreground">We sent a verification code to:</p>
+            <p className="text-foreground font-semibold mt-1">{otpEmail}</p>
+            <button
+              type="button"
+              onClick={() => { setShowOtp(false); setOtpValue(""); setOtpError(""); }}
+              className="text-xs text-accent hover:underline mt-1"
+            >
+              Edit email
+            </button>
           </div>
-          <div className="flex items-start gap-3 p-4 rounded-xl bg-accent/5 border border-accent/20 text-left">
-            <Mail className="h-5 w-5 text-accent shrink-0 mt-0.5" />
-            <p className="text-sm text-muted-foreground">
-              Click the link in your email to verify your account and get started. The link will expire in 24 hours.
+
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground font-medium">Enter the 6-digit code:</p>
+
+            <div className={`flex justify-center ${shake ? "animate-shake" : ""}`}>
+              <InputOTP
+                maxLength={6}
+                value={otpValue}
+                onChange={(val) => {
+                  setOtpValue(val);
+                  setOtpError("");
+                  if (val.length === 6) handleOtpComplete(val);
+                }}
+                disabled={verifying}
+              >
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} className="h-14 w-12 text-2xl font-bold border-border" />
+                  <InputOTPSlot index={1} className="h-14 w-12 text-2xl font-bold border-border" />
+                  <InputOTPSlot index={2} className="h-14 w-12 text-2xl font-bold border-border" />
+                </InputOTPGroup>
+                <span className="mx-2 text-muted-foreground text-2xl">—</span>
+                <InputOTPGroup>
+                  <InputOTPSlot index={3} className="h-14 w-12 text-2xl font-bold border-border" />
+                  <InputOTPSlot index={4} className="h-14 w-12 text-2xl font-bold border-border" />
+                  <InputOTPSlot index={5} className="h-14 w-12 text-2xl font-bold border-border" />
+                </InputOTPGroup>
+              </InputOTP>
+            </div>
+
+            {verifying && (
+              <div className="flex items-center justify-center gap-2 text-accent">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span className="text-sm">Verifying...</span>
+              </div>
+            )}
+
+            {otpError && (
+              <p className="text-sm text-destructive font-medium">{otpError}</p>
+            )}
+
+            <p className="text-xs text-muted-foreground">
+              Code should arrive in 5–10 seconds. Check your spam folder.
             </p>
           </div>
-          <div className="space-y-3">
-            <p className="text-xs text-muted-foreground">Didn't receive the email? Check your spam folder.</p>
+
+          <div className="space-y-3 pt-2">
+            <p className="text-xs text-muted-foreground">Didn't receive it?</p>
             <Button
               variant="outline"
               className="w-full"
-              onClick={handleResendEmail}
+              onClick={handleResendOtp}
               disabled={resendCooldown > 0}
             >
               <RefreshCw className="mr-2 h-4 w-4" />
-              {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend Verification Email"}
+              {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend Code"}
             </Button>
-            <Button variant="ghost" className="w-full" onClick={() => setShowVerification(false)}>
+            <Button variant="ghost" className="w-full" onClick={() => { setShowOtp(false); setOtpValue(""); setOtpError(""); }}>
               <ArrowLeft className="mr-2 h-4 w-4" /> Back to Sign Up
             </Button>
           </div>
+
           <p className="text-center text-sm text-muted-foreground">
             Already verified?{" "}
             <Link to="/login" className="text-accent font-semibold hover:underline">Sign in</Link>
@@ -192,6 +300,7 @@ export default function Signup() {
     );
   }
 
+  // ── SIGNUP FORM ──
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-md space-y-8">
@@ -280,7 +389,9 @@ export default function Signup() {
           </div>
 
           <Button type="submit" className="w-full h-11" disabled={submitting || !validatePassword(password)}>
-            {submitting ? "Creating account…" : "Create account"}
+            {submitting ? (
+              <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating account…</>
+            ) : "Create account"}
           </Button>
         </form>
 
