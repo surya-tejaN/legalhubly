@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Calendar, Clock, Video, Phone, Building2, CheckCircle2, ArrowLeft, Loader2 } from "lucide-react";
+import { Calendar, Clock, Video, Phone, Building2, CheckCircle2, ArrowLeft, Loader2, X, MessageSquare, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,16 +34,13 @@ const typeLabels: Record<string, string> = {
   "in-person": "In Person",
 };
 
-// Generate dates for next 2 weeks
 function getAvailableDates() {
   const dates = [];
   const today = new Date();
   for (let i = 1; i <= 14; i++) {
     const d = new Date(today);
     d.setDate(today.getDate() + i);
-    if (d.getDay() !== 0 && d.getDay() !== 6) { // Skip weekends
-      dates.push(d);
-    }
+    if (d.getDay() !== 0 && d.getDay() !== 6) dates.push(d);
   }
   return dates;
 }
@@ -59,9 +56,26 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [booked, setBooked] = useState(false);
-  
+  const [autoCloseTimer, setAutoCloseTimer] = useState(8);
 
   const dates = getAvailableDates();
+
+  // Auto-close success modal after 8 seconds
+  useEffect(() => {
+    if (!booked) return;
+    const interval = setInterval(() => {
+      setAutoCloseTimer((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          onClose();
+          navigate("/client/messages");
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [booked, navigate, onClose]);
 
   const handleBook = async () => {
     if (!selectedDate || !selectedTime || !clientName.trim()) return;
@@ -76,7 +90,6 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
       if (period === "AM" && h === 12) h = 0;
       scheduledAt.setHours(h, parseInt(minutes), 0, 0);
 
-      // Create Stripe Checkout session
       const { data, error } = await supabase.functions.invoke("create-checkout-session", {
         body: {
           lawyerId,
@@ -91,11 +104,10 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
       if (error) throw new Error(error.message || "Failed to create checkout session");
       if (!data?.url) throw new Error("No checkout URL returned");
 
-      // Redirect to Stripe Checkout
       window.location.href = data.url;
     } catch (e: any) {
       console.error(e);
-      toast.error(e.message || "Failed to initiate payment. Please try again.");
+      toast.error(e.message || "Failed to initiate booking. Please try again.");
       setIsSubmitting(false);
     }
   };
@@ -104,30 +116,47 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get("booking") === "success" && !booked) {
     setBooked(true);
+    toast.success("Consultation confirmed! Check your email.");
   }
 
   if (booked) {
     return (
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-8 px-6">
-        <div className="h-16 w-16 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-4">
-          <CheckCircle2 className="h-8 w-8 text-success" />
+      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-8 px-6 relative">
+        <button onClick={onClose} className="absolute top-3 right-3 text-muted-foreground hover:text-foreground transition-colors">
+          <X className="h-5 w-5" />
+        </button>
+        <div className="h-20 w-20 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-4">
+          <CheckCircle2 className="h-10 w-10 text-success" />
         </div>
-        <h3 className="font-serif text-xl text-foreground mb-2">Consultation Booked!</h3>
+        <h3 className="font-serif text-2xl text-foreground mb-2">Consultation Booked!</h3>
         <p className="text-sm text-muted-foreground mb-1">
-          {typeLabels[selectedType]} with <strong>{lawyerName}</strong>
+          {typeLabels[selectedType] || "Video Call"} with <strong>{lawyerName}</strong>
         </p>
-        <p className="text-sm text-muted-foreground mb-4">
-          {selectedDate?.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })} at {selectedTime}
-        </p>
-        <p className="text-xs text-muted-foreground mb-4">
-          <span className="inline-flex items-center gap-1 bg-success/10 text-success font-bold px-2 py-0.5 rounded-full text-[10px]">PAYMENT CONFIRMED</span>
-        </p>
+        {selectedDate && (
+          <p className="text-sm text-muted-foreground mb-2">
+            {selectedDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })} at {selectedTime}
+          </p>
+        )}
+        <div className="flex items-center gap-2 justify-center mb-4">
+          <span className="inline-flex items-center gap-1 bg-success/10 text-success font-bold px-2.5 py-1 rounded-full text-xs">
+            <CheckCircle2 className="h-3 w-3" /> CONFIRMED
+          </span>
+        </div>
+        <div className="flex items-start gap-3 p-3 rounded-xl bg-accent/5 border border-accent/20 text-left mb-6">
+          <Mail className="h-4 w-4 text-accent shrink-0 mt-0.5" />
+          <p className="text-xs text-muted-foreground">
+            We've sent a confirmation email to you and the lawyer with all the details.
+          </p>
+        </div>
         <div className="flex gap-3 justify-center">
-          <Button variant="gold" onClick={() => { onClose(); navigate("/client/consultations"); }}>
+          <Button variant="gold" className="gap-2" onClick={() => { onClose(); navigate("/client/messages"); }}>
+            <MessageSquare className="h-4 w-4" /> Go to Messages
+          </Button>
+          <Button variant="outline" onClick={() => { onClose(); navigate("/client/consultations"); }}>
             View Consultations
           </Button>
-          <Button variant="outline" onClick={onClose}>Done</Button>
         </div>
+        <p className="text-xs text-muted-foreground mt-4">Auto-closing in {autoCloseTimer}s</p>
       </motion.div>
     );
   }
@@ -141,10 +170,7 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
         </div>
         <div className="flex items-center gap-3">
           {[1, 2, 3].map((s) => (
-            <div key={s} className={cn(
-              "h-2 w-8 rounded-full transition-colors",
-              s <= step ? "bg-accent" : "bg-muted"
-            )} />
+            <div key={s} className={cn("h-2 w-8 rounded-full transition-colors", s <= step ? "bg-accent" : "bg-muted")} />
           ))}
         </div>
       </div>
@@ -155,31 +181,16 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
             <p className="text-sm font-medium text-foreground mb-3">Consultation Type</p>
             <div className="grid grid-cols-3 gap-3 mb-6">
               {consultationTypes.map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setSelectedType(type)}
-                  className={cn(
-                    "p-4 rounded-xl border-2 text-center transition-all",
-                    selectedType === type
-                      ? "border-accent bg-accent/5"
-                      : "border-border hover:border-accent/30"
-                  )}
-                >
+                <button key={type} onClick={() => setSelectedType(type)}
+                  className={cn("p-4 rounded-xl border-2 text-center transition-all", selectedType === type ? "border-accent bg-accent/5" : "border-border hover:border-accent/30")}>
                   <div className="flex justify-center mb-2 text-accent">{typeIcons[type]}</div>
                   <div className="text-xs font-medium text-foreground">{typeLabels[type]}</div>
                 </button>
               ))}
             </div>
-
             <p className="text-sm font-medium text-foreground mb-3">Your Name</p>
-            <input
-              type="text"
-              value={clientName}
-              onChange={(e) => setClientName(e.target.value)}
-              placeholder="Full name"
-              className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-accent/30 mb-4"
-            />
-
+            <input type="text" value={clientName} onChange={(e) => setClientName(e.target.value)} placeholder="Full name"
+              className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-accent/30 mb-4" />
             <Button variant="gold" className="w-full" disabled={!clientName.trim()} onClick={() => setStep(2)}>
               Choose Date & Time
             </Button>
@@ -191,59 +202,31 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
             <button onClick={() => setStep(1)} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground mb-3">
               <ArrowLeft className="h-3 w-3" /> Back
             </button>
-
             <p className="text-sm font-medium text-foreground mb-3">Select Date</p>
             <div className="grid grid-cols-5 gap-2 mb-5">
               {dates.slice(0, 10).map((d) => (
-                <button
-                  key={d.toISOString()}
-                  onClick={() => setSelectedDate(d)}
-                  className={cn(
-                    "p-2.5 rounded-lg border text-center transition-all",
-                    selectedDate?.toDateString() === d.toDateString()
-                      ? "border-accent bg-accent/5"
-                      : "border-border hover:border-accent/30"
-                  )}
-                >
-                  <div className="text-[10px] text-muted-foreground uppercase">
-                    {d.toLocaleDateString("en-US", { weekday: "short" })}
-                  </div>
+                <button key={d.toISOString()} onClick={() => setSelectedDate(d)}
+                  className={cn("p-2.5 rounded-lg border text-center transition-all", selectedDate?.toDateString() === d.toDateString() ? "border-accent bg-accent/5" : "border-border hover:border-accent/30")}>
+                  <div className="text-[10px] text-muted-foreground uppercase">{d.toLocaleDateString("en-US", { weekday: "short" })}</div>
                   <div className="text-sm font-semibold text-foreground">{d.getDate()}</div>
-                  <div className="text-[10px] text-muted-foreground">
-                    {d.toLocaleDateString("en-US", { month: "short" })}
-                  </div>
+                  <div className="text-[10px] text-muted-foreground">{d.toLocaleDateString("en-US", { month: "short" })}</div>
                 </button>
               ))}
             </div>
-
             {selectedDate && (
               <>
                 <p className="text-sm font-medium text-foreground mb-3">Select Time</p>
                 <div className="grid grid-cols-4 gap-2 mb-5">
                   {timeSlots.map((slot) => (
-                    <button
-                      key={slot}
-                      onClick={() => setSelectedTime(slot)}
-                      className={cn(
-                        "py-2 px-3 rounded-lg border text-xs font-medium transition-all",
-                        selectedTime === slot
-                          ? "border-accent bg-accent/5 text-accent"
-                          : "border-border text-muted-foreground hover:border-accent/30"
-                      )}
-                    >
+                    <button key={slot} onClick={() => setSelectedTime(slot)}
+                      className={cn("py-2 px-3 rounded-lg border text-xs font-medium transition-all", selectedTime === slot ? "border-accent bg-accent/5 text-accent" : "border-border text-muted-foreground hover:border-accent/30")}>
                       {slot}
                     </button>
                   ))}
                 </div>
               </>
             )}
-
-            <Button
-              variant="gold"
-              className="w-full"
-              disabled={!selectedDate || !selectedTime}
-              onClick={() => setStep(3)}
-            >
+            <Button variant="gold" className="w-full" disabled={!selectedDate || !selectedTime} onClick={() => setStep(3)}>
               Review Booking
             </Button>
           </motion.div>
@@ -254,7 +237,6 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
             <button onClick={() => setStep(2)} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground mb-4">
               <ArrowLeft className="h-3 w-3" /> Back
             </button>
-
             <div className="rounded-xl border bg-muted/30 p-4 mb-4 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-muted-foreground">Lawyer</span>
@@ -281,20 +263,14 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
                 <span className="text-sm font-medium text-foreground">30 minutes</span>
               </div>
               <div className="flex items-center justify-between pt-2 border-t">
-                  <span className="text-xs font-medium text-foreground">Fee</span>
-                  <span className="text-sm font-bold text-accent">FREE</span>
-                </div>
+                <span className="text-xs font-medium text-foreground">Fee</span>
+                <span className="text-sm font-bold text-accent">FREE</span>
+              </div>
             </div>
-
             <p className="text-sm font-medium text-foreground mb-2">Notes (optional)</p>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              rows={2}
+            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2}
               placeholder="Anything you'd like the lawyer to know beforehand..."
-              className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none resize-none placeholder:text-muted-foreground focus:ring-2 focus:ring-accent/30 mb-4"
-            />
-
+              className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none resize-none placeholder:text-muted-foreground focus:ring-2 focus:ring-accent/30 mb-4" />
             <Button variant="gold" className="w-full" onClick={handleBook} disabled={isSubmitting}>
               {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...</> : "Book Consultation — Free"}
             </Button>

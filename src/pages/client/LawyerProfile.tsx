@@ -257,7 +257,7 @@ export default function LawyerProfile() {
                 <Button variant="gold" size="lg" onClick={() => setShowBooking(true)} className="gap-2">
                   <Calendar className="h-4 w-4" /> Book Consultation
                 </Button>
-                <Button variant="outline" size="lg" className="gap-2 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10 hover:text-primary-foreground">
+                <Button variant="outline" size="lg" className="gap-2 border-white/40 text-white hover:bg-white/15 hover:text-white hover:border-white/60">
                   <MessageSquare className="h-4 w-4" /> Send Message
                 </Button>
                 <Button
@@ -265,8 +265,8 @@ export default function LawyerProfile() {
                   size="lg"
                   onClick={handleSave}
                   className={cn(
-                    "gap-2 border-primary-foreground/20 hover:bg-primary-foreground/10",
-                    saved ? "text-accent border-accent/40" : "text-primary-foreground hover:text-primary-foreground"
+                    "gap-2 border-white/40 hover:bg-white/15 hover:border-white/60",
+                    saved ? "text-accent border-accent/40 hover:text-accent" : "text-white hover:text-white"
                   )}
                 >
                   <Heart className={cn("h-4 w-4", saved && "fill-accent")} />
