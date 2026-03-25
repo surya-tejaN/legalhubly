@@ -91,6 +91,39 @@ export default function Signup() {
     }
   };
 
+  if (showVerification) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-4 py-12">
+        <div className="w-full max-w-md text-center space-y-6">
+          <div className="mx-auto h-20 w-20 rounded-full bg-success/10 flex items-center justify-center">
+            <CheckCircle className="h-10 w-10 text-success" />
+          </div>
+          <div>
+            <h1 className="font-serif text-3xl font-bold text-foreground mb-2">Check Your Email!</h1>
+            <p className="text-muted-foreground">We sent a verification link to:</p>
+            <p className="text-foreground font-semibold mt-1">{email.trim().toLowerCase()}</p>
+          </div>
+          <div className="flex items-start gap-3 p-4 rounded-xl bg-accent/5 border border-accent/20 text-left">
+            <Mail className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+            <p className="text-sm text-muted-foreground">
+              Click the link in your email to verify your account and get started. The link will expire in 24 hours.
+            </p>
+          </div>
+          <div className="space-y-3">
+            <p className="text-xs text-muted-foreground">Didn't receive the email? Check your spam folder.</p>
+            <Button variant="outline" className="w-full" onClick={() => setShowVerification(false)}>
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back to Sign Up
+            </Button>
+          </div>
+          <p className="text-center text-sm text-muted-foreground">
+            Already verified?{" "}
+            <Link to="/login" className="text-accent font-semibold hover:underline">Sign in</Link>
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-md space-y-8">

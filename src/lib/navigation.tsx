@@ -36,7 +36,7 @@ export const lawyerNavItems = [
   { icon: <Briefcase />, label: "Matters", to: "/lawyer/cases" },
   { icon: <Calendar />, label: "Calendar", to: "/lawyer/calendar" },
   { icon: <FileText />, label: "AI Documents", to: "/lawyer/documents" },
-  { icon: <MessageSquare />, label: "Messages", to: "/lawyer/messages", badge: 4 },
+  { icon: <MessageSquare />, label: "Messages", to: "/lawyer/messages" },
   { icon: <CreditCard />, label: "Billing", to: "/lawyer/billing" },
   { icon: <BarChart3 />, label: "Analytics", to: "/lawyer/analytics" },
 ];
