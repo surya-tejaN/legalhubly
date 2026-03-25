@@ -58,7 +58,7 @@ export default function Unsubscribe() {
 
         {status === "success" && (
           <div className="space-y-3">
-            <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto" />
+            <CheckCircle2 className="h-12 w-12 text-success mx-auto" />
             <p className="text-foreground font-medium">You've been unsubscribed.</p>
             <p className="text-sm text-muted-foreground">You will no longer receive app emails from Legalhubly.</p>
           </div>
