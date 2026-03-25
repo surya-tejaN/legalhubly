@@ -59,7 +59,7 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [booked, setBooked] = useState(false);
-  const [conversationId, setConversationId] = useState<string | null>(null);
+  
 
   const dates = getAvailableDates();
 
@@ -76,73 +76,35 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
       if (period === "AM" && h === 12) h = 0;
       scheduledAt.setHours(h, parseInt(minutes), 0, 0);
 
-      // Create consultation
-      const { error } = await supabase.from("consultations").insert({
-        lawyer_id: lawyerId,
-        client_name: clientName.trim(),
-        title: `Consultation with ${lawyerName}`,
-        scheduled_at: scheduledAt.toISOString(),
-        type: selectedType,
-        notes: notes.trim() || null,
-        status: "scheduled",
-        duration_minutes: 30,
+      // Create Stripe Checkout session
+      const { data, error } = await supabase.functions.invoke("create-checkout-session", {
+        body: {
+          lawyerId,
+          lawyerName,
+          consultationType: selectedType,
+          scheduledAt: scheduledAt.toISOString(),
+          clientName: clientName.trim(),
+          notes: notes.trim() || "",
+        },
       });
-      if (error) throw error;
 
-      // Create conversation + add participants if user is logged in
-      let newConvoId: string | null = null;
-      if (user) {
-        const { data: convo, error: convoErr } = await supabase
-          .from("conversations")
-          .insert({})
-          .select("id")
-          .single();
-        if (!convoErr && convo) {
-          newConvoId = convo.id;
-          await supabase.from("conversation_participants").insert([
-            { conversation_id: convo.id, user_id: user.id },
-          ]);
-          // Send initial message
-          await supabase.from("messages").insert({
-            conversation_id: convo.id,
-            sender_user_id: user.id,
-            body: `📅 Consultation booked: ${typeLabels[selectedType]} with ${lawyerName} on ${scheduledAt.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })} at ${selectedTime}.`,
-          });
-        }
-      }
+      if (error) throw new Error(error.message || "Failed to create checkout session");
+      if (!data?.url) throw new Error("No checkout URL returned");
 
-      setConversationId(newConvoId);
-      setBooked(true);
-
-      // Send booking confirmation email
-      if (user?.email) {
-        const bookingId = crypto.randomUUID();
-        supabase.functions.invoke("send-transactional-email", {
-          body: {
-            templateName: "booking-confirmation",
-            recipientEmail: user.email,
-            idempotencyKey: `booking-confirm-${bookingId}`,
-            templateData: {
-              clientName: clientName.trim(),
-              lawyerName,
-              consultationType: typeLabels[selectedType],
-              date: selectedDate?.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" }),
-              time: selectedTime,
-              duration: "30 minutes",
-            },
-          },
-        }).catch(console.error);
-      }
-
-      toast.success("Consultation booked! Check your email for confirmation.");
-      onBooked?.();
-    } catch (e) {
+      // Redirect to Stripe Checkout
+      window.location.href = data.url;
+    } catch (e: any) {
       console.error(e);
-      toast.error("Failed to book consultation. Please try again.");
-    } finally {
+      toast.error(e.message || "Failed to initiate payment. Please try again.");
       setIsSubmitting(false);
     }
   };
+
+  // Handle success redirect
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("booking") === "success" && !booked) {
+    setBooked(true);
+  }
 
   if (booked) {
     return (
@@ -158,15 +120,13 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
           {selectedDate?.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })} at {selectedTime}
         </p>
         <p className="text-xs text-muted-foreground mb-4">
-          <span className="inline-flex items-center gap-1 bg-success/10 text-success font-bold px-2 py-0.5 rounded-full text-[10px]">FREE CONSULTATION (MVP)</span>
+          <span className="inline-flex items-center gap-1 bg-success/10 text-success font-bold px-2 py-0.5 rounded-full text-[10px]">PAYMENT CONFIRMED</span>
         </p>
         <div className="flex gap-3 justify-center">
-          {conversationId && (
-            <Button variant="gold" onClick={() => { onClose(); navigate(`/client/messages?conversationId=${conversationId}`); }}>
-              Open Chat
-            </Button>
-          )}
-          <Button variant={conversationId ? "outline" : "gold"} onClick={onClose}>Done</Button>
+          <Button variant="gold" onClick={() => { onClose(); navigate("/client/consultations"); }}>
+            View Consultations
+          </Button>
+          <Button variant="outline" onClick={onClose}>Done</Button>
         </div>
       </motion.div>
     );
@@ -322,12 +282,7 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
               </div>
               <div className="flex items-center justify-between pt-2 border-t">
                   <span className="text-xs font-medium text-foreground">Fee</span>
-                  <div className="flex items-center gap-2">
-                    {consultationFee ? (
-                      <span className="text-sm line-through text-muted-foreground">${consultationFee}</span>
-                    ) : null}
-                    <span className="text-[10px] font-bold bg-success/10 text-success px-2 py-0.5 rounded-full">FREE (MVP)</span>
-                  </div>
+                  <span className="text-sm font-bold text-accent">${consultationFee || 150}</span>
                 </div>
             </div>
 
@@ -341,7 +296,7 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
             />
 
             <Button variant="gold" className="w-full" onClick={handleBook} disabled={isSubmitting}>
-              {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Booking...</> : "Confirm Booking"}
+              {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...</> : "Pay & Book — $150"}
             </Button>
           </motion.div>
         )}

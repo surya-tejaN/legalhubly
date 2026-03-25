@@ -876,6 +876,7 @@ export type Database = {
           id: string
           profile_photo: string | null
           role: Database["public"]["Enums"]["app_role"]
+          stripe_customer_id: string | null
           updated_at: string
           user_id: string
         }
@@ -888,6 +889,7 @@ export type Database = {
           id?: string
           profile_photo?: string | null
           role?: Database["public"]["Enums"]["app_role"]
+          stripe_customer_id?: string | null
           updated_at?: string
           user_id: string
         }
@@ -900,6 +902,7 @@ export type Database = {
           id?: string
           profile_photo?: string | null
           role?: Database["public"]["Enums"]["app_role"]
+          stripe_customer_id?: string | null
           updated_at?: string
           user_id?: string
         }

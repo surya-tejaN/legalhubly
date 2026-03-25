@@ -49,12 +49,21 @@ export default function ClientPayments() {
   const statusVariant = (s: string) => s === "paid" ? "success" as const : s === "overdue" ? "destructive" as const : "warning" as const;
 
   const handlePayNow = (inv: Invoice) => {
-    // Stripe integration placeholder — will create checkout session when Stripe is configured
     toast.info("Payment processing will be available once Stripe is configured.");
   };
 
-  const handleUpdateCard = () => {
-    toast.info("Card management will be available once Stripe is configured.");
+  const handleUpdateCard = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke("create-portal-session");
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      } else {
+        toast.error("Could not open payment settings.");
+      }
+    } catch {
+      toast.error("Failed to open payment settings. Please try again.");
+    }
   };
 
   return (
