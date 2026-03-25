@@ -114,6 +114,7 @@ function AnimatedRoutes() {
         <Route path="/cities/:citySlug" element={<PageTransition><CityDepartments /></PageTransition>} />
         <Route path="/lawyers" element={<PageTransition><SeoDirectory /></PageTransition>} />
         <Route path="/lawyers/:practiceArea/:city" element={<PageTransition><SeoLandingPage /></PageTransition>} />
+        <Route path="/unsubscribe" element={<PageTransition><Unsubscribe /></PageTransition>} />
 
         <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
       </Routes>
