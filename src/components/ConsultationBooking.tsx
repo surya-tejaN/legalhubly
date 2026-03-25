@@ -76,70 +76,26 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
       if (period === "AM" && h === 12) h = 0;
       scheduledAt.setHours(h, parseInt(minutes), 0, 0);
 
-      // Create consultation
-      const { error } = await supabase.from("consultations").insert({
-        lawyer_id: lawyerId,
-        client_name: clientName.trim(),
-        title: `Consultation with ${lawyerName}`,
-        scheduled_at: scheduledAt.toISOString(),
-        type: selectedType,
-        notes: notes.trim() || null,
-        status: "scheduled",
-        duration_minutes: 30,
+      // Create Stripe Checkout session
+      const { data, error } = await supabase.functions.invoke("create-checkout-session", {
+        body: {
+          lawyerId,
+          lawyerName,
+          consultationType: selectedType,
+          scheduledAt: scheduledAt.toISOString(),
+          clientName: clientName.trim(),
+          notes: notes.trim() || "",
+        },
       });
-      if (error) throw error;
 
-      // Create conversation + add participants if user is logged in
-      let newConvoId: string | null = null;
-      if (user) {
-        const { data: convo, error: convoErr } = await supabase
-          .from("conversations")
-          .insert({})
-          .select("id")
-          .single();
-        if (!convoErr && convo) {
-          newConvoId = convo.id;
-          await supabase.from("conversation_participants").insert([
-            { conversation_id: convo.id, user_id: user.id },
-          ]);
-          // Send initial message
-          await supabase.from("messages").insert({
-            conversation_id: convo.id,
-            sender_user_id: user.id,
-            body: `📅 Consultation booked: ${typeLabels[selectedType]} with ${lawyerName} on ${scheduledAt.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })} at ${selectedTime}.`,
-          });
-        }
-      }
+      if (error) throw new Error(error.message || "Failed to create checkout session");
+      if (!data?.url) throw new Error("No checkout URL returned");
 
-      setConversationId(newConvoId);
-      setBooked(true);
-
-      // Send booking confirmation email
-      if (user?.email) {
-        const bookingId = crypto.randomUUID();
-        supabase.functions.invoke("send-transactional-email", {
-          body: {
-            templateName: "booking-confirmation",
-            recipientEmail: user.email,
-            idempotencyKey: `booking-confirm-${bookingId}`,
-            templateData: {
-              clientName: clientName.trim(),
-              lawyerName,
-              consultationType: typeLabels[selectedType],
-              date: selectedDate?.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" }),
-              time: selectedTime,
-              duration: "30 minutes",
-            },
-          },
-        }).catch(console.error);
-      }
-
-      toast.success("Consultation booked! Check your email for confirmation.");
-      onBooked?.();
-    } catch (e) {
+      // Redirect to Stripe Checkout
+      window.location.href = data.url;
+    } catch (e: any) {
       console.error(e);
-      toast.error("Failed to book consultation. Please try again.");
-    } finally {
+      toast.error(e.message || "Failed to initiate payment. Please try again.");
       setIsSubmitting(false);
     }
   };
