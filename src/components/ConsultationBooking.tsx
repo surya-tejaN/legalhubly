@@ -59,7 +59,7 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [booked, setBooked] = useState(false);
-  const [conversationId, setConversationId] = useState<string | null>(null);
+  
 
   const dates = getAvailableDates();
 
