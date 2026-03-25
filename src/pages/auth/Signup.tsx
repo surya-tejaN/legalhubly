@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Scale, Mail, Lock, User, MapPin, Eye, EyeOff } from "lucide-react";
+import { Scale, Mail, Lock, User, MapPin, Eye, EyeOff, CheckCircle, ArrowLeft } from "lucide-react";
 import PasswordStrengthMeter, { validatePassword } from "@/components/PasswordStrengthMeter";
 
 const ROLES: { value: AppRole; label: string; desc: string }[] = [
