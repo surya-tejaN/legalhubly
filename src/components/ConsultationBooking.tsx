@@ -282,7 +282,7 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
               </div>
               <div className="flex items-center justify-between pt-2 border-t">
                   <span className="text-xs font-medium text-foreground">Fee</span>
-                  <span className="text-sm font-bold text-accent">${consultationFee || 150}</span>
+                  <span className="text-sm font-bold text-accent">FREE</span>
                 </div>
             </div>
 
