@@ -11,8 +11,10 @@ export interface TemplateEntry {
 
 import { template as bookingConfirmation } from './booking-confirmation.tsx'
 import { template as paymentReceipt } from './payment-receipt.tsx'
+import { template as otpVerification } from './otp-verification.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'booking-confirmation': bookingConfirmation,
   'payment-receipt': paymentReceipt,
+  'otp-verification': otpVerification,
 }
