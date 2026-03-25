@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.follow-up-agent]
 verify_jwt = false
+
+[functions.process-email-queue]
+verify_jwt = true
