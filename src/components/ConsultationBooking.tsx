@@ -282,7 +282,7 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
               </div>
               <div className="flex items-center justify-between pt-2 border-t">
                   <span className="text-xs font-medium text-foreground">Fee</span>
-                  <span className="text-sm font-bold text-accent">${consultationFee || 150}</span>
+                  <span className="text-sm font-bold text-accent">FREE</span>
                 </div>
             </div>
 
@@ -296,7 +296,7 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
             />
 
             <Button variant="gold" className="w-full" onClick={handleBook} disabled={isSubmitting}>
-              {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...</> : "Pay & Book — $150"}
+              {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...</> : "Book Consultation — Free"}
             </Button>
           </motion.div>
         )}
