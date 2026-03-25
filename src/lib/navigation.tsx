@@ -23,8 +23,8 @@ export const clientNavItems = [
   { icon: <Search />, label: "Find Lawyers", to: "/client/find-lawyers" },
   { icon: <Heart />, label: "Saved Lawyers", to: "/client/saved-lawyers" },
   { icon: <Calendar />, label: "Consultations", to: "/client/consultations" },
-  { icon: <MessageSquare />, label: "Messages", to: "/client/messages", badge: 3 },
-  { icon: <Briefcase />, label: "My Cases", to: "/client/cases", badge: 2 },
+  { icon: <MessageSquare />, label: "Messages", to: "/client/messages" },
+  { icon: <Briefcase />, label: "My Cases", to: "/client/cases" },
   { icon: <FileText />, label: "Documents", to: "/client/documents" },
   { icon: <CreditCard />, label: "Payments", to: "/client/payments" },
   { icon: <Settings />, label: "Account Settings", to: "/client/settings" },
@@ -32,11 +32,11 @@ export const clientNavItems = [
 
 export const lawyerNavItems = [
   { icon: <LayoutDashboard />, label: "Dashboard", to: "/lawyer/dashboard" },
-  { icon: <Users />, label: "Leads", to: "/lawyer/leads", badge: 6 },
-  { icon: <Briefcase />, label: "Matters", to: "/lawyer/cases", badge: 5 },
+  { icon: <Users />, label: "Leads", to: "/lawyer/leads" },
+  { icon: <Briefcase />, label: "Matters", to: "/lawyer/cases" },
   { icon: <Calendar />, label: "Calendar", to: "/lawyer/calendar" },
   { icon: <FileText />, label: "AI Documents", to: "/lawyer/documents" },
-  { icon: <MessageSquare />, label: "Messages", to: "/lawyer/messages", badge: 4 },
+  { icon: <MessageSquare />, label: "Messages", to: "/lawyer/messages" },
   { icon: <CreditCard />, label: "Billing", to: "/lawyer/billing" },
   { icon: <BarChart3 />, label: "Analytics", to: "/lawyer/analytics" },
 ];
