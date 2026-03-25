@@ -58,8 +58,6 @@ export default function Signup() {
   const [otpError, setOtpError] = useState("");
   const [shake, setShake] = useState(false);
 
-  if (!loading && user) return <Navigate to={dashboardPath} replace />;
-
   // Resend cooldown timer
   useEffect(() => {
     if (resendCooldown <= 0) return;
@@ -71,6 +69,8 @@ export default function Signup() {
     }, 1000);
     return () => clearInterval(timer);
   }, [resendCooldown]);
+
+  if (!loading && user) return <Navigate to={dashboardPath} replace />;
 
   const sendOtp = async (userId: string, emailAddr: string) => {
     const { error } = await supabase.functions.invoke("verify-email-otp", {
