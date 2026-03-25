@@ -11,11 +11,6 @@ project_id = "agmkgxmjktbfzpzpkqez"
     verify_jwt = false
   [functions.create-portal-session]
     verify_jwt = false
-    verify_jwt = false
-  [functions.billing-agent]
-    verify_jwt = false
-  [functions.client-support]
-    verify_jwt = false
   [functions.document-agent]
     verify_jwt = false
   [functions.follow-up-agent]
@@ -36,3 +31,5 @@ project_id = "agmkgxmjktbfzpzpkqez"
     verify_jwt = true
   [functions.send-transactional-email]
     verify_jwt = true
+  [functions.stripe-webhook]
+    verify_jwt = false
