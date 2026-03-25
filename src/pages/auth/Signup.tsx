@@ -26,6 +26,8 @@ export default function Signup() {
   const [role, setRole] = useState<AppRole>("client");
   const [submitting, setSubmitting] = useState(false);
 
+  const [showVerification, setShowVerification] = useState(false);
+
   if (!loading && user) return <Navigate to={dashboardPath} replace />;
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -48,7 +50,7 @@ export default function Signup() {
     }
 
     setSubmitting(true);
-    const { error } = await supabase.auth.signUp({
+    const { data: signUpData, error } = await supabase.auth.signUp({
       email: trimmedEmail,
       password,
       options: {
@@ -58,6 +60,9 @@ export default function Signup() {
     });
     if (error) {
       toast.error(error.message);
+    } else if (signUpData.user && !signUpData.session) {
+      // Email confirmation required
+      setShowVerification(true);
     } else {
       toast.success("Account created! Signing you in…");
     }
