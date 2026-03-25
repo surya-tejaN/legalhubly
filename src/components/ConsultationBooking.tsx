@@ -296,7 +296,7 @@ export default function ConsultationBooking({ lawyerName, lawyerId, consultation
             />
 
             <Button variant="gold" className="w-full" onClick={handleBook} disabled={isSubmitting}>
-              {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...</> : "Pay & Book — $150"}
+              {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...</> : "Book Consultation — Free"}
             </Button>
           </motion.div>
         )}
