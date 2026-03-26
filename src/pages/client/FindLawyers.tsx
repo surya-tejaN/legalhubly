@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -411,6 +411,7 @@ function LawyerResults({ lawyers, loading, city, practiceArea, sortBy, onSortCha
 export default function FindLawyers() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [cities, setCities] = useState<City[]>([]);
   const [practiceAreas, setPracticeAreas] = useState<PracticeArea[]>([]);
@@ -422,6 +423,7 @@ export default function FindLawyers() {
   const [loadingLawyers, setLoadingLawyers] = useState(false);
   const [sortBy, setSortBy] = useState<SortKey>("rating");
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+  const urlApplied = useRef(false);
 
   // Load saved lawyer IDs
   useEffect(() => {
@@ -463,7 +465,34 @@ export default function FindLawyers() {
     });
   }, []);
 
-  // Fetch lawyers when city + area selected
+  // Apply URL parameters to skip steps
+  useEffect(() => {
+    if (urlApplied.current) return;
+    const urlLocation = searchParams.get("location");
+    const urlCategory = searchParams.get("category");
+    if (!urlLocation && !urlCategory) return;
+    if (cities.length === 0 || practiceAreas.length === 0) return;
+
+    const matchedCity = cities.find(
+      (c) => `${c.name}, ${c.state}` === urlLocation || c.name.toLowerCase() === urlLocation?.toLowerCase()
+    );
+    const matchedArea = practiceAreas.find(
+      (pa) => pa.name === urlCategory || pa.slug === urlCategory?.toLowerCase()
+    );
+
+    if (matchedCity && matchedArea) {
+      setSelectedCity(matchedCity);
+      setSelectedArea(matchedArea);
+      setStep(3);
+      urlApplied.current = true;
+    } else if (matchedCity) {
+      setSelectedCity(matchedCity);
+      setStep(2);
+      urlApplied.current = true;
+    }
+  }, [searchParams, cities, practiceAreas]);
+
+
   useEffect(() => {
     if (!selectedCity || !selectedArea) return;
     setLoadingLawyers(true);
