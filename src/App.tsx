@@ -83,7 +83,7 @@ function AnimatedRoutes() {
         <Route path="/client/dashboard" element={<ProtectedRoute allowedRoles={["client"]}><PageTransition><ClientDashboard /></PageTransition></ProtectedRoute>} />
         <Route path="/client/intake" element={<ProtectedRoute allowedRoles={["client"]}><PageTransition><CaseIntake /></PageTransition></ProtectedRoute>} />
         <Route path="/client/cases" element={<ProtectedRoute allowedRoles={["client"]}><PageTransition><ClientCases /></PageTransition></ProtectedRoute>} />
-        <Route path="/client/find-lawyers" element={<ProtectedRoute allowedRoles={["client"]}><PageTransition><FindLawyers /></PageTransition></ProtectedRoute>} />
+        <Route path="/client/find-lawyers" element={<PageTransition><FindLawyers /></PageTransition>} />
         <Route path="/client/messages" element={<ProtectedRoute allowedRoles={["client"]}><PageTransition><ClientMessages /></PageTransition></ProtectedRoute>} />
         <Route path="/client/cases/:caseId" element={<ProtectedRoute allowedRoles={["client"]}><PageTransition><CaseWorkspace role="client" /></PageTransition></ProtectedRoute>} />
         <Route path="/client/documents" element={<ProtectedRoute allowedRoles={["client"]}><PageTransition><ClientDocuments /></PageTransition></ProtectedRoute>} />
