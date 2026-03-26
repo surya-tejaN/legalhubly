@@ -411,6 +411,7 @@ function LawyerResults({ lawyers, loading, city, practiceArea, sortBy, onSortCha
 export default function FindLawyers() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [cities, setCities] = useState<City[]>([]);
   const [practiceAreas, setPracticeAreas] = useState<PracticeArea[]>([]);
@@ -422,6 +423,7 @@ export default function FindLawyers() {
   const [loadingLawyers, setLoadingLawyers] = useState(false);
   const [sortBy, setSortBy] = useState<SortKey>("rating");
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+  const urlApplied = useRef(false);
 
   // Load saved lawyer IDs
   useEffect(() => {
