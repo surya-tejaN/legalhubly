@@ -465,7 +465,34 @@ export default function FindLawyers() {
     });
   }, []);
 
-  // Fetch lawyers when city + area selected
+  // Apply URL parameters to skip steps
+  useEffect(() => {
+    if (urlApplied.current) return;
+    const urlLocation = searchParams.get("location");
+    const urlCategory = searchParams.get("category");
+    if (!urlLocation && !urlCategory) return;
+    if (cities.length === 0 || practiceAreas.length === 0) return;
+
+    const matchedCity = cities.find(
+      (c) => `${c.name}, ${c.state}` === urlLocation || c.name.toLowerCase() === urlLocation?.toLowerCase()
+    );
+    const matchedArea = practiceAreas.find(
+      (pa) => pa.name === urlCategory || pa.slug === urlCategory?.toLowerCase()
+    );
+
+    if (matchedCity && matchedArea) {
+      setSelectedCity(matchedCity);
+      setSelectedArea(matchedArea);
+      setStep(3);
+      urlApplied.current = true;
+    } else if (matchedCity) {
+      setSelectedCity(matchedCity);
+      setStep(2);
+      urlApplied.current = true;
+    }
+  }, [searchParams, cities, practiceAreas]);
+
+
   useEffect(() => {
     if (!selectedCity || !selectedArea) return;
     setLoadingLawyers(true);
