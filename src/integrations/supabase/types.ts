@@ -559,10 +559,12 @@ export type Database = {
           rating: number
           review_count: number
           review_summary: string | null
+          short_description: string | null
           specialization_tags: string[]
           state: string | null
           updated_at: string
           verified: boolean
+          website_url: string | null
         }
         Insert: {
           availability_status?: string
@@ -591,10 +593,12 @@ export type Database = {
           rating?: number
           review_count?: number
           review_summary?: string | null
+          short_description?: string | null
           specialization_tags?: string[]
           state?: string | null
           updated_at?: string
           verified?: boolean
+          website_url?: string | null
         }
         Update: {
           availability_status?: string
@@ -623,10 +627,12 @@ export type Database = {
           rating?: number
           review_count?: number
           review_summary?: string | null
+          short_description?: string | null
           specialization_tags?: string[]
           state?: string | null
           updated_at?: string
           verified?: boolean
+          website_url?: string | null
         }
         Relationships: [
           {
