@@ -166,7 +166,7 @@ export default function DashboardLayout({ children, sidebarItems, portalLabel, u
               <Search className="h-4 w-4 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Search cases, documents, messages..."
+                placeholder="Search lawyers..."
                 className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/60"
               />
               <kbd className="hidden lg:inline-flex text-[10px] text-muted-foreground/50 bg-background/80 border px-1.5 py-0.5 rounded font-mono">⌘K</kbd>

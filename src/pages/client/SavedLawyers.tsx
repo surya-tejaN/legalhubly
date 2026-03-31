@@ -151,7 +151,7 @@ export default function SavedLawyers() {
           })}
         </div>
       )}
-      <ClientSupportChat />
+      
     </DashboardLayout>
   );
 }
