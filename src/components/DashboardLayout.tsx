@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Scale, ChevronLeft, ChevronRight, Search, Menu, X, User, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import NotificationsCenter from "@/components/NotificationsCenter";
+
 import { motion, AnimatePresence } from "framer-motion";
 
 interface SidebarItem {
