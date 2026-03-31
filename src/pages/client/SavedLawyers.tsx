@@ -11,7 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import ClientSupportChat from "@/components/ClientSupportChat";
+
 
 interface SavedRow {
   id: string;
