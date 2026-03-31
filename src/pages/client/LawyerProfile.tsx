@@ -162,6 +162,7 @@ export default function LawyerProfile() {
                 <span className="flex items-center gap-1.5">
                   <Star className="h-3.5 w-3.5 fill-accent text-accent" /> {lawyer.rating.toFixed(1)} ({lawyer.review_count} reviews)
                 </span>
+                <span className="flex items-center gap-1.5"><Scale className="h-3.5 w-3.5" /> {Math.round(lawyer.experience_years * 20 + lawyer.review_count * 3)}+ cases</span>
                 <span className="flex items-center gap-1.5"><Timer className="h-3.5 w-3.5" /> Responds in {responseLabel}</span>
               </div>
 
