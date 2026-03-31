@@ -279,17 +279,9 @@ function LawyerCard({ lawyer, index, savedIds, onToggleSave }: { lawyer: Lawyer;
 
           {/* CTA */}
           <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-3 shrink-0">
-            <div className="text-right">
-              <div className="text-xl font-serif text-foreground">
-                {lawyer.consultation_fee ? `$${lawyer.consultation_fee}` : "Free"}
-              </div>
-              <div className="text-[11px] text-muted-foreground">
-                {lawyer.consultation_fee ? "consultation" : "free consult"}
-              </div>
-            </div>
             <Button variant="gold" size="default" asChild>
               <Link to={`/client/lawyer/${lawyer.id}`}>
-                <Calendar className="mr-2 h-4 w-4" /> Book Consultation
+                View Profile <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
               </Link>
             </Button>
           </div>
