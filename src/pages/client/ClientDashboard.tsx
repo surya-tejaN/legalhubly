@@ -7,11 +7,10 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  Search, Heart, Calendar, MessageSquare, Settings, ArrowRight,
-  Star, MapPin, Clock, Scale, Sparkles, AlertCircle, User,
-  Mail, Shield, LogOut,
+  Search, Heart, Settings, ArrowRight,
+  Star, MapPin, Scale, Sparkles, User,
+  Mail, LogOut,
 } from "lucide-react";
-import ClientSupportChat from "@/components/ClientSupportChat";
 
 const anim = (delay: number) => ({
   initial: { opacity: 0, y: 10 },
@@ -23,7 +22,6 @@ export default function ClientDashboard() {
   const { user, profile, signOut } = useAuth();
   const firstName = profile?.full_name?.split(" ")[0] || "there";
 
-  // Saved lawyers
   const { data: savedLawyers = [] } = useQuery({
     queryKey: ["saved-lawyers", user?.id],
     queryFn: async () => {
@@ -33,21 +31,6 @@ export default function ClientDashboard() {
         .select("*, lawyers(*)")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
-        .limit(4);
-      return data || [];
-    },
-    enabled: !!user,
-  });
-
-  // Upcoming consultations
-  const { data: consultations = [] } = useQuery({
-    queryKey: ["consultations", user?.id],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("consultations")
-        .select("*, lawyers(name, avatar_initials, firm)")
-        .gte("scheduled_at", new Date().toISOString())
-        .order("scheduled_at", { ascending: true })
         .limit(4);
       return data || [];
     },
@@ -69,7 +52,7 @@ export default function ClientDashboard() {
               Welcome back, {firstName}
             </h1>
             <p className="text-muted-foreground mt-1">
-              Here's what's happening with your legal matters.
+              Discover and connect with the right lawyers for your needs.
             </p>
           </div>
           <Button variant="gold" asChild>
@@ -81,12 +64,11 @@ export default function ClientDashboard() {
       </motion.div>
 
       {/* Quick stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         {[
           { icon: <Search className="h-5 w-5 text-accent" />, label: "Find Lawyers", value: "Search", to: "/client/find-lawyers" },
           { icon: <Heart className="h-5 w-5 text-accent" />, label: "Saved Lawyers", value: savedLawyers.length, to: "/client/saved-lawyers" },
-          { icon: <Calendar className="h-5 w-5 text-accent" />, label: "Consultations", value: consultations.length, to: "/client/consultations" },
-          { icon: <MessageSquare className="h-5 w-5 text-accent" />, label: "Messages", value: "View", to: "/client/messages" },
+          { icon: <Settings className="h-5 w-5 text-accent" />, label: "Account", value: "Settings", to: "/client/settings" },
         ].map((stat, i) => (
           <motion.div key={stat.label} {...anim(i * 0.05)}>
             <Link
@@ -107,9 +89,8 @@ export default function ClientDashboard() {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Left column */}
+        {/* Left column - Saved Lawyers */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Saved Lawyers */}
           <motion.div {...anim(0.1)}>
             <div className="rounded-xl bg-card border shadow-card">
               <div className="flex items-center justify-between p-5 border-b">
@@ -130,7 +111,7 @@ export default function ClientDashboard() {
                 </div>
               ) : (
                 <div className="divide-y">
-                  {savedLawyers.slice(0, 3).map((sl: any) => {
+                  {savedLawyers.slice(0, 4).map((sl: any) => {
                     const lawyer = sl.lawyers;
                     if (!lawyer) return null;
                     return (
@@ -164,114 +145,12 @@ export default function ClientDashboard() {
               )}
             </div>
           </motion.div>
-
-          {/* Consultation Bookings */}
-          <motion.div {...anim(0.15)}>
-            <div className="rounded-xl bg-card border shadow-card">
-              <div className="flex items-center justify-between p-5 border-b">
-                <h2 className="font-semibold text-foreground flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-accent" /> Consultation Bookings
-                </h2>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/client/consultations">View All <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link>
-                </Button>
-              </div>
-              {consultations.length === 0 ? (
-                <div className="p-8 text-center">
-                  <Calendar className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
-                  <p className="text-sm text-muted-foreground">No upcoming consultations.</p>
-                  <Button variant="outline" size="sm" className="mt-3" asChild>
-                    <Link to="/client/find-lawyers">Book a Consultation</Link>
-                  </Button>
-                </div>
-              ) : (
-                <div className="divide-y">
-                  {consultations.slice(0, 3).map((c: any) => {
-                    const lawyer = c.lawyers;
-                    const date = new Date(c.scheduled_at);
-                    return (
-                      <div key={c.id} className="flex items-center gap-4 p-4">
-                        <div className="h-11 w-11 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
-                          <Calendar className="h-5 w-5 text-accent" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm text-foreground">{c.title}</div>
-                          <div className="text-xs text-muted-foreground mt-0.5">
-                            {lawyer?.name || c.client_name} · {c.type}
-                          </div>
-                          <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                            <Clock className="h-3 w-3" />
-                            {date.toLocaleDateString("en-US", { month: "short", day: "numeric" })} at{" "}
-                            {date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
-                          </div>
-                        </div>
-                        <span className={`text-[10px] font-medium px-2.5 py-1 rounded-full ${
-                          c.status === "confirmed" ? "bg-[hsl(var(--success))]/10 text-[hsl(var(--success))]" : "bg-accent/10 text-accent"
-                        }`}>
-                          {c.status}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </motion.div>
-
-          {/* Messages Preview */}
-          <motion.div {...anim(0.2)}>
-            <div className="rounded-xl bg-card border shadow-card">
-              <div className="flex items-center justify-between p-5 border-b">
-                <h2 className="font-semibold text-foreground flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4 text-accent" /> Messages
-                </h2>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/client/messages">Open Inbox <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link>
-                </Button>
-              </div>
-              <div className="p-8 text-center">
-                <MessageSquare className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
-                <p className="text-sm text-muted-foreground">Messages with your lawyers will appear here.</p>
-                <Button variant="outline" size="sm" className="mt-3" asChild>
-                  <Link to="/client/messages">Go to Messages</Link>
-                </Button>
-              </div>
-            </div>
-          </motion.div>
         </div>
 
         {/* Right column */}
         <div className="space-y-6">
-          {/* Recent Searches */}
+          {/* Account Card */}
           <motion.div {...anim(0.05)}>
-            <div className="rounded-xl bg-card border shadow-card">
-              <div className="p-5 border-b">
-                <h2 className="font-semibold text-foreground flex items-center gap-2">
-                  <Search className="h-4 w-4 text-accent" /> Recent Searches
-                </h2>
-              </div>
-              <div className="p-4 space-y-2">
-                {["Immigration lawyer in Chicago", "Family law attorney", "Employment dispute help"].map((s, i) => (
-                  <Link
-                    key={i}
-                    to="/client/find-lawyers"
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors text-sm text-foreground"
-                  >
-                    <Clock className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                    <span className="truncate">{s}</span>
-                  </Link>
-                ))}
-                <Button variant="outline" size="sm" className="w-full mt-1" asChild>
-                  <Link to="/client/find-lawyers">
-                    <Search className="mr-2 h-3.5 w-3.5" /> New Search
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Account Settings Card */}
-          <motion.div {...anim(0.1)}>
             <div className="rounded-xl bg-card border shadow-card">
               <div className="p-5 border-b">
                 <h2 className="font-semibold text-foreground flex items-center gap-2">
@@ -302,13 +181,6 @@ export default function ClientDashboard() {
                     <Settings className="h-4 w-4 text-muted-foreground" />
                     Edit Profile
                   </Link>
-                  <Link
-                    to="/client/payments"
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors text-sm text-foreground"
-                  >
-                    <Shield className="h-4 w-4 text-muted-foreground" />
-                    Billing & Payments
-                  </Link>
                   <button
                     onClick={signOut}
                     className="flex items-center gap-3 p-3 rounded-lg hover:bg-destructive/5 transition-colors text-sm text-destructive w-full text-left"
@@ -321,32 +193,30 @@ export default function ClientDashboard() {
             </div>
           </motion.div>
 
-          {/* AI Assistant promo */}
-          <motion.div {...anim(0.15)}>
+          {/* Discovery promo */}
+          <motion.div {...anim(0.1)}>
             <div className="rounded-xl border border-accent/20 bg-accent/5 p-5">
               <div className="flex items-center gap-3 mb-3">
                 <div className="h-10 w-10 rounded-lg bg-accent/15 flex items-center justify-center">
                   <Scale className="h-5 w-5 text-accent" />
                 </div>
                 <div>
-                  <div className="font-semibold text-sm text-foreground">Need Help?</div>
-                  <div className="text-xs text-muted-foreground">Our AI assistant is here 24/7</div>
+                  <div className="font-semibold text-sm text-foreground">Find Your Lawyer</div>
+                  <div className="text-xs text-muted-foreground">Search by city and practice area</div>
                 </div>
               </div>
               <p className="text-xs text-muted-foreground mb-3">
-                Ask about finding lawyers, booking consultations, or understanding your legal options.
+                Browse verified attorneys in your area and visit their websites to learn more.
               </p>
               <Button variant="outline" size="sm" className="w-full" asChild>
-                <Link to="/client/intake">
-                  <Sparkles className="mr-2 h-3.5 w-3.5" /> Start AI Legal Intake
+                <Link to="/client/find-lawyers">
+                  <Search className="mr-2 h-3.5 w-3.5" /> Start Searching
                 </Link>
               </Button>
             </div>
           </motion.div>
         </div>
       </div>
-
-      <ClientSupportChat />
     </DashboardLayout>
   );
 }
