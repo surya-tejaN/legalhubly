@@ -180,7 +180,7 @@ export default function DashboardLayout({ children, sidebarItems, portalLabel, u
             >
               {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
-            <NotificationsCenter />
+            
           </div>
         </header>
 
