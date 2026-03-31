@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Scale, ChevronLeft, ChevronRight, Search, Menu, X, User, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import NotificationsCenter from "@/components/NotificationsCenter";
+
 import { motion, AnimatePresence } from "framer-motion";
 
 interface SidebarItem {
@@ -166,7 +166,7 @@ export default function DashboardLayout({ children, sidebarItems, portalLabel, u
               <Search className="h-4 w-4 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Search cases, documents, messages..."
+                placeholder="Search lawyers..."
                 className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/60"
               />
               <kbd className="hidden lg:inline-flex text-[10px] text-muted-foreground/50 bg-background/80 border px-1.5 py-0.5 rounded font-mono">⌘K</kbd>
@@ -180,7 +180,7 @@ export default function DashboardLayout({ children, sidebarItems, portalLabel, u
             >
               {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
-            <NotificationsCenter />
+            
           </div>
         </header>
 
