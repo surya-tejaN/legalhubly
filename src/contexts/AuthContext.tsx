@@ -42,7 +42,7 @@ export function useDashboardPath(role?: AppRole | null): string {
     case "platform_admin":
       return "/admin/dashboard";
     default:
-      return "/client/dashboard";
+      return "/client/cases";
   }
 }
 
