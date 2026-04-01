@@ -1,38 +1,24 @@
 import {
-  LayoutDashboard,
   Search,
-  Heart,
-  Settings,
-  MessageSquare,
-  FileText,
   Briefcase,
-  Video,
-  CreditCard,
+  User,
+  LayoutDashboard,
   Users,
-  Calendar,
-  Receipt,
+  Wrench,
+  Settings,
 } from "lucide-react";
 
 export const clientNavItems = [
-  { icon: <LayoutDashboard />, label: "Dashboard", to: "/client/dashboard" },
   { icon: <Search />, label: "Find Lawyers", to: "/client/find-lawyers" },
-  { icon: <Heart />, label: "Saved Lawyers", to: "/client/saved-lawyers" },
-  { icon: <MessageSquare />, label: "Messages", to: "/client/messages" },
   { icon: <Briefcase />, label: "My Cases", to: "/client/cases" },
-  { icon: <Video />, label: "Consultations", to: "/client/consultations" },
-  { icon: <FileText />, label: "Documents", to: "/client/documents" },
-  { icon: <CreditCard />, label: "Payments", to: "/client/payments" },
-  { icon: <Settings />, label: "Account Settings", to: "/client/settings" },
+  { icon: <User />, label: "Profile", to: "/client/profile" },
 ];
 
 export const lawyerNavItems = [
   { icon: <LayoutDashboard />, label: "Dashboard", to: "/lawyer/dashboard" },
-  { icon: <Users />, label: "Leads", to: "/lawyer/leads" },
-  { icon: <MessageSquare />, label: "Messages", to: "/lawyer/messages" },
-  { icon: <Briefcase />, label: "Cases", to: "/lawyer/cases" },
-  { icon: <Calendar />, label: "Calendar", to: "/lawyer/calendar" },
-  { icon: <Receipt />, label: "Billing", to: "/lawyer/billing" },
-  { icon: <FileText />, label: "Documents", to: "/lawyer/documents" },
+  { icon: <Users />, label: "Clients", to: "/lawyer/clients" },
+  { icon: <Wrench />, label: "Tools", to: "/lawyer/tools" },
+  { icon: <Settings />, label: "Settings", to: "/lawyer/settings" },
 ];
 
 export const firmNavItems = [
