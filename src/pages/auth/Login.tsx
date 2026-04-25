@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { useAuth, useDashboardPath } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,11 +52,14 @@ export default function Login() {
     setSubmitting(false);
   };
 
+  const oauthRedirect = `${window.location.origin}/login`;
+
   const handleGoogleLogin = async () => {
     setErrorMsg("");
     setSubmitting(true);
-    const { error } = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: oauthRedirect },
     });
     if (error) {
       toast.error(error.message || "Google sign-in failed");
@@ -68,8 +70,9 @@ export default function Login() {
   const handleAppleLogin = async () => {
     setErrorMsg("");
     setSubmitting(true);
-    const { error } = await lovable.auth.signInWithOAuth("apple", {
-      redirect_uri: window.location.origin,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "apple",
+      options: { redirectTo: oauthRedirect },
     });
     if (error) {
       toast.error(error.message || "Apple sign-in failed");

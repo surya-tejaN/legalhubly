@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { getAiChatEnv } from "../_shared/ai_chat.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -56,21 +57,20 @@ serve(async (req) => {
 
   try {
     const { messages, action } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const { apiKey: AI_API_KEY, url: AI_CHAT_URL, model: AI_MODEL } = getAiChatEnv();
 
     // Action: generate summary from conversation
     if (action === "generate_summary") {
       const summaryResponse = await fetch(
-        "https://ai.gateway.lovable.dev/v1/chat/completions",
+        AI_CHAT_URL,
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            Authorization: `Bearer ${AI_API_KEY}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            model: "google/gemini-3-flash-preview",
+            model: AI_MODEL,
             messages: [
               {
                 role: "system",
@@ -180,15 +180,15 @@ serve(async (req) => {
 
     // Default action: stream conversational response
     const response = await fetch(
-      "https://ai.gateway.lovable.dev/v1/chat/completions",
+      AI_CHAT_URL,
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          Authorization: `Bearer ${AI_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
+          model: AI_MODEL,
           messages: [
             { role: "system", content: SYSTEM_PROMPT },
             ...messages,

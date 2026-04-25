@@ -1,5 +1,10 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
-import { WebhookError, verifyWebhookRequest } from 'npm:@lovable.dev/webhooks-js'
+import {
+  LEGACY_EMAIL_SIGNATURE_HEADER,
+  LEGACY_EMAIL_TIMESTAMP_HEADER,
+  verifySignedWebhookRequest,
+  WebhookVerificationError,
+} from '../_shared/signed_webhook.ts'
 
 // Suppression event payload sent by the Go API when Mailgun reports
 // a bounce, complaint, or unsubscribe.
@@ -36,7 +41,7 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'Method not allowed' }, 405)
   }
 
-  const apiKey = Deno.env.get('LOVABLE_API_KEY')
+  const apiKey = Deno.env.get('EMAIL_SERVICE_SECRET')
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
@@ -45,17 +50,18 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: 'Server configuration error' }, 500)
   }
 
-  // Verify HMAC signature using the Lovable API Key (same as auth-email-hook)
   let payload: SuppressionPayload
   try {
-    const verified = await verifyWebhookRequest({
+    const verified = await verifySignedWebhookRequest({
       req,
       secret: apiKey,
+      signatureHeader: LEGACY_EMAIL_SIGNATURE_HEADER,
+      timestampHeader: LEGACY_EMAIL_TIMESTAMP_HEADER,
       parser: parseSuppressionPayload,
     })
     payload = verified.payload
   } catch (error) {
-    if (error instanceof WebhookError) {
+    if (error instanceof WebhookVerificationError) {
       switch (error.code) {
         case 'invalid_signature':
           console.error('Invalid webhook signature')
