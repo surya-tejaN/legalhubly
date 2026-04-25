@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Star, MapPin, Shield, ArrowUpDown,
-  Briefcase, Scale, ArrowLeft, ArrowRight,
+  Briefcase, ArrowLeft, ArrowRight,
   User, Building2, Award, Search, Info, Heart, Sparkles, ExternalLink, Zap,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,7 +48,6 @@ const SORT_OPTIONS: { value: SortKey; label: string; icon: typeof Star }[] = [
 
 function LawyerCard({ lawyer, index, savedIds, onToggleSave }: { lawyer: Lawyer; index: number; savedIds: Set<string>; onToggleSave: (id: string) => void }) {
   const isSaved = savedIds.has(lawyer.id);
-  const casesHandled = Math.round(lawyer.experience_years * 20 + lawyer.review_count * 3);
 
   return (
     <motion.div
@@ -111,10 +110,6 @@ function LawyerCard({ lawyer, index, savedIds, onToggleSave }: { lawyer: Lawyer;
               <span className="flex items-center gap-1.5 text-muted-foreground">
                 <Briefcase className="h-3.5 w-3.5" />
                 <span className="font-medium text-foreground">{lawyer.experience_years}</span> yrs
-              </span>
-              <span className="flex items-center gap-1.5 text-muted-foreground">
-                <Scale className="h-3.5 w-3.5" />
-                <span className="font-medium text-foreground">{casesHandled}+</span> cases
               </span>
             </div>
 

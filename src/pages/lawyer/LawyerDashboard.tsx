@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { StatCard, SectionHeader } from "@/components/DashboardComponents";
-import { Users, Briefcase, Calendar, DollarSign, TrendingUp, Loader2 } from "lucide-react";
+import { Users, Briefcase, Calendar, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function LawyerDashboard() {
@@ -27,14 +27,23 @@ export default function LawyerDashboard() {
     },
   });
 
+  const totalActivity = (stats?.leads || 0) + (stats?.cases || 0) + (stats?.consultations || 0);
+
   return (
     <DashboardLayout sidebarItems={lawyerNavItems} portalLabel="Lawyer Portal" userName={profile?.full_name || "Lawyer"} userRole="Lawyer">
       <SectionHeader title={`Welcome, ${firstName}`} subtitle="Your practice at a glance" />
 
       {isLoading ? (
         <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-accent" /></div>
+      ) : totalActivity === 0 ? (
+        <div className="rounded-xl border bg-card p-8 text-center mb-8">
+          <h3 className="font-serif text-xl text-foreground mb-2">Welcome!</h3>
+          <p className="text-sm text-muted-foreground">
+            Your dashboard will populate as clients engage with you.
+          </p>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0 }}>
             <StatCard icon={<Users className="h-5 w-5 text-accent" />} label="Active Leads" value={stats?.leads || 0} />
           </motion.div>
@@ -43,9 +52,6 @@ export default function LawyerDashboard() {
           </motion.div>
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
             <StatCard icon={<Calendar className="h-5 w-5 text-accent" />} label="Consultations" value={stats?.consultations || 0} />
-          </motion.div>
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-            <StatCard icon={<DollarSign className="h-5 w-5 text-accent" />} label="Revenue" value="$0" />
           </motion.div>
         </div>
       )}

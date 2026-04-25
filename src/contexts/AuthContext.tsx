@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
-export type AppRole = "client" | "lawyer" | "firm_admin" | "platform_admin";
+export type AppRole = "client" | "lawyer";
 
 interface Profile {
   id: string;
@@ -37,10 +37,6 @@ export function useDashboardPath(role?: AppRole | null): string {
   switch (role) {
     case "lawyer":
       return "/lawyer/dashboard";
-    case "firm_admin":
-      return "/firm/dashboard";
-    case "platform_admin":
-      return "/admin/dashboard";
     default:
       return "/client/cases";
   }

@@ -16,6 +16,10 @@ import Signup from "./pages/auth/Signup";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ResetPassword from "./pages/auth/ResetPassword";
 import VerifyEmailSuccess from "./pages/auth/VerifyEmailSuccess";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import Contact from "./pages/Contact";
+import About from "./pages/About";
 
 // Client pages
 import FindLawyers from "./pages/client/FindLawyers";
@@ -46,6 +50,10 @@ function AnimatedRoutes() {
         <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
         <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
         <Route path="/verify-email-success" element={<PageTransition><VerifyEmailSuccess /></PageTransition>} />
+        <Route path="/privacy" element={<PageTransition><Privacy /></PageTransition>} />
+        <Route path="/terms" element={<PageTransition><Terms /></PageTransition>} />
+        <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
+        <Route path="/about" element={<PageTransition><About /></PageTransition>} />
 
         {/* Public discovery */}
         <Route path="/client/find-lawyers" element={<PageTransition><FindLawyers /></PageTransition>} />

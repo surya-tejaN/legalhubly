@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth, useDashboardPath } from "@/contexts/AuthContext";
 import {
   Scale, Shield, ArrowRight, Sparkles, MapPin, Briefcase,
-  Menu, X, Star, Clock, BadgeCheck, Search,
+  Menu, X, Clock, Search,
   Users, Home, Gavel, Globe, Heart, Building2,
   Landmark, ScrollText, ChevronRight, DollarSign, Brain,
   Stethoscope, ShieldCheck, Car, KeyRound, GraduationCap,
@@ -58,19 +58,6 @@ const KEYWORD_MAP: Record<string, string[]> = {
   "Tax Law": ["tax", "irs", "audit", "tax planning", "tax dispute"],
   "Intellectual Property": ["patent", "trademark", "copyright", "intellectual property", "ip", "trade secret"],
 };
-
-const testimonials = [
-  { name: "Jessica Park", role: "Business Owner", quote: "Found the right attorney in under 10 minutes. The whole experience felt effortless.", rating: 5, initials: "JP" },
-  { name: "David Chen", role: "Employment Attorney", quote: "Quality leads delivered straight to my inbox. Cut my intake admin by 70%.", rating: 5, initials: "DC" },
-  { name: "Maria Santos", role: "Immigration Client", quote: "The guided process made everything clear before I even spoke to a lawyer.", rating: 5, initials: "MS" },
-];
-
-const trustPoints = [
-  { icon: BadgeCheck, value: "500+", label: "Verified Lawyers" },
-  { icon: Star, value: "98%", label: "Client Satisfaction" },
-  { icon: Clock, value: "< 2hr", label: "Avg Response Time" },
-  { icon: Shield, value: "Free", label: "To Get Started" },
-];
 
 const fadeUp = {
   initial: { opacity: 0, y: 24 },
@@ -280,7 +267,7 @@ export default function Index() {
                     onKeyDown={(e) => { if (e.key === "Enter") handleSmartMatch(); }}
                     placeholder="Describe your legal issue (e.g., visa, divorce, accident...)"
                     className="flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground/60 min-w-0"
-                    autoFocus
+                    autoFocus={typeof window !== "undefined" && window.innerWidth > 768}
                   />
                   {issueInput && (
                     <button onClick={() => { setIssueInput(""); inputRef.current?.focus(); }} className="text-muted-foreground hover:text-foreground transition-colors">
@@ -312,7 +299,12 @@ export default function Index() {
       <section className="py-10 border-y border-border/50 bg-muted/20">
         <div className="container">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {trustPoints.map((t, i) => (
+            {[
+              { icon: Scale, value: "20+", label: "Practice Areas Covered" },
+              { icon: MapPin, value: "Chicago", label: "Available In" },
+              { icon: Clock, value: "2026", label: "Built For" },
+              { icon: Sparkles, value: "AI", label: "Powered Matching" },
+            ].map((t, i) => (
               <motion.div key={t.label} {...fadeUp} {...staggerChild(i)} className="flex items-center gap-3 justify-center md:justify-start">
                 <div className="h-10 w-10 rounded-xl bg-accent/8 flex items-center justify-center shrink-0">
                   <t.icon className="h-5 w-5 text-accent" />
@@ -388,40 +380,6 @@ export default function Index() {
         </div>
       </section>
 
-      {/* ═══ TESTIMONIALS ═══ */}
-      <section id="reviews" className="py-24 md:py-32">
-        <div className="container">
-          <motion.div {...fadeUp} className="text-center mb-16 max-w-lg mx-auto">
-            <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-accent mb-3 block">Testimonials</span>
-            <h2 className="text-3xl md:text-[2.75rem] font-serif text-foreground leading-tight">Trusted by thousands</h2>
-          </motion.div>
-
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {testimonials.map((t, i) => (
-              <motion.div key={t.name} {...fadeUp} {...staggerChild(i)}
-                className="p-8 rounded-2xl bg-card border border-border/60 shadow-card"
-              >
-                <div className="flex gap-0.5 mb-5">
-                  {[...Array(t.rating)].map((_, j) => (
-                    <Star key={j} className="h-4 w-4 text-accent fill-accent" />
-                  ))}
-                </div>
-                <p className="text-sm text-foreground leading-relaxed mb-6">"{t.quote}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-accent/10 flex items-center justify-center text-sm font-bold text-accent">
-                    {t.initials}
-                  </div>
-                  <div>
-                    <div className="text-sm font-semibold text-foreground">{t.name}</div>
-                    <div className="text-xs text-muted-foreground">{t.role}</div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ═══ CTA ═══ */}
       <section className="py-24 md:py-32">
         <div className="container">
@@ -457,8 +415,7 @@ export default function Index() {
             </div>
             {[
               { title: "Platform", links: [{ label: "Find a Lawyer", href: "/client/find-lawyers" }, { label: "Practice Areas", href: "#practice-areas" }, { label: "How It Works", href: "#how" }] },
-              { title: "Resources", links: [{ label: "About", href: "#" }, { label: "Blog", href: "#" }] },
-              { title: "Company", links: [{ label: "Privacy Policy", href: "#" }, { label: "Terms of Service", href: "#" }, { label: "Contact", href: "#" }] },
+              { title: "Legal", links: [{ label: "Privacy Policy", href: "/privacy" }, { label: "Terms of Service", href: "/terms" }, { label: "Contact", href: "/contact" }, { label: "About", href: "/about" }] },
             ].map((col) => (
               <div key={col.title}>
                 <h4 className="text-xs font-bold uppercase tracking-wider text-foreground mb-4">{col.title}</h4>
@@ -475,8 +432,8 @@ export default function Index() {
           <div className="pt-8 border-t flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-xs text-muted-foreground">© 2026 Legalhubly. All rights reserved.</p>
             <div className="flex items-center gap-4">
-              <a href="#" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Privacy</a>
-              <a href="#" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Terms</a>
+              <Link to="/privacy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Privacy</Link>
+              <Link to="/terms" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Terms</Link>
             </div>
           </div>
         </div>

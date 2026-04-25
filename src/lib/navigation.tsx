@@ -20,11 +20,3 @@ export const lawyerNavItems = [
   { icon: <Wrench />, label: "Tools", to: "/lawyer/tools" },
   { icon: <Settings />, label: "Settings", to: "/lawyer/settings" },
 ];
-
-export const firmNavItems = [
-  { icon: <LayoutDashboard />, label: "Dashboard", to: "/firm/dashboard" },
-];
-
-export const adminNavItems = [
-  { icon: <LayoutDashboard />, label: "Dashboard", to: "/admin/dashboard" },
-];

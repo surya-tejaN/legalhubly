@@ -20,10 +20,7 @@ export default function Login() {
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  if (!loading && user) {
-    toast.success("Welcome back!");
-    return <Navigate to={dashboardPath} replace />;
-  }
+  if (!loading && user) return <Navigate to={dashboardPath} replace />;
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
